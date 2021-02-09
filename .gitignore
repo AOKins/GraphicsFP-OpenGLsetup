@@ -1,0 +1,6 @@
+.vscode
+*.exe
+glew32.dll
+glfw3.dll
+opengl32.dll
+resources/*
