@@ -56,6 +56,9 @@ GLFWwindow* setup() {
 int main() {
     // Setup the window with current context
     GLFWwindow * window = setup();
+
+    Camera myCamera(window);
+
     // Setting the initial GL render window to be the entire window
     glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
     // Setting key callback to method
@@ -200,33 +203,33 @@ int main() {
     myShader.setInt("texture1", 1);
 
     // Creating and setting up the camera
-    Camera myCamera = Camera(glm::vec3(0.0f, 0.0f, 3.0f));
-    myCamera.setTarget(glm::vec3(0.0f, 0.0f, 0.0f));
-    myCamera.setPerspective(45.0f);
+    
+    myCamera.setPerspective(90.0f);
 
     // Initialize the 3 matrices needed
     glm::mat4 model = glm::mat4(1.0f);
     glm::mat4 view = glm::mat4(1.0f);
     glm::mat4 projection = glm::mat4(1.0f);
 
-    // Radius of the spin
-    const float radius = 10.0f;
 
     projection = glm::perspective(myCamera.getPerspective(), (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT, 0.1f, 100.0f);
 
+    float lastTime, currentTime, dTime;
+    lastTime = 0.0f;
+    currentTime = 0.0f;
+    dTime = 0.0f;
     // The render loop
     while (!glfwWindowShouldClose(window)) {
         glClearColor(0.5f, 0.5f, 0.5f, 0.0f); // Setting background color
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glEnable(GL_DEPTH_TEST);
 
-        myCamera.setPos(glm::vec3(sin(glfwGetTime())*radius, myCamera.getPos().y, cos(glfwGetTime())*radius));
-
-        glEnable(GL_DEPTH_TEST);  
         // Bind the textures to texture units
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, textureID0);
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, textureID1);
+
 
         myShader.setMat4("model", model);
         myShader.setMat4("view", myCamera.getView());
@@ -247,6 +250,13 @@ int main() {
         }
         // Swap the buffers to update window display
         glfwSwapBuffers(window);
+
+        currentTime = glfwGetTime();
+        dTime = currentTime - lastTime;
+        lastTime = currentTime;
+        // Call camera's input update, where it reads for key input
+        myCamera.inputUpdate(dTime);
+
         // Process event
         glfwPollEvents();
     }

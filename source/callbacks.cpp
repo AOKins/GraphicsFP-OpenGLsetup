@@ -18,17 +18,17 @@ void error_callback(int error, const char* description) {
 // Callback method for managing key input
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
     // Checking when key is pressed
-    if (GLFW_PRESS) {
+    if (action == GLFW_PRESS) {
         // Checking for keys
         switch (key) {
             case (GLFW_KEY_ESCAPE):
                 glfwSetWindowShouldClose(window, GLFW_TRUE);
                 break;
-            case (GLFW_KEY_1):
+            case (GLFW_KEY_F1):
                 std::cout << "Wireframe mode on\n";
                 glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
                 break;
-            case (GLFW_KEY_2):
+            case (GLFW_KEY_F2):
                 std::cout << "Filled mode on\n";
                 glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
                 break;
