@@ -4,3 +4,5 @@ glew32.dll
 glfw3.dll
 opengl32.dll
 resources/*
+glm
+stb_image.h

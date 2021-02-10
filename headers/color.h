@@ -1,6 +1,7 @@
 #ifndef _COLOR_H_
 #define _COLOR_H_
 
+// A basic struct to hold color data as floats
 struct color {
     float r,g,b,o;
     
