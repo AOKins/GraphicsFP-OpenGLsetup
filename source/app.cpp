@@ -1,4 +1,3 @@
-
 #include "../headers/app.h"
 #include "shader.cpp"
 #include "input.cpp"
@@ -123,7 +122,7 @@ void application::render(double ctime, double ltime) {
     // Using the one shader program created in setup, identifying with the id value in this class
     glUseProgram(shaderApp->shaderID);
     // Call to draw the tirangle, starting at index 0 and number of vertices to render for triangles (using size of entire array divided by size of each vertex)
-    glDrawArrays(GL_TRIANGLES, 0, sizeof(triangleVertices)/(3*sizeof(GLfloat)));
+    glDrawArrays(GL_TRIANGLES, 0, sizeof(triangleVertices)/(sizeof(glm::vec3)));
 
     SDL_GL_SwapWindow(window);
 }

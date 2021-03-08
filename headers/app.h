@@ -6,6 +6,7 @@
 #include <SDL2/SDL.h>
 #include "shader.h"
 #include <math.h>
+#include <GLM/glm.hpp>
 
 class application {
 protected: 
@@ -23,10 +24,11 @@ protected:
     int mouseClick = 0;
 
     // Creating an array of 3D positions for each point of a simple triangle
-    GLfloat triangleVertices[9] = {
-         0.5f,  0.5f, 0.0f, 
-        -0.5f, -0.5f, 0.0f,
-         0.5f, -0.5f, 0.0f
+    glm::vec3 triangleVertices[3] = {
+        // Original Triangle data
+        glm::vec3(0.5f,  0.5f, 0.0f),
+        glm::vec3(-0.5f, -0.5f, 0.0f),
+        glm::vec3(0.5f, -0.5f, 0.0f)
     };
 
     // Array for background color, default value is solid white

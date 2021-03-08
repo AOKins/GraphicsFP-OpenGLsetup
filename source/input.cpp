@@ -40,10 +40,10 @@ void application::onMouseMove(SDL_MouseMotionEvent * mouse_event) {
     // Ignores mouse cords every 4th click
     if (mouseClick % 4 != 3) {
         // Adjusting the x,y coordinates of the mouse into a value range between -1 and +1
-        GLfloat x_cords = 2 * GLfloat(x)/float(window_width) - 1.0f;
+        GLfloat x_cords =  2 * GLfloat(x)/float(window_width)  - 1.0f;
         GLfloat y_cords = -2 * GLfloat(y)/float(window_height) + 1.0f;
         // Setting the triangle vertex cordinates (one of the three dependent on mouseClick count) to mouse coordinates
-        triangleVertices[0 + 3*(abs(mouseClick) % 3)] = x_cords;
-        triangleVertices[1 + 3*(abs(mouseClick) % 3)] = y_cords;
+        triangleVertices[(abs(mouseClick) % 3)].x = x_cords;
+        triangleVertices[(abs(mouseClick) % 3)].y = y_cords;
     }
 }
