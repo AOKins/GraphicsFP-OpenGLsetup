@@ -30,8 +30,6 @@ shader::shader() {
 
     const GLchar * frag_source = load_from_file("shaders/fragment.shader");
     
-    std::cout << frag_source << std::endl;
-
     // Sending the source code for the fragment shader
     glShaderSource(fragmentID, 1, &frag_source, NULL);
     // Compiling the source code that has been sent
@@ -58,7 +56,6 @@ shader::shader() {
 const char* shader::load_from_file(const char * filePath) {
     char * fileContent;
     std::ifstream fileStream;
-
     fileStream.open(filePath);
 
     int i = 0;
@@ -70,7 +67,5 @@ const char* shader::load_from_file(const char * filePath) {
     fileContent[i-1] = '\0';
 
     fileStream.close();
-
-
     return fileContent;
 }

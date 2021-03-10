@@ -8,11 +8,9 @@ struct shader {
     // ID values
     GLuint shaderID;
 
-
     shader();
 
     const char* load_from_file(const char * filePath);
-
 };
 
 #endif
