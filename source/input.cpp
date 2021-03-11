@@ -1,5 +1,8 @@
 #include "../headers/app.h"
 
+// Handler for general events
+// Input: event - pointer to SDL_Event type
+// Output: identifies a relevant event and calls appriopriate metehod
 void application::event(SDL_Event * event) {
     // Determine the event and call appriopriate method
     switch (event->type) {
@@ -16,6 +19,7 @@ void application::event(SDL_Event * event) {
         */
         case (SDL_KEYDOWN):
             onKeyPress(&event->key);
+            break;
     }
 }
 
@@ -67,37 +71,42 @@ void application::onKeyPress(SDL_KeyboardEvent * key_event) {
             break;
         case (SDL_SCANCODE_F2):
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+            glLineWidth(3.0f);
             break;
         case (SDL_SCANCODE_SPACE): // Space key force NONE mode (no transformations)
             transformMode = NONE;
             break;
         // 1-7 keys perform specific tranform modes
-        case (SDL_SCANCODE_1):
+        case (SDL_SCANCODE_T):
             transformMode = TRANSLATION;
             break;
         case (SDL_SCANCODE_2):
             transformMode = SCALE;
             break;
-        case (SDL_SCANCODE_3):
-            transformMode = ROTATION;
+        case (SDL_SCANCODE_X):
+            transformMode = ROTATION_X;
             break;
-        case (SDL_SCANCODE_4):
+        case (SDL_SCANCODE_Y):
+            transformMode = ROTATION_Y;
+            break;
+        case (SDL_SCANCODE_Z):
+            transformMode = ROTATION_Z;
+            break;
+        case (SDL_SCANCODE_R):
             transformMode = REFLECTION;
             break;
         case (SDL_SCANCODE_5):
             transformMode = SHEARING;
             break;
-        case (SDL_SCANCODE_6):
-            transformMode = INVERSION;
+        case (SDL_SCANCODE_I):
+            //shaderApp->setBool("cancel", !shaderApp->cancel);;
+            //shaderApp->cancel = !shaderApp->cancel;
             break;
-        case (SDL_SCANCODE_7):
+        case (SDL_SCANCODE_P):
             transformMode = PROJECTION;
             break;
         case (SDL_SCANCODE_F): // F key engages FUN mode
             transformMode = FUN;
-            break;
-        case (SDL_SCANCODE_BACKSPACE): // Reset the position info for the vertices to original
-            transformMode = RESET;
             break;
         default: // If unrecognized, default to NONE
             transformMode = NONE;

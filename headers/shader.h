@@ -10,6 +10,7 @@
 struct shader {
     // ID values
     GLuint shaderID;
+    bool cancel;
 
     shader();
     ~shader();

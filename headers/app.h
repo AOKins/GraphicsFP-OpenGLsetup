@@ -18,12 +18,12 @@ private:
         NONE, // Don't do anything but render the current state
         TRANSLATION,
         SCALE,
-        ROTATION,
+        ROTATION_X,
+        ROTATION_Y,
+        ROTATION_Z,
         REFLECTION,
         SHEARING,
-        INVERSION,
         PROJECTION,
-        RESET, // Reset the vertices to their initial values
         FUN
     };
 protected: 

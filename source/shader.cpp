@@ -48,11 +48,12 @@ shader::shader() {
     glAttachShader(shaderID, vertexID);
     glAttachShader(shaderID, fragmentID);
     glLinkProgram(shaderID);
-
     // Now that shader program has been setup, can delete shader objects to clean up unused resources
     glDeleteShader(vertexID);
     glDeleteShader(fragmentID);
 
+    this->cancel = false;
+    setBool("cancel", this->cancel);
 }
 
 // Really simple load_from_file method to read file contents with given path
