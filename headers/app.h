@@ -4,16 +4,18 @@
 #define GLEW_STATIC
 #include <GL/glew.h>
 #include <SDL2/SDL.h>
-#include "shader.h"
 #include <math.h>
 #include <GLM/glm.hpp>
 #include <GLM/gtc/matrix_transform.hpp>
+
+#include "vertexColor.h"
+#include "shader.h"
 
 class application {
 private:
     // Enumerated values for the modes that the application will operate under
     enum MODE {
-        NONE,
+        NONE, // Don't do anything but render the current state
         TRANSLATION,
         SCALE,
         ROTATION,
@@ -21,6 +23,7 @@ private:
         SHEARING,
         INVERSION,
         PROJECTION,
+        RESET, // Reset the vertices to their initial values
         FUN
     };
 protected: 
@@ -28,7 +31,7 @@ protected:
     SDL_Window * window;
     SDL_GLContext context;
 
-    MODE transformMode;
+    MODE transformMode; // Current mode of transformations the application is running
     
     GLuint vertexArrayID, vertexBufferID, elementBufferID;
     
@@ -39,22 +42,17 @@ protected:
 
     int mouseClick = 0;
 
-    // Creating an array of 3D positions for each point of a simple triangle
-    glm::vec4 triangleVertices[3] = {
-        // Original Triangle data
-        glm::vec4( 0.5f,  0.5f, 0.0f, 1.0f),
-        glm::vec4(-0.5f, -0.5f, 0.0f, 1.0f),
-        glm::vec4( 0.5f, -0.5f, 0.0f, 1.0f)
-    };
-
-    glm::vec4 triangleColor = glm::vec4(1.0f,0.0f,1.0f,1.0f);
+    // Creating an array of 3D positions for each point of two simple triangles to create a square
+    vertexColor * triangleData;
+    int num_triangles;
 
     // Array for background color, default value is solid white
-    GLfloat bg_color[4] = {0.5f, 0.5f, 0.5f, 1.0f};
+    GLfloat bg_color[4] = {0.0f, 0.0f, 0.0f, 1.0f};
 
 public:
     // Default constructor, calls initialize and sets running to false
     application();
+    ~application();
 
     // Sets up the window and context, also initialization of GLEW
     void initialize();
@@ -67,15 +65,16 @@ public:
 
     void event(SDL_Event * event);
 
-    void close();
-
+    // Simple getter for getting running boolean value
     bool isRunning();
 
     void onMouseMove(SDL_MouseMotionEvent * mouse_event);
 
     void onMouseButton(SDL_MouseButtonEvent * button);
 
-    void onKeyPress(SDL_KeyboardEvent * key_event);
+    void onKeyPress(SDL_KeyboardEvent * key_event);    
+    
+    void close();
 };
 
 #endif

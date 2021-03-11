@@ -6,6 +6,5 @@ int main(int argv, char** args) {
     application myApp;
     // Start the application
     myApp.start();
-
     return 0;
 }

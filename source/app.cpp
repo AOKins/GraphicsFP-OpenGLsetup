@@ -2,7 +2,6 @@
 #include "shader.cpp"
 #include "input.cpp"
 #include <iostream>
-// #include "shader.cpp"
 
 // Default constructor, calls initialize and sets running to false
 application::application() {
@@ -10,6 +9,40 @@ application::application() {
     // Default screen resolution is 760x480
     this->window_width = 760;
     this->window_height = 760;
+    this->num_triangles = 2;
+    this->triangleData = new vertexColor[3*this->num_triangles];
+    this->transformMode = NONE;
+
+    // Front bottom right triangle
+    triangleData[0] = vertexColor(
+        glm::vec4( 0.5f, 0.5f, 0.0f, 1.0f), // Position
+        glm::vec4( 1.0f, 0.0f, 0.0f, 1.0f)   // Color
+    );
+    triangleData[1] = vertexColor(
+        glm::vec4(-0.5f, -0.5f, 0.0f, 1.0f),
+        glm::vec4( 1.0f,  0.0f, 0.0f, 1.0f)
+    );
+    triangleData[2] = vertexColor(
+        glm::vec4( 0.5f, -0.5f, 0.0f, 1.0f),
+        glm::vec4( 1.0f,  0.0f, 0.0f, 1.0f)
+    );
+
+    // Front bottom right triangle
+    triangleData[3] = vertexColor(
+        glm::vec4( 0.5f, 0.5f, 0.0f, 1.0f), // Position
+        glm::vec4( 0.0f, 1.0f, 0.0f, 1.0f)   // Color
+    );
+    triangleData[4] = vertexColor(
+        glm::vec4(-0.5f, -0.5f, 0.0f, 1.0f),
+        glm::vec4( 0.0f,  1.0f, 0.0f, 1.0f)
+    );
+    triangleData[5] = vertexColor(
+        glm::vec4(-0.5f,  0.5f, 0.0f, 1.0f),
+        glm::vec4( 0.0f,  1.0f, 0.0f, 1.0f)
+    );
+
+
+
     // Call initialize
     initialize();
 }
@@ -54,22 +87,24 @@ void application::start() {
     glBindBuffer(GL_ARRAY_BUFFER, vertexBufferID);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBufferID);
     
-    // Send triangelVertices data to the buffer, specifing that it is to the array buffer, providing size and address, followed by the usage (which here is as static drawing)
-    glBufferData(GL_ARRAY_BUFFER, sizeof(triangleVertices), &triangleVertices, GL_STATIC_DRAW);
+    // Send triangle data to the buffer, specifing that it is to the array buffer, providing size and address, followed by the usage (which here is as static drawing)
+    glBufferData(GL_ARRAY_BUFFER, 3*sizeof(vertexColor)*num_triangles, triangleData, GL_STATIC_DRAW);
 
     // Setting attributes to the vertex array so that it knows how to uses the vertex array
     // resource that was used in this usage and acquirng this current state of understanding is https://learnopengl.com/Getting-started/Hello-Triangle
     // first argument setting input variable being attributed which is zero as the location for the vertices data is set to 0 in the shader (location = 0 for position)
-    // second argument specifies number of values (the vertex data is comprised of 3 data points)
+    // second argument specifies number of values (the vertex data is comprised of 4 data points as well as color)
     // third argument gives size of each value (floats)
     // fourth sets to normalize the data if true
-    // fifth argument gives the distance between each set of data, since it's a homogenous series of vertices its just the size of a vertex (3 floats)
-    // (if there was data in-between we would need to take that into account)
+    // fifth argument gives the distance between each set of data
     // sixth gives offset in the buffer to start off with (which is 0 as there is no need for offsetting) 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 4*sizeof(GLfloat), (GLvoid*)0);
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(vertexColor), (GLvoid*)0);
 
-    // Enabling the array that has been created to be used in the vertex shader
+    // Enabling the arrays that have been created to be used in the vertex shader
     glEnableVertexAttribArray(0);
+    
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(vertexColor), (GLvoid*)(4*sizeof(float)) );
+    glEnableVertexAttribArray(1);
     
     // Call the loop method to 
     loop();
@@ -97,25 +132,21 @@ void application::loop() {
 // Handles the actual rendering behavior (including manage of triangle data)
 void application::render(double ctime, double ltime) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
     // Setting the background color buffer, first argument specifies the buffer, second argument is 0 as only this one buffer is being modified, 
     glClearBufferfv(GL_COLOR, 0, bg_color);
 
     double delta = ctime - ltime;
-
     glm::mat4x4 transformMatrix;
     float scaleSize = 1.2f;
 
     switch(transformMode) {
         case (TRANSLATION):
+            // Having translation be dependent on time with trig methods to have overall behavior be circular motion
             transformMatrix = glm::mat4x4(
-                1.0f, 0.0f, 0.0f, glm::cos(ctime)/200.0f,
-                0.0f, 1.0f, 0.0f, glm::sin(ctime)/200.0f,
+                1.0f, 0.0f, 0.0f, glm::cos(ctime)/2.0f,
+                0.0f, 1.0f, 0.0f, glm::sin(ctime)/2.0f,
                 0.0f, 0.0f, 1.0f, 0.0f,
                 0.0f, 0.0f, 0.0f, 1.0f);
-            triangleVertices[0] = triangleVertices[0] * transformMatrix;
-            triangleVertices[1] = triangleVertices[1] * transformMatrix;
-            triangleVertices[2] = triangleVertices[2] * transformMatrix;
             break;
         case(SCALE):
             transformMatrix = glm::mat4x4(
@@ -123,64 +154,78 @@ void application::render(double ctime, double ltime) {
                 0.0f, scaleSize,      0.0f,   0.0f,
                 0.0f,      0.0f, scaleSize,   0.0f,
                 0.0f,      0.0f,      0.0f,   1.0f);
-            triangleVertices[0] = triangleVertices[0] * transformMatrix;
-            triangleVertices[1] = triangleVertices[1] * transformMatrix;
-            triangleVertices[2] = triangleVertices[2] * transformMatrix;
-            transformMode = NONE;
             break;
         case (ROTATION):
             transformMatrix = glm::mat4x4(
-                 glm::cos(delta), glm::sin(delta), 0.0f, 0.0f,
-                -glm::sin(delta), glm::cos(delta), 0.0f, 0.0f,
+                 glm::cos(ctime/2.0f), glm::sin(ctime/2.0f), 0.0f, 0.0f,
+                -glm::sin(ctime/2.0f), glm::cos(ctime/2.0f), 0.0f, 0.0f,
                             0.0f,            0.0f, 1.0f, 0.0f,
-                            0.0f,            0.0f, 0.0f, 1.0f
-            );
-            triangleVertices[0] = triangleVertices[0] * transformMatrix;
-            triangleVertices[1] = triangleVertices[1] * transformMatrix;
-            triangleVertices[2] = triangleVertices[2] * transformMatrix;
+                            0.0f,            0.0f, 0.0f, 1.0f);
             break;
         case(REFLECTION):
+            transformMatrix = glm::mat4x4(
+                1.0f, 0.0f, 0.0f, 0.0f,
+                0.0f,-1.0f, 0.0f, 0.0f,
+                0.0f, 0.0f, 1.0f, 0.0f,
+                0.0f, 0.0f, 0.0f, 1.0f
+            );
             break;
         case(SHEARING):
             transformMatrix = glm::mat4x4(
-                1.2f, 0.0f, 0.0f, 0.0f,
+                1.4f, 0.0f, 0.0f, 0.0f,
                 0.0f, 1.0f, 0.0f, 0.0f,
-                0.0f, 0.0f, 0.8f, 0.0f,
+                0.0f, 0.0f, 0.6f, 0.0f,
                 0.0f, 0.0f, 0.0f, 1.0f);
-            triangleVertices[0] = triangleVertices[0] * transformMatrix;
-            triangleVertices[1] = triangleVertices[1] * transformMatrix;
-            triangleVertices[2] = triangleVertices[2] * transformMatrix;
-            transformMode = NONE;
             break;
-        case(INVERSION):
+        case(INVERSION): // Currently not implemented
+            transformMatrix = glm::mat4x4(
+                1.0f, 0.0f, 0.0f, 0.0f,
+                0.0f, 1.0f, 0.0f, 0.0f,
+                0.0f, 0.0f, 1.0f, 0.0f,
+                0.0f, 0.0f, 0.0f, 1.0f);
             break;
-        case(PROJECTION):
+        case(PROJECTION): // Currently not implemented
+            transformMatrix = glm::mat4x4(
+                1.0f, 0.0f, 0.0f, 0.0f,
+                0.0f, 1.0f, 0.0f, 0.0f,
+                0.0f, 0.0f, 1.0f, 0.0f,
+                0.0f, 0.0f, 0.0f, 1.0f);
             break;
-        case(FUN):
-            std::cout << "X,\tY,\tZ,\tW\n";
-            std::cout << triangleVertices[0].x << "\t" << triangleVertices[0].y << "\t" << triangleVertices[0].z << "\t" << triangleVertices[0].w << "\n";
-            std::cout << triangleVertices[1].x << "\t" << triangleVertices[1].y << "\t" << triangleVertices[1].z << "\t" << triangleVertices[1].w << "\n";
-            std::cout << triangleVertices[2].x << "\t" << triangleVertices[2].y << "\t" << triangleVertices[2].z << "\t" << triangleVertices[2].w << "\n";
-            transformMode = NONE;
+        case(FUN): // Currently not implemented
+            transformMatrix = glm::mat4x4(
+                1.0f, 0.0f, 0.0f, 0.0f,
+                0.0f, 1.0f, 0.0f, 0.0f,
+                0.0f, 0.0f, 1.0f, 0.0f,
+                0.0f, 0.0f, 0.0f, 1.0f);
             break;
-        case(NONE):
+        case(RESET): // Not implemented
+            break;
+        case(NONE): // Don't do anything
+            transformMatrix = glm::mat4x4(
+                1.0f, 0.0f, 0.0f, 0.0f,
+                0.0f, 1.0f, 0.0f, 0.0f,
+                0.0f, 0.0f, 1.0f, 0.0f,
+                0.0f, 0.0f, 0.0f, 1.0f);
             break;
     }
+    // Applying transform matrix if not in reset mode or none
+    shaderApp->setMat4("transform",transformMatrix);
 
-    // Updating the buffer data by calling glBufferData again with array
+    // Updating the buffer data
     // First argument specifies that this is an array
     // Second argument gives size of the array
     // Third argument gives start of the array via the array's address
     // Fourth argument tells that this data is to be accessed and modified very often 
     //      (https://www.reddit.com/r/opengl/comments/57i9cl/examples_of_when_to_use_gl_dynamic_draw/ was used to find this, as I had prior used GL_STATIC_DRAW but wanted to know what other options I had that would be more applicable)
-    glBufferData(GL_ARRAY_BUFFER, sizeof(triangleVertices), &triangleVertices, GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, 3*num_triangles*sizeof(vertexColor), triangleData, GL_DYNAMIC_DRAW);
     
     // Now dealing with rendering the triangle //
     // Using the one shader program created in setup, identifying with the id value in the app's struct
     glUseProgram(shaderApp->shaderID);
 
     // Call to draw the tirangle, starting at index 0 and number of vertices to render for triangles (using size of entire array divided by size of each vertex)
-    glDrawArrays(GL_TRIANGLES, 0, sizeof(triangleVertices)/(sizeof(glm::vec3)));
+    glBindVertexArray(vertexArrayID);
+    glDrawArrays(GL_TRIANGLES, 0, 3*num_triangles);
 
     // Swapping buffers to update display
     SDL_GL_SwapWindow(window);
@@ -191,7 +236,7 @@ void application::close() {
     this->running = false;
     
     glDeleteVertexArrays(1, &vertexArrayID);
-    
+    // Closing window and closing library
     SDL_DestroyWindow(window);
     SDL_Quit();
 }
@@ -200,3 +245,7 @@ bool application::isRunning(){
     return this->running;
 }
 
+application::~application() {
+    delete this->shaderApp;
+    delete [] this->triangleData;
+}
