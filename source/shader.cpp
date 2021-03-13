@@ -54,6 +54,7 @@ shader::shader() {
 
     this->cancel = false;
     setBool("cancel", this->cancel);
+    setInt("render_mode", 0); // Defaulting to render mode 0
 }
 
 // Really simple load_from_file method to read file contents with given path
@@ -80,19 +81,24 @@ shader::~shader() {
     glDeleteProgram(shaderID);
 }
 
-
+// Implementing the set methods for uniform variables
+// Based on example from learnopengl.com 
+// Bool uniform
 void shader::setBool(const std::string &name, bool value) const {
     glUniform1i(glGetUniformLocation(shaderID, name.c_str()), (int)value); 
 }
 
+// Integer uniform
 void shader::setInt(const std::string &name, int value) const { 
     glUniform1i(glGetUniformLocation(shaderID, name.c_str()), value); 
 }
 
+// Float uniform
 void shader::setFloat(const std::string &name, float value) const { 
     glUniform1f(glGetUniformLocation(shaderID, name.c_str()), value); 
 }
 
+// 4x4 matrix uniform
 void shader::setMat4(const std::string &name, glm::mat4 matrix) const {
     glUniformMatrix4fv(glGetUniformLocation(shaderID, name.c_str()), 1, GL_FALSE, glm::value_ptr(matrix));
 }

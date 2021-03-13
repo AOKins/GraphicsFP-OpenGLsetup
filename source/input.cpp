@@ -1,5 +1,6 @@
 #include "../headers/app.h"
 
+
 // Handler for general events
 // Input: event - pointer to SDL_Event type
 // Output: identifies a relevant event and calls appriopriate metehod
@@ -61,11 +62,12 @@ void application::onMouseMove(SDL_MouseMotionEvent * mouse) {
     }
 }
 
-// Handler for keyboard presses
+// Handler for keyboard presses - https://wiki.libsdl.org/SDL_Scancode was useful in identifying specific keys wanted
 // Input: key_event - SDL keyboard event object
 // Output: Depending on recognized key press, changes the mode for transformation behavior the application will do in render()
 void application::onKeyPress(SDL_KeyboardEvent * key_event) {
     switch(key_event->keysym.scancode) {
+        // Function keys change polygon mode between filled and lines (wireframe)
         case (SDL_SCANCODE_F1):
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
             break;
@@ -76,20 +78,42 @@ void application::onKeyPress(SDL_KeyboardEvent * key_event) {
         case (SDL_SCANCODE_SPACE): // Space key force NONE mode (no transformations)
             transformMode = NONE;
             break;
-        // 1-7 keys perform specific tranform modes
+        // Input that impacts the world position of the object
+        case (SDL_SCANCODE_S):
+            this->pos_z = this->pos_z + 0.01;
+            break;
+        case (SDL_SCANCODE_2):
+            this->pos_z = this->pos_z - 0.01;
+            break;
+        case (SDL_SCANCODE_A):
+            this->pos_x = this->pos_x - 0.01;
+            break;
+        case (SDL_SCANCODE_D):
+            this->pos_x = this->pos_x + 0.01;
+            break;
+        case (SDL_SCANCODE_W):
+            this->pos_y = this->pos_y + 0.01;
+            break;
+        case (SDL_SCANCODE_X):
+            this->pos_y = this->pos_y - 0.01;
+            break;
+        // Input that changes the mode
         case (SDL_SCANCODE_T):
             transformMode = TRANSLATION;
             break;
-        case (SDL_SCANCODE_2):
-            transformMode = SCALE;
+        case (SDL_SCANCODE_EQUALS):
+            scaleSize += 0.1;
             break;
-        case (SDL_SCANCODE_X):
+        case (SDL_SCANCODE_MINUS):
+            scaleSize -= 0.1;
+            break;
+        case (SDL_SCANCODE_B):
             transformMode = ROTATION_X;
             break;
-        case (SDL_SCANCODE_Y):
+        case (SDL_SCANCODE_N):
             transformMode = ROTATION_Y;
             break;
-        case (SDL_SCANCODE_Z):
+        case (SDL_SCANCODE_M):
             transformMode = ROTATION_Z;
             break;
         case (SDL_SCANCODE_R):
@@ -99,13 +123,12 @@ void application::onKeyPress(SDL_KeyboardEvent * key_event) {
             transformMode = SHEARING;
             break;
         case (SDL_SCANCODE_I):
-            //shaderApp->setBool("cancel", !shaderApp->cancel);;
-            //shaderApp->cancel = !shaderApp->cancel;
+            this->show_inverse = !this->show_inverse;
             break;
         case (SDL_SCANCODE_P):
-            transformMode = PROJECTION;
+            this->show_projection = !this->show_projection;
             break;
-        case (SDL_SCANCODE_F): // F key engages FUN mode
+        case (SDL_SCANCODE_F): // F key engages FUN mode which is a moving cube with some rotation as it spins around
             transformMode = FUN;
             break;
         default: // If unrecognized, default to NONE

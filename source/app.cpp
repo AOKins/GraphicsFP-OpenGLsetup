@@ -1,17 +1,25 @@
 #include "../headers/app.h"
 #include "shader.cpp"
 #include "input.cpp"
+#include "transformDerive.cpp"
 #include <iostream>
 
 // Default constructor, calls initialize and sets running to false
 application::application() {
     this->running = false;
+    this->show_inverse = false;
+    this->show_projection = false;
     // Default screen resolution is 760x480
     this->window_width = 760;
     this->window_height = 760;
     this->num_triangles = 12; // 2 triangles for each side of a 6 sided cube
     this->triangleData = new vertexColor[3*this->num_triangles];
     this->transformMode = NONE;
+
+    this->pos_x = 0;
+    this->pos_y = 0;
+    this->pos_z = 0;
+    this->scaleSize = 1.0f;
 
     // Big (and nasty) series of assignments to initialize the triangleData to form a cube //
     // Setting positions and colors, with color of each side being unique with lighter and darker triangles //
@@ -263,123 +271,17 @@ void application::render(double ctime, double ltime) {
     // Setting the background color buffer, first argument specifies the buffer, second argument is 0 as only this one buffer is being modified, 
     glClearBufferfv(GL_COLOR, 0, bg_color);
 
-    glm::mat4x4 transformMatrix; // Stores the resulting transformation wanting to be made on the cube
+    glm::mat4x4 transformMatrix, scale, translate, projection, perspective, rotation, inverse;
 
-    float d = 2.0f;
-    float scaleSize = 2.0f;
+          scale =       getScale(ctime);
+       rotation =    getRotation(ctime);
+      translate =   getTranslate(ctime);
+    perspective = getPerspective(ctime);
 
-    switch(transformMode) {
-        case (TRANSLATION):
-            // Having translation be dependent on time with trig methods to have overall behavior be circular motion
-            transformMatrix = glm::mat4x4(
-                1.0f, 0.0f, 0.0f, glm::cos(ctime)/2.0f,
-                0.0f, 1.0f, 0.0f, glm::sin(ctime)/2.0f,
-                0.0f, 0.0f, 1.0f,                 0.0f,
-                0.0f, 0.0f, 0.0f,                 1.0f);
-            break;
-        case(SCALE):
-            transformMatrix = glm::mat4x4( // Simply scaling the cube by scaleSize
-                scaleSize, 0.0f,      0.0f,   0.0f,
-                0.0f, scaleSize,      0.0f,   0.0f,
-                0.0f,      0.0f, scaleSize,   0.0f,
-                0.0f,      0.0f,      0.0f,   1.0f);
-            break;
-        case (ROTATION_Z):
-            transformMatrix = glm::mat4x4( // Rotation about the z axis
-                 glm::cos(ctime/2.0f), glm::sin(ctime/2.0f), 0.0f, 0.0f,
-                -glm::sin(ctime/2.0f), glm::cos(ctime/2.0f), 0.0f, 0.0f,
-                                 0.0f,                 0.0f, 1.0f, 0.0f,
-                                 0.0f,                 0.0f, 0.0f, 1.0f);
-            break;
-        case (ROTATION_Y):
-            transformMatrix = glm::mat4x4( // Rotation about the y axis
-                glm::cos(ctime/2.0f),   0.0f,  -glm::sin(ctime/2.0f),   0.0f,
-                0.0f,                   1.0f,                   0.0f,   0.0f,
-                glm::sin(ctime/2.0f),   0.0f,   glm::cos(ctime/2.0f),   0.0f,
-                0.0f,                   0.0f,                   0.0f,   1.0f);
-            break;
-        case (ROTATION_X):
-            transformMatrix = glm::mat4x4( // Rotation about the x axis
-                1.0f,                   0.0f,                 0.0f, 0.0f,
-                0.0f,   glm::cos(ctime/2.0f), glm::sin(ctime/2.0f), 0.0f,
-                0.0f,  -glm::sin(ctime/2.0f), glm::cos(ctime/2.0f), 0.0f,
-                0.0f,                   0.0f,                 0.0f, 1.0f);
-            break;
-        case(REFLECTION):
-            transformMatrix = glm::mat4x4( // Simple reflection along y axis
-                1.0f, 0.0f, 0.0f, 0.0f,
-                0.0f,-1.0f, 0.0f, 0.0f,
-                0.0f, 0.0f, 1.0f, 0.0f,
-                0.0f, 0.0f, 0.0f, 1.0f);
-            break;
-        case(SHEARING):
-            transformMatrix = glm::mat4x4( // Setting shearing demo to be dependent on time to show dynamic shearing effect that is "wobbly"
-                1.0f, glm::sin(ctime*glm::cos(ctime)), 0.0f, 0.0f,
-                glm::sin(ctime*glm::cos(ctime)), 1.0f, 0.0f, 0.0f,
-                0.0f,                 0.0f, 1.0f, 0.0f,
-                0.0f,                 0.0f, 0.0f, 1.0f);
-            break;
-        case(PROJECTION): // Projection with other things to emphasis it
-            transformMatrix = 
-            glm::mat4x4( // Making the cube smaller so that it doesn't take up as much screen space
-                0.5f, 0.0f, 0.0f, 0.0f,
-                0.0f, 0.5f, 0.0f, 0.0f,
-                0.0f, 0.0f, 0.5f, 0.0f,
-                0.0f, 0.0f, 0.0f, 1.0f)
-            * glm::mat4x4( // Then, translating the object to the bottom right a little with some distance back to setup a positioned scene
-                1.0f, 0.0f, 0.0f, 0.5f,
-                0.0f, 1.0f, 0.0f, -0.5f,
-                0.0f, 0.0f, 1.0f, 1.0f,
-                0.0f, 0.0f, 0.0f, 1.0f)
-            * glm::mat4x4( // Now that the position is in place, perform the projection with plane at z = 2
-                1.0f, 0.0f, 0.0f, 0.0f,
-                0.0f, 1.0f, 0.0f, 0.0f,
-                0.0f, 0.0f, 1.0f, 0.0f,
-                0.0f, 0.0f, 0.5f, 1.0f);
-            break;
-        case(FUN):
-            transformMatrix = glm::mat4x4(  // Rotation on x plane
-                1.0f,                   0.0f,                 0.0f, 0.0f,
-                0.0f,   glm::cos(ctime/2.1f), glm::sin(ctime/2.1f), 0.0f,
-                0.0f,  -glm::sin(ctime/2.1f), glm::cos(ctime/2.1f),  0.0f,
-                0.0f,                   0.0f,                  0.0f, 1.0f)
-                * glm::mat4x4(  // Rotation on y plane
-                glm::cos(ctime/2.0f),   0.0f, -glm::sin(ctime/2.0f), 0.0f,
-                0.0f,                   1.0f,                  0.0f, 0.0f,
-                glm::sin(ctime/2.0f),   0.0f,  glm::cos(ctime/2.0f), 0.0f,
-                0.0f,                   0.0f,                  0.0f, 1.0f)
-                * glm::mat4x4( // Rotation on z plane finally
-                glm::cos(ctime/2.2f), glm::sin(ctime/2.2f), 0.0f, 0.0f,
-               -glm::sin(ctime/2.2f), glm::cos(ctime/2.2f), 0.0f, 0.0f,
-                                0.0f,                 0.0f, 1.0f, 0.0f,
-                                0.0f,                 0.0f, 0.0f, 1.0f)
-                * glm::mat4x4( // Applying translation AFTER rotation so that it's a rotating cube moving in a clear circular motion and this time also adding Z translation
-                1.0f, 0.0f, 0.0f, glm::cos(ctime)/2.0f,
-                0.0f, 1.0f, 0.0f, glm::sin(ctime)/2.0f,
-                0.0f, 0.0f, 1.0f, 0.45*glm::sin(ctime/1.0f),
-                0.0f, 0.0f, 0.0f,                 1.0f)
-                * glm::mat4x4( // Scaling it down to half its original size
-                0.5f, 0.0f, 0.0f, 0.0f,
-                0.0f, 0.5f, 0.0f, 0.0f,
-                0.0f, 0.0f, 0.5f, 0.0f,
-                0.0f, 0.0f, 0.0f, 1.0f)
-                * glm::mat4x4( // Perform the projection with z = 2 so we got some depth going on
-                1.0f, 0.0f, 0.0f, 0.0f,
-                0.0f, 1.0f, 0.0f, 0.0f,
-                0.0f, 0.0f, 1.0f, 0.0f,
-                0.0f, 0.0f, 0.5f, 1.0f);
-            break;
-        case(NONE): // Don't do anything
-            transformMatrix = glm::mat4x4(
-                1.0f, 0.0f, 0.0f, 0.0f,
-                0.0f, 1.0f, 0.0f, 0.0f,
-                0.0f, 0.0f, 1.0f, 0.0f,
-                0.0f, 0.0f, 0.0f, 1.0f);
-            break;
-    }
+    transformMatrix =  scale * rotation * translate;
 
     // Applying transform matrix to the shader
-    shaderApp->setMat4("transform", transformMatrix);
+    shaderApp->setMat4("transform", transformMatrix * perspective);
 
     // Updating the buffer data
     // First argument specifies that this is an array
@@ -397,6 +299,31 @@ void application::render(double ctime, double ltime) {
     glBindVertexArray(vertexArrayID);
     glDrawArrays(GL_TRIANGLES, 0, 3*num_triangles);
 
+    // Show the projection of the result on the y plane (enable wireframe to see)
+    if (this->show_projection) {
+        projection = transformMatrix * getProjection(ctime);
+
+        // Applying transform matrix to the shader
+        shaderApp->setMat4("transform", projection);
+
+        // Call to draw the tirangle, starting at index 0 and number of vertices to render for triangles (using size of entire array divided by size of each vertex)
+        glBindVertexArray(vertexArrayID);
+        glDrawArrays(GL_TRIANGLES, 0, 3*num_triangles);
+    }
+
+    // Show an in
+    if (this->show_inverse) {
+        inverse = getInverse(scale, rotation, translate);
+
+        // Applying transform matrix to the shader
+        shaderApp->setMat4("transform",inverse * transformMatrix );
+
+
+        // Call to draw the tirangle, starting at index 0 and number of vertices to render for triangles (using size of entire array divided by size of each vertex)
+        glBindVertexArray(vertexArrayID);
+        glDrawArrays(GL_TRIANGLES, 0, 3*num_triangles);
+    }
+
     // Swapping buffers to update display
     SDL_GL_SwapWindow(window);
 }
@@ -404,17 +331,18 @@ void application::render(double ctime, double ltime) {
 // Handle closing the application
 void application::close() {
     this->running = false;
-    
     glDeleteVertexArrays(1, &vertexArrayID);
     // Closing window and closing library
     SDL_DestroyWindow(window);
     SDL_Quit();
 }
 
+// Simple getter for running property
 bool application::isRunning(){
     return this->running;
 }
 
+// Simple deconstructor that deletes the shader and triangle data
 application::~application() {
     delete this->shaderApp;
     delete [] this->triangleData;

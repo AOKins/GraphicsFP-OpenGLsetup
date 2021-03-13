@@ -11,16 +11,16 @@
 #include "vertexColor.h"
 #include "shader.h"
 
+
 class application {
-private:
+
     // Enumerated values for the modes that the application will operate under
     enum MODE {
         NONE, // Don't do anything but render the current state
         TRANSLATION,
-        SCALE,
-        ROTATION_X,
-        ROTATION_Y,
-        ROTATION_Z,
+        ROTATION_X, // Simply do some rotation about the stated axis
+        ROTATION_Y, // Simply do some rotation about the stated axis
+        ROTATION_Z, // Simply do some rotation about the stated axis
         REFLECTION,
         SHEARING,
         PROJECTION,
@@ -28,6 +28,8 @@ private:
     };
 protected: 
     bool running;
+    bool show_inverse, show_projection;
+    float scaleSize;
     SDL_Window * window;
     SDL_GLContext context;
 
@@ -42,12 +44,12 @@ protected:
 
     int mouseClick = 0;
 
-    // Creating an array of 3D positions for each point of two simple triangles to create a square
-    vertexColor * triangleData;
     int num_triangles;
+    float pos_x, pos_y, pos_z; // Coordinates of the cube object in world space
+    // Creating an array of 3D positions for each point of a triangle
+    vertexColor * triangleData;
 
-    // Array for background color, default value is solid white
-    GLfloat bg_color[4] = {0.0f, 0.0f, 0.0f, 1.0f};
+    GLfloat bg_color[4] = {0.0f,0.0f,0.0f,1.0f};
 
 public:
     // Default constructor, calls initialize and sets running to false
@@ -75,6 +77,15 @@ public:
     void onKeyPress(SDL_KeyboardEvent * key_event);    
     
     void close();
+
+    glm::mat4x4 getScale(double ctime);
+    glm::mat4x4 getTranslate(double ctime);
+    glm::mat4x4 getRotation(double ctime);
+    glm::mat4x4 getProjection(double ctime);
+    glm::mat4x4 getPerspective(double ctime);
+
+    glm::mat4x4 getInverse(glm::mat4x4 orig_scale, glm::mat4x4 orig_rotate, glm::mat4x4 orig_transl);
+
 };
 
 #endif
