@@ -1,5 +1,6 @@
 #include <glm/glm.hpp>
 
+// Simple struct to help manage the vertices and their colors
 struct vertexColor {
     glm::vec4 vertex;
     glm::vec4 color;
@@ -15,5 +16,5 @@ vertexColor::vertexColor() {
 
 vertexColor::vertexColor(glm::vec4 set_vertex, glm::vec4 set_color) {
     vertex = set_vertex;
-     color = set_color;
+    color = set_color;
 }

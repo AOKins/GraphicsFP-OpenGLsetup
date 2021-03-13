@@ -117,7 +117,7 @@ void application::onKeyPress(SDL_KeyboardEvent * key_event) {
             transformMode = ROTATION_Z;
             break;
         case (SDL_SCANCODE_R):
-            transformMode = REFLECTION;
+            this->show_reflection = !this->show_reflection;
             break;
         case (SDL_SCANCODE_5):
             transformMode = SHEARING;

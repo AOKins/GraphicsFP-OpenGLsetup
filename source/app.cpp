@@ -9,6 +9,7 @@ application::application() {
     this->running = false;
     this->show_inverse = false;
     this->show_projection = false;
+    this->show_reflection = false;
     // Default screen resolution is 760x480
     this->window_width = 760;
     this->window_height = 760;
@@ -305,6 +306,17 @@ void application::render(double ctime, double ltime) {
 
         // Applying transform matrix to the shader
         shaderApp->setMat4("transform", projection);
+
+        // Call to draw the tirangle, starting at index 0 and number of vertices to render for triangles (using size of entire array divided by size of each vertex)
+        glBindVertexArray(vertexArrayID);
+        glDrawArrays(GL_TRIANGLES, 0, 3*num_triangles);
+    }
+
+    // Show the projection of the result on the y plane (enable wireframe to see)
+    if (this->show_reflection) {
+
+        // Applying transform matrix to the shader
+        shaderApp->setMat4("transform", transformMatrix * perspective * getReflection(ctime));
 
         // Call to draw the tirangle, starting at index 0 and number of vertices to render for triangles (using size of entire array divided by size of each vertex)
         glBindVertexArray(vertexArrayID);
