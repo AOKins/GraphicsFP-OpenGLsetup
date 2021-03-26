@@ -49,8 +49,9 @@ void application::onMouseButton(SDL_MouseButtonEvent * button) {
 // Output: Depending on mouseClick count, one (or none) of the vertices will have their x,y positions updated to where the mouse is
 void application::onMouseMove(SDL_MouseMotionEvent * mouse) {
     // Get the x & y coordinates of the mouse
-    int x = mouse->x;
-    int y = mouse->y;
+    // int x = mouse->x;
+    // int y = mouse->y;
+
 
 }
 
@@ -59,6 +60,9 @@ void application::onMouseMove(SDL_MouseMotionEvent * mouse) {
 // Output: Depending on recognized key press, changes the mode for transformation behavior the application will do in render()
 void application::onKeyPress(SDL_KeyboardEvent * key_event, double deltaTime) {
     switch(key_event->keysym.scancode) {
+        case (SDL_SCANCODE_ESCAPE):
+            this->close();
+            break;
         // Function keys change polygon mode between filled and lines (wireframe)
         case (SDL_SCANCODE_F1):
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -76,23 +80,36 @@ void application::onKeyPress(SDL_KeyboardEvent * key_event, double deltaTime) {
             break;
         // Movement inputs
         case (SDL_SCANCODE_W):
-            mainCamera.updatePos(-deltaTime*0.5f, Z);
+            mainCamera.updatePos(-deltaTime, Z);
             break;
         case (SDL_SCANCODE_S):
-            mainCamera.updatePos(deltaTime*0.5f, Z);
+            mainCamera.updatePos(deltaTime, Z);
             break;
         case (SDL_SCANCODE_A):
-            mainCamera.updatePos(-deltaTime*0.5f, X);
+            mainCamera.updatePos(-deltaTime, X);
             break;
         case (SDL_SCANCODE_D):
-            mainCamera.updatePos(deltaTime*0.5f, X);
+            mainCamera.updatePos(deltaTime, X);
             break;
         case (SDL_SCANCODE_Z):
-            mainCamera.updatePos(deltaTime*0.5f, Y);
+            mainCamera.updatePos(deltaTime, Y);
             break;
         case (SDL_SCANCODE_X):
-            mainCamera.updatePos(-deltaTime*0.5f, Y);
+            mainCamera.updatePos(-deltaTime, Y);
+            break;/*
+        case (SDL_SCANCODE_UP):
+            mainCamera.setFront(glm::vec3( 0.0f, 1.0f, 0.0f));
             break;
+        case (SDL_SCANCODE_DOWN):
+            mainCamera.setFront(glm::vec3( 0.0f,-1.0f, 0.0f));
+            break;
+        case (SDL_SCANCODE_LEFT):
+            mainCamera.setFront(glm::vec3(-1.0f, 0.0f, 0.0f));
+            break;
+        case (SDL_SCANCODE_RIGHT):
+            mainCamera.setFront(glm::vec3( 1.0f, 0.0f, 0.0f));
+            break;
+        */
         default: // If unrecognized, default to doing nothing
             break;
     }

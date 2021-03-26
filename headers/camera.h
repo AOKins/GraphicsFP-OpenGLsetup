@@ -17,10 +17,10 @@ private:
     // Camera properties for position and orientation
     glm::vec3 position;
     glm::vec3 front;
-    // Direction is the vector describing where the camera is pointing at (gives normal of plane)
     glm::vec3 direction;
     glm::mat4 view;
 
+    // Private methods used by setters to manage view transformation matrix and direction vector data
     void updateView();
     void updateDirection();
 
@@ -33,6 +33,8 @@ private:
 
     float fov; // Field of view of the camera
 
+    float bank, heading, pitch;
+
 public:
     // A constructor for camera that simply takes in position
     camera();
@@ -43,6 +45,7 @@ public:
     void setUp(glm::vec3 new_up);
     void setFOV(float new_pers);
 
+    // Updates the position of the camera by offset along given axis
     void updatePos(double offset, AXIS axis);
 
     // Getters
@@ -57,7 +60,7 @@ public:
     void updateUp();
     float getFOV();
 
-    void inputUpdate(float deltaTime);
+
 };
 
 

@@ -97,9 +97,6 @@ void application::start() {
 
     }
 
-    // Enabling the depth buffer since dealing with depth now
-    glEnable(GL_DEPTH_TEST);
-
     // Call the loop method to 
     loop();
 }
@@ -144,20 +141,24 @@ void application::render(double ctime, double ltime) {
 
         shaderApp->setMat4("perspective", glm::perspective(mainCamera.getFOV(), float(window_width) / float(window_height), 0.1f, 100.0f));
 
-        float objScale = objects[i].scale;
+        glm::mat4 translation(1.0f);
+        translation = glm::translate(translation, glm::vec3(objects[i].x, objects[i].y, objects[i].z));
 
-        glm::mat4 scaleMatrix = glm::mat4x4(
-            objScale,0.0f,0.0f,0.0f,
-            0.0f,objScale,0.0f,0.0f,
-            0.0f,0.0f,objScale,0.0f,
-            0.0f,0.0f,0.0f,1.0f
-        );
-        // Setting scale matrix
+        shaderApp->setMat4("translation", translation);
+
+        // Creating the scale matrix to appriopriately set the size of the object
+        glm::mat4 scaleMatrix = glm::mat4x4(objects[i].scale);
+        scaleMatrix[3].w = 1.0f;
+
+        // Setting scale matrix into shader
         shaderApp->setMat4("scale", scaleMatrix);
         // Setting the orientation of the object (rotating to correctly according to it's bank, heading, and pitch)
-        shaderApp->setMat4("ori", getRotationMatrix(objects[i].bank, objects[i].heading, objects[i].pitch));
+        shaderApp->setMat4("ori", getRotationMatrix(objects[i].pitch, objects[i].heading, objects[i].bank));
+
         if (i == 0) {
-            objects[i].bank = ctime;
+            objects[i].pitch = ctime/2.0f + M_PI/2.0f;
+            objects[i].x = glm::cos(ctime/2.0f);
+            objects[i].y = glm::sin(ctime/2.0f);
         }
 
         // Now dealing with rendering the triangle //

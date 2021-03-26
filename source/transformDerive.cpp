@@ -1,3 +1,6 @@
+#ifndef _TRANSFORMS_CPP_
+#define _TRANSFORMS_CPP_
+
 #include <GLM/glm.hpp>
 
 
@@ -34,3 +37,5 @@ glm::mat4 getRotationZ(float angle) {
           0.0f,                 0.0f, 1.0f, 0.0f,
           0.0f,                 0.0f, 0.0f, 1.0f);
 }
+
+#endif
