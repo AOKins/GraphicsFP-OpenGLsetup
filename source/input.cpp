@@ -58,6 +58,7 @@ void application::onKeyPress(SDL_KeyboardEvent * key_event, double deltaTime) {
         case (SDL_SCANCODE_X):
             mainCamera.updatePos(-deltaTime, Y);
             break;
+        // Simple camera rotation controls
         case (SDL_SCANCODE_LEFT):
             mainCamera.turnLeftRight(-deltaTime);
             break;

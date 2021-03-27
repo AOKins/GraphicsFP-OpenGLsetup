@@ -6,6 +6,7 @@ camera::camera() {
     this->front = glm::vec3(0.0f, 0.0f, -0.1f);
     this->fov = 90.0f; // Default camera fov is 90
 
+    // Defaulting the camera to 0 orientation
     this->bank = 0;
     this->pitch = 0;
     this->heading = 0;
@@ -17,6 +18,7 @@ camera::camera() {
     this->updateView();
 }
 
+// Setter for the front vector with argument being the new front (facing orientation)
 void camera::setFront(glm::vec3 new_orientation) {
     this->front = new_orientation;
     this->updateDirection();
@@ -25,12 +27,14 @@ void camera::setFront(glm::vec3 new_orientation) {
     this->updateView();
 }
 
+// Setter for position
 void camera::setPos(glm::vec3 new_pos) {
     this->position = new_pos;
     // With position changed, need to update the view
     this->updateView();
 }
 
+// Setter for changing position along a given axis (currently there is no consideration for *relative* coordinate changes)
 void camera::updatePos(double offset, AXIS axis) {
     switch(axis) {
         case(X):
@@ -46,14 +50,17 @@ void camera::updatePos(double offset, AXIS axis) {
     this->updateView();    // With position changed, need to update the view
 }
 
+// Getter for position data
 glm::vec3 camera::getPos() {
     return this->position;
 }
 
+// Getter for front (direction camera is facing)
 glm::vec3 camera::getFront() {
     return this->front;
 }
 
+// Method updating the direction which is normalized difference between position and front
 void camera::updateDirection() {
     this->direction = glm::normalize(this->position - this->front);
 }

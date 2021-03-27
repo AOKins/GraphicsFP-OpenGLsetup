@@ -2,14 +2,18 @@
 #include "pop_substr.cpp"
 #include <fstream>
 
+// Constructor
 object::object(std::string filePath) {
+    // Initializes orientation as 0 and position in origin
     this->bank = 0;
     this->heading = 0;
     this->pitch = 0;
     this->x = 0;
     this->y = 0;
     this->z = 0;
+    // Default scale is 1.0
     this->scale = 1.0f;
+    // Load from file for other data
     load_from_file(filePath);
 }
 
@@ -67,10 +71,8 @@ void object::load_from_file(std::string filePath) {
                     //Isolate next triangle set
                     //First before / /
                     tempFace.push_back( std::stoi(pop_substr(sub,"/")) ); //sub_part 0 == vertex index
-                    
                     //second value in triplet (between the / and /)
                     tempFace.push_back( std::stoi(pop_substr(sub,"/")) ); //sub_part 1 == texture coordinate index
-
                     //third value in triplet (after both /, " " up next)
                     tempFace.push_back( std::stoi(pop_substr(sub," ")) ); //sub_part 2 == normal index                    
                 }
@@ -139,8 +141,5 @@ void object::load_from_file(std::string filePath) {
             this->normals.push_back(tempNorm[tempFace[i+2]-1]); //n1
             this->normals.push_back(tempNorm[tempFace[i+5]-1]); //n1
             this->normals.push_back(tempNorm[tempFace[i+8]-1]); //n1
-
         }
-        
-
 }

@@ -49,13 +49,15 @@ void application::initialize() {
     shaderApp = new shader();
 }
 
-// Start the application, also calls
+// Start the application, ending with call to loop()
 void application::start() {
     this->running = true;
 
+    // Loading objects
     this->objects.push_back(object("./resources/EnterpriseProject.obj"));
     this->objects.push_back(object("./resources/KlingonBOP_Project.obj"));
     
+    // Setting the arrays for buffer id values of each item
     vertexArrayID = new GLuint[objects.size()];
     vertexBufferID = new GLuint[objects.size()];
     elementBufferID = new GLuint[objects.size()];
@@ -71,7 +73,7 @@ void application::start() {
         
         objects[i].scale = 0.1f;
 
-        // Setting up the triangle info //
+        // Setting up the triangle info for objects //
 
         // Setting the vertex array and buffers to be binded to this current running context, arguments specify which buffer type and id
         glBindVertexArray(vertexArrayID[i]);
@@ -94,7 +96,6 @@ void application::start() {
 
         // Enabling the arrays that have been created to be used in the vertex shader
         glEnableVertexAttribArray(0);
-
     }
 
     // Call the loop method to 
@@ -127,7 +128,7 @@ void application::render(double ctime, double ltime) {
     // Setting the background color buffer, first argument specifies the buffer, second argument is 0 as only this one buffer is being modified, 
     glClearBufferfv(GL_COLOR, 0, bg_color);
 
-
+    // Render each item
     for (int i = 0; i < objects.size(); i++) {
         // Updating the buffer data
         // First argument specifies that this is an array
@@ -137,13 +138,14 @@ void application::render(double ctime, double ltime) {
         //      (https://www.reddit.com/r/opengl/comments/57i9cl/examples_of_when_to_use_gl_dynamic_draw/ was used to find this, as I had prior used GL_STATIC_DRAW but wanted to know what other options I had that would be more applicable)
         glBufferData(GL_ARRAY_BUFFER, objects[i].vertices.size() * sizeof(objects[i].vertices[i]), objects[i].vertices.data(), GL_DYNAMIC_DRAW);
 
+        // Setting camera transform
         shaderApp->setMat4("camera", mainCamera.getView());
-
+        // Setting perspective transform
         shaderApp->setMat4("perspective", glm::perspective(mainCamera.getFOV(), float(window_width) / float(window_height), 0.1f, 100.0f));
 
+        // Setting the translation transform for the obejct
         glm::mat4 translation(1.0f);
         translation = glm::translate(translation, glm::vec3(objects[i].x, objects[i].y, objects[i].z));
-
         shaderApp->setMat4("translation", translation);
 
         // Creating the scale matrix to appriopriately set the size of the object
@@ -155,13 +157,14 @@ void application::render(double ctime, double ltime) {
         // Setting the orientation of the object (rotating to correctly according to it's bank, heading, and pitch)
         shaderApp->setMat4("ori", getRotationMatrix(objects[i].pitch, objects[i].heading, objects[i].bank));
 
+        // Setting item 0 (Enterprise) to do some movement and rotation
         if (i == 0) {
             objects[i].pitch = ctime/2.0f + M_PI/2.0f;
             objects[i].x = glm::cos(ctime/2.0f);
             objects[i].y = glm::sin(ctime/2.0f);
         }
 
-        // Now dealing with rendering the triangle //
+        // Now dealing with actively rendering the triangles //
         // Using the one shader program created in setup, identifying with the id value in the app's struct
         glUseProgram(shaderApp->shaderID);
 
@@ -177,9 +180,8 @@ void application::render(double ctime, double ltime) {
 // Handle closing the application
 void application::close() {
     this->running = false;
-    
+    // Delete the object arrays in the buffers
     glDeleteVertexArrays(objects.size(), vertexArrayID);
-    
     // Closing window and closing library
     SDL_DestroyWindow(window);
     SDL_Quit();
@@ -192,6 +194,7 @@ bool application::isRunning(){
 
 // Simple deconstructor that deletes the shader and triangle data
 application::~application() {
+    // Clear up everything
     delete this->shaderApp;
     delete [] vertexArrayID;
     delete [] vertexBufferID;

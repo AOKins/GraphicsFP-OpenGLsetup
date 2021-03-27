@@ -10,7 +10,6 @@
 #include <vector>
 
 #include "object.h"
-#include "vertexColor.h"
 #include "shader.h"
 #include "camera.h"
 
