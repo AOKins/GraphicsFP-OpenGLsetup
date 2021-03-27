@@ -66,10 +66,10 @@ void application::onKeyPress(SDL_KeyboardEvent * key_event, double deltaTime) {
             mainCamera.turnLeftRight(deltaTime);
             break;
         case (SDL_SCANCODE_UP):
-            mainCamera.turnUpDown(deltaTime);
+            mainCamera.turnUpDown(-deltaTime);
             break;
         case (SDL_SCANCODE_DOWN):
-            mainCamera.turnUpDown(-deltaTime);
+            mainCamera.turnUpDown(deltaTime);
             break;
         default: // If unrecognized, default to doing nothing
             break;

@@ -38,9 +38,9 @@ glm::mat4 getRotationX(float angle) {
 glm::mat4 getRotationY(float angle) {
     return glm::mat4x4( // Rotation about the y axis
         glm::cos(angle), 0.0f, -glm::sin(angle), 0.0f,
-        0.0f,                 1.0f,                  0.0f, 0.0f,
+        0.0f,            1.0f,             0.0f, 0.0f,
         glm::sin(angle), 0.0f,  glm::cos(angle), 0.0f,
-        0.0f,                 0.0f,                  0.0f, 1.0f);
+        0.0f,            0.0f,             0.0f, 1.0f);
 }
 
 // Generate rotation matrix that is for rotation around Z axis given angle

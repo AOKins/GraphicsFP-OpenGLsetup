@@ -13,5 +13,5 @@ out vec4 fragColor;
 
 void main() {
    gl_Position =  (perspective * camera * translation * ori * scale * position) / position.w;
-   fragColor = vec4(  1.0f, 1.0f - position.x / 10.0f, 1.0f - position.z / 10.0f, 1.0f);
+   fragColor = vec4(1.0f - position.x, 1.0f, 1.0f - position.z, 1.0f);
 }

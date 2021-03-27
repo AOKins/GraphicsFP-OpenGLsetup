@@ -4,7 +4,7 @@
 camera::camera() {
     this->position = glm::vec3(0.0f, 0.0f,1.0f);
     this->front = glm::vec3(0.0f, 0.0f, -0.1f);
-    this->fov = 90.0f; // Default camera fov is 90
+    this->fov = M_PI/2; // Default camera fov is 90
 
     // Defaulting the camera to 0 orientation
     this->bank = 0;
@@ -97,17 +97,18 @@ void camera::turnLeftRight(float angle) {
     else if (this->heading <= -2*M_PI) {
         this->heading += 2*M_PI;
     }
-    setFront(abs_front * getRotataionN(this->pitch, this->right) * getRotataionN(this->heading, this->abs_up));
+    setFront(abs_front * getRotationMatrix(this->bank, this->heading, this->pitch));
+
 }
 
 void camera::turnUpDown(float angle) {
     this->pitch = this->pitch + angle;
-    if (this->pitch >= M_PI/4.0f) {
-        this->pitch = M_PI/4.0f;
+    if (this->pitch >= M_PI/1.9f) {
+        this->pitch = M_PI/1.9f;
     }
-    else if (this->pitch <= -M_PI/4.0f) {
-        this->pitch = -M_PI/4.0f;
+    else if (this->pitch <= -M_PI/1.9f) {
+        this->pitch = -M_PI/1.9f;
     }
-    setFront(abs_front * getRotataionN(this->pitch, this->right) * getRotataionN(this->heading, this->abs_up));
+    setFront(abs_front * getRotationMatrix(this->bank, this->heading, this->pitch));
 }
 

@@ -30,7 +30,7 @@ private:
     glm::vec3 up;
     // Direction that is taken to be absolute up and forward
     const glm::vec3 abs_up = glm::vec3(0.0f, 1.0f, 0.0f);
-    const glm::vec3 abs_front = glm::vec3(0.0f, 0.0f,-1.0f);
+    const glm::vec4 abs_front = glm::vec4(0.0f, 0.0f,-1.0f, 1.0f);
 
     float fov; // Field of view of the camera
 

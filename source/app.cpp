@@ -12,8 +12,8 @@
 // Default constructor, calls initialize and sets running to false
 application::application() {
     this->running = false;
-    // Default screen resolution is 760x480
-    this->window_width = 760;
+    // Default screen resolution is 
+    this->window_width = 900;
     this->window_height = 760;
 
     // Call initialize
@@ -53,13 +53,26 @@ void application::initialize() {
 void application::start() {
     this->running = true;
 
-    // Loading objects
-    this->objects.push_back(object("./resources/EnterpriseProject.obj"));
-    this->objects.push_back(object("./resources/KlingonBOP_Project.obj"));
+    // Loading objects, hardcoding their scales to correspond canon sizes (0.1 is 1km)
+    this->objects.push_back(object("./resources/Enterprise.obj"));
+    this->objects[0].scale = 0.0290f;
+    this->objects.push_back(object("./resources/KlingonBOP.obj"));
+    // The Bird-of-Prey Size Paradox https://www.ex-astris-scientia.org/articles/bop-size.htm
+    this->objects[1].scale = 0.0110f;
+    this->objects.push_back(object("./resources/RomulanBOP.obj"));
+    this->objects[2].scale = 0.0192f;
+    this->objects.push_back(object("./resources/Planet_Ring.obj"));
+    // Making it big
+    this->objects[3].scale = 10.0f;
+    // Setting planet object's position somewhere far away (but not TOO far away!)
+    this->objects[3].x = 50.0f;
+    this->objects[3].y = -5.0f;
+    this->objects[3].z = -50.0f;
+    this->objects[3].heading = M_PI/3;
     
     // Setting the arrays for buffer id values of each item
-    vertexArrayID = new GLuint[objects.size()];
-    vertexBufferID = new GLuint[objects.size()];
+      vertexArrayID = new GLuint[objects.size()];
+     vertexBufferID = new GLuint[objects.size()];
     elementBufferID = new GLuint[objects.size()];
 
     // Creating one vertex array, setting an id to vertexArrayID
@@ -69,20 +82,15 @@ void application::start() {
     glCreateBuffers(objects.size(), vertexBufferID);
     glCreateBuffers(objects.size(), elementBufferID);
     
+    // Setting up the triangle info for objects //
     for (int i = 0; i < objects.size(); i++) {
-        
-        objects[i].scale = 0.1f;
-
-        // Setting up the triangle info for objects //
-
         // Setting the vertex array and buffers to be binded to this current running context, arguments specify which buffer type and id
         glBindVertexArray(vertexArrayID[i]);
         glBindBuffer(GL_ARRAY_BUFFER, vertexBufferID[i]);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBufferID[i]);
 
         // Send triangle data to the buffer, specifing that it is to the array buffer, providing size and address, followed by the usage (which here is as static drawing)
-
-        glBufferData(GL_ARRAY_BUFFER, objects[0].vertices.size() * sizeof(objects[0].vertices[0]), objects[0].vertices.data() , GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, objects[i].vertices.size() * sizeof(objects[i].vertices[0]), objects[i].vertices.data() , GL_STATIC_DRAW);
 
         // Setting attributes to the vertex array so that it knows how to uses the vertex array
         // resource that was used in this usage and acquirng this current state of understanding is https://learnopengl.com/Getting-started/Hello-Triangle
@@ -157,11 +165,39 @@ void application::render(double ctime, double ltime) {
         // Setting the orientation of the object (rotating to correctly according to it's bank, heading, and pitch)
         shaderApp->setMat4("ori", getRotationMatrix(objects[i].pitch, objects[i].heading, objects[i].bank));
 
-        // Setting item 0 (Enterprise) to do some movement and rotation
+
         if (i == 0) {
-            objects[i].pitch = ctime/2.0f + M_PI/2.0f;
-            objects[i].x = glm::cos(ctime/2.0f);
-            objects[i].y = glm::sin(ctime/2.0f);
+            // Position update
+            objects[i].x = 1.5f * glm::sin(ctime/2.0f);
+            objects[i].z = 1.5f * glm::sin(ctime/2.0f) * glm::cos(ctime/2.0f);
+            // Updating heading by the x / z to help indicate direction going
+            objects[i].heading = 4*glm::atan(objects[i].x/objects[i].z) + M_PI/2.0f;
+            // https://www.wolframalpha.com/input/?i=derivative+of+atan%28secx%29
+            double changeDir = glm::tan(ctime/2.0f)/glm::cos(ctime/2.0f);
+            if (abs(changeDir) <= 1) {
+                objects[i].bank = 0;
+            }
+            else if (changeDir < 0 ) {
+                objects[i].bank = M_PI/8;
+            }
+            else {
+                objects[i].bank = -M_PI/8;
+            }
+        }
+        else if (i == 1) {
+            // Position update
+            objects[i].x = glm::sin(ctime/2.0f + 1.0f);
+            objects[i].y = glm::cos(ctime/2.0f + 1.0f);
+            // Updating heading by the x / y to help indicate direction going
+            objects[i].pitch = -ctime/2.0f - M_PI/2.0f;
+
+        }
+        else if (i == 2) {
+            objects[i].x = -10.0f * glm::cos(-ctime/100.0f) + 10.0f;
+            objects[i].y = 0.1f * glm::cos(ctime/2.0f) + 1.0f;
+            objects[i].z = 5.0f*glm::sin(ctime/100.0f) - 5.0f;
+
+            objects[i].heading = glm::atan(objects[i].x/objects[i].z);
         }
 
         // Now dealing with actively rendering the triangles //
