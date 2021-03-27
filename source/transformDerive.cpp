@@ -38,4 +38,21 @@ glm::mat4 getRotationZ(float angle) {
           0.0f,                 0.0f, 0.0f, 1.0f);
 }
 
+glm::mat3 getRotataionN(float angle, glm::vec3 axis) {
+    return glm::mat3(
+        // Row 1
+        axis.x*axis.x*(1 - glm::cos(angle)) + glm::cos(angle),
+        axis.x*axis.y*(1 - glm::cos(angle)) + axis.z*glm::sin(angle),
+        axis.x*axis.z*(1 - glm::cos(angle)) - axis.y*glm::sin(angle),
+        // Row 2
+        axis.x*axis.y*(1 - glm::cos(angle)) - axis.z*glm::sin(angle),
+        axis.y*axis.y*(1 - glm::cos(angle)) + glm::cos(angle),
+        axis.y*axis.z*(1 - glm::cos(angle)) - axis.x*glm::sin(angle),
+        // Row 3
+        axis.x*axis.z*(1 - glm::cos(angle)) + axis.y*glm::sin(angle),
+        axis.y*axis.z*(1 - glm::cos(angle)) + axis.x*glm::sin(angle),
+        axis.z*axis.z*(1 - glm::cos(angle)) + glm::cos(angle)
+    );
+}
+
 #endif

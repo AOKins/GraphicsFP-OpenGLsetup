@@ -1,10 +1,14 @@
 #include "../headers/camera.h"
-#include <iostream>
+#include "transformDerive.cpp"
 
 camera::camera() {
     this->position = glm::vec3(0.0f, 0.0f,1.0f);
-    this->front = glm::vec3(0.0f, 0.0f, -1.0f);
+    this->front = glm::vec3(0.0f, 0.0f, -0.1f);
     this->fov = 90.0f; // Default camera fov is 90
+
+    this->bank = 0;
+    this->pitch = 0;
+    this->heading = 0;
 
     // Setting derived values by calling their update methods
     this->updateDirection();
@@ -55,7 +59,7 @@ void camera::updateDirection() {
 }
 
 void camera::updateView() {
-    this->view = glm::lookAt(this->position, this->position + this->front, this->up);
+    this->view = glm::lookAt(this->position, this->front + this->position, this->up);
 }
 
 void camera::updateRight() {
@@ -77,3 +81,26 @@ void camera::setFOV(float new_fov) {
 float camera::getFOV() {
     return this->fov;
 }
+
+void camera::turnLeftRight(float angle) {
+    this->heading = this->heading + angle;
+    if (this->heading >= 2*M_PI) {
+        this->heading -= 2*M_PI;
+    }
+    else if (this->heading <= -2*M_PI) {
+        this->heading += 2*M_PI;
+    }
+    setFront(abs_front * getRotataionN(this->pitch, this->right) * getRotataionN(this->heading, this->abs_up));
+}
+
+void camera::turnUpDown(float angle) {
+    this->pitch = this->pitch + angle;
+    if (this->pitch >= M_PI/4.0f) {
+        this->pitch = M_PI/4.0f;
+    }
+    else if (this->pitch <= -M_PI/4.0f) {
+        this->pitch = -M_PI/4.0f;
+    }
+    setFront(abs_front * getRotataionN(this->pitch, this->right) * getRotataionN(this->heading, this->abs_up));
+}
+

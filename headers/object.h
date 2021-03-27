@@ -9,7 +9,7 @@
 // Structure to hold properties of a rendered object
 // Contents based on Scott's example of object loading
 struct object {
-    float bank, heading, pitch; // Orientation of the object in degrees
+    float bank, heading, pitch; // Orientation of the object in radians
     float x,y,z; // Position in 3D space
     float scale;
     std::vector<glm::vec4> vertices;

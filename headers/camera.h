@@ -28,12 +28,13 @@ private:
     glm::vec3 right;
     // Direction that is up to the camera's perspective
     glm::vec3 up;
-    // Direction that is taken to be absolute up
+    // Direction that is taken to be absolute up and forward
     const glm::vec3 abs_up = glm::vec3(0.0f, 1.0f, 0.0f);
+    const glm::vec3 abs_front = glm::vec3(0.0f, 0.0f,-1.0f);
 
     float fov; // Field of view of the camera
 
-    float bank, heading, pitch;
+    float bank, heading, pitch; // Orientation of the camera in radians
 
 public:
     // A constructor for camera that simply takes in position
@@ -60,6 +61,9 @@ public:
     void updateUp();
     float getFOV();
 
+    void turnLeftRight(float angle);
+    void turnUpDown(float angle);
+    void turnRotate(float angle);
 
 };
 
