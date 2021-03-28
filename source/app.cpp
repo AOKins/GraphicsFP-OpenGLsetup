@@ -137,46 +137,55 @@ void application::render(double ctime, double ltime) {
     // Setting the background color buffer, first argument specifies the buffer, second argument is 0 as only this one buffer is being modified, 
     glClearBufferfv(GL_COLOR, 0, bg_color);
 
+    float dx, dz, dy; // Delta values for holding change in x and z (using derivatives!), useful for deriving heading rotation
+    
     // Render each item
     for (int i = 0; i < objects.size(); i++) {
-        float dx, dz, dy; // Delta values for holding change in x and z (using derivatives!), useful for deriving heading rotation
         dx = 0.0f;
         dy = 0.0f;
         dz = 0.0f;
 
-        // Enterprise position and orientation setting
-        if (i == 0) {
-            // Position update
-            objects[i].x = 1.5f * glm::sin(ctime/12.0f);
-            objects[i].z = 1.5f * glm::sin(ctime/12.0f) * glm::cos(ctime/12.0f);
-            // Updating heading by the change in x / z to help indicate direction going
-            dx = glm::cos(ctime/12.0f);
-            dz = glm::cos(ctime/6.0f);
-        }
-        // Klingon Bird of Prey position and orientation setting
-        else if (i == 1) {
-            // Position update
-            objects[i].x = 0.0f;//glm::sin(ctime/2.0f + 1.0f) + 0.5f;
-            objects[i].y = 0.0f;//glm::cos(ctime/2.0f + 1.0f);
+        // Position and orientation values dependent on object
+        switch (i) {
+            // Enterprise position and orientation setting
+            case(0):
+                // Position update
+                objects[i].x = 1.5f * glm::sin(ctime/12.0f);
+                objects[i].z = 1.5f * glm::sin(ctime/12.0f) * glm::cos(ctime/12.0f);
+                // Updating heading by the change in x / z to help indicate direction going
+                dx = glm::cos(ctime/12.0f);
+                dz = glm::cos(ctime/6.0f);
+                break;
+            // Klingon Bird of Prey position and orientation setting
+            case(1):
+                // Position update
+                objects[i].x = glm::sin(ctime/2.0f + 1.0f) + 0.75f;
+                objects[i].z = glm::cos(ctime/2.0f + 1.0f);
+                objects[i].y = 0.5f * glm::cos(ctime/2.0f + 1.0f);
 
-            dx = glm::sin(ctime);
-            dy = ctime/2.0f;
+                dx = 0.5f * glm::cos(ctime/2.0f + 1.0f);
+                dz = -0.5f * glm::sin(ctime/2.0f + 1.0f);
+                dy = -0.25f * glm::sin(ctime/2.0f + 1.0f);
+                break;
+            // Romulan Bird of Prey position and orientation setting
+            case(2):
+                objects[i].x = -10.0f * glm::cos(-ctime/100.0f) + 5.0f;
+                objects[i].z = 5.0f*glm::sin(ctime/100.0f) - 5.0f;
+                objects[i].y = 0.1f * glm::cos(ctime/2.0f) + 1.0f;
 
-        }
-        // Romulan Bird of Prey position and orientation setting
-        else if (i == 2) {
-            objects[i].x = -10.0f * glm::cos(-ctime/100.0f) + 5.0f;
-            objects[i].y = 0.1f * glm::cos(ctime/2.0f) + 1.0f;
-            objects[i].z = 5.0f*glm::sin(ctime/100.0f) - 5.0f;
-
-            dx = 0.1f * glm::sin(ctime/100.0f);
-            dz = 0.05f * glm::cos(ctime/100.0f);
+                dx = -0.1f * glm::sin(-ctime/100.0f);
+                dz = 0.05f * glm::cos(ctime/100.0f);
+                break;
+            default:
+                break;
         }
         
         // If one of the three ship objects
         if (i <= 2) {
             objects[i].heading = glm::atan(dx / dz) - M_PI/2.0f;
-            // objects[i].pitch = glm::atan(dy) - M_PI/2.0f;
+            objects[i].pitch   = glm::atan(dy / pow(dx*dx+dz*dz,0.5f));
+
+            // Correcting orientations due to domain range of arctan()
             if (dz < 0) {
                 objects[i].heading += M_PI;
             }
