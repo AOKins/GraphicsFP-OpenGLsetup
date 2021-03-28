@@ -56,6 +56,7 @@ void application::start() {
     // Loading objects, hardcoding their scales to correspond canon sizes (0.1 is 1km)
     this->objects.push_back(object("./resources/Enterprise.obj"));
     this->objects[0].scale = 0.0290f;
+    
     this->objects.push_back(object("./resources/KlingonBOP.obj"));
     // The Bird-of-Prey Size Paradox https://www.ex-astris-scientia.org/articles/bop-size.htm
     this->objects[1].scale = 0.0110f;
@@ -63,11 +64,11 @@ void application::start() {
     this->objects[2].scale = 0.0192f;
     this->objects.push_back(object("./resources/Planet_Ring.obj"));
     // Making it big
-    this->objects[3].scale = 10.0f;
+    this->objects[3].scale = 0.1f;
     // Setting planet object's position somewhere far away (but not TOO far away!)
-    this->objects[3].x = 50.0f;
-    this->objects[3].y = -5.0f;
-    this->objects[3].z = -50.0f;
+    this->objects[3].x = 0.75;
+    this->objects[3].y = -0.0f;
+    this->objects[3].z = -00.0f;
     this->objects[3].heading = M_PI/3;
     
     // Setting the arrays for buffer id values of each item
@@ -138,6 +139,50 @@ void application::render(double ctime, double ltime) {
 
     // Render each item
     for (int i = 0; i < objects.size(); i++) {
+        float dx, dz, dy; // Delta values for holding change in x and z (using derivatives!), useful for deriving heading rotation
+        dx = 0.0f;
+        dy = 0.0f;
+        dz = 0.0f;
+
+        // Enterprise position and orientation setting
+        if (i == 0) {
+            // Position update
+            objects[i].x = 1.5f * glm::sin(ctime/12.0f);
+            objects[i].z = 1.5f * glm::sin(ctime/12.0f) * glm::cos(ctime/12.0f);
+            // Updating heading by the change in x / z to help indicate direction going
+            dx = glm::cos(ctime/12.0f);
+            dz = glm::cos(ctime/6.0f);
+        }
+        // Klingon Bird of Prey position and orientation setting
+        else if (i == 1) {
+            // Position update
+            objects[i].x = 0.0f;//glm::sin(ctime/2.0f + 1.0f) + 0.5f;
+            objects[i].y = 0.0f;//glm::cos(ctime/2.0f + 1.0f);
+
+            dx = glm::sin(ctime);
+            dy = ctime/2.0f;
+
+        }
+        // Romulan Bird of Prey position and orientation setting
+        else if (i == 2) {
+            objects[i].x = -10.0f * glm::cos(-ctime/100.0f) + 5.0f;
+            objects[i].y = 0.1f * glm::cos(ctime/2.0f) + 1.0f;
+            objects[i].z = 5.0f*glm::sin(ctime/100.0f) - 5.0f;
+
+            dx = 0.1f * glm::sin(ctime/100.0f);
+            dz = 0.05f * glm::cos(ctime/100.0f);
+        }
+        
+        // If one of the three ship objects
+        if (i <= 2) {
+            objects[i].heading = glm::atan(dx / dz) - M_PI/2.0f;
+            // objects[i].pitch = glm::atan(dy) - M_PI/2.0f;
+            if (dz < 0) {
+                objects[i].heading += M_PI;
+            }
+        }
+
+
         // Updating the buffer data
         // First argument specifies that this is an array
         // Second argument gives size of the array
@@ -163,42 +208,7 @@ void application::render(double ctime, double ltime) {
         // Setting scale matrix into shader
         shaderApp->setMat4("scale", scaleMatrix);
         // Setting the orientation of the object (rotating to correctly according to it's bank, heading, and pitch)
-        shaderApp->setMat4("ori", getRotationMatrix(objects[i].pitch, objects[i].heading, objects[i].bank));
-
-
-        if (i == 0) {
-            // Position update
-            objects[i].x = 1.5f * glm::sin(ctime/2.0f);
-            objects[i].z = 1.5f * glm::sin(ctime/2.0f) * glm::cos(ctime/2.0f);
-            // Updating heading by the x / z to help indicate direction going
-            objects[i].heading = 4*glm::atan(objects[i].x/objects[i].z) + M_PI/2.0f;
-            // https://www.wolframalpha.com/input/?i=derivative+of+atan%28secx%29
-            double changeDir = glm::tan(ctime/2.0f)/glm::cos(ctime/2.0f);
-            if (abs(changeDir) <= 1) {
-                objects[i].bank = 0;
-            }
-            else if (changeDir < 0 ) {
-                objects[i].bank = M_PI/8;
-            }
-            else {
-                objects[i].bank = -M_PI/8;
-            }
-        }
-        else if (i == 1) {
-            // Position update
-            objects[i].x = glm::sin(ctime/2.0f + 1.0f);
-            objects[i].y = glm::cos(ctime/2.0f + 1.0f);
-            // Updating heading by the x / y to help indicate direction going
-            objects[i].pitch = -ctime/2.0f - M_PI/2.0f;
-
-        }
-        else if (i == 2) {
-            objects[i].x = -10.0f * glm::cos(-ctime/100.0f) + 10.0f;
-            objects[i].y = 0.1f * glm::cos(ctime/2.0f) + 1.0f;
-            objects[i].z = 5.0f*glm::sin(ctime/100.0f) - 5.0f;
-
-            objects[i].heading = glm::atan(objects[i].x/objects[i].z);
-        }
+        shaderApp->setMat4("ori", getRotationMatrix(objects[i].bank, objects[i].heading, objects[i].pitch));
 
         // Now dealing with actively rendering the triangles //
         // Using the one shader program created in setup, identifying with the id value in the app's struct

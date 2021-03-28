@@ -34,42 +34,42 @@ void application::onKeyPress(SDL_KeyboardEvent * key_event, double deltaTime) {
             break;
         // Adjust FOV
         case (SDL_SCANCODE_F5):
-            mainCamera.setFOV(mainCamera.getFOV()-deltaTime);
+            mainCamera.setFOV(mainCamera.getFOV()-deltaTime*2.0f);
             break;
         case (SDL_SCANCODE_F6):
-            mainCamera.setFOV(mainCamera.getFOV()+deltaTime);
+            mainCamera.setFOV(mainCamera.getFOV()+deltaTime*2.0f);
             break;
         // Movement inputs
         case (SDL_SCANCODE_W):
-            mainCamera.updatePos(-deltaTime, Z);
+            mainCamera.updatePos(-deltaTime*2.0f, Z);
             break;
         case (SDL_SCANCODE_S):
-            mainCamera.updatePos(deltaTime, Z);
+            mainCamera.updatePos(deltaTime*2.0f, Z);
             break;
         case (SDL_SCANCODE_A):
-            mainCamera.updatePos(-deltaTime, X);
+            mainCamera.updatePos(-deltaTime*2.0f, X);
             break;
         case (SDL_SCANCODE_D):
-            mainCamera.updatePos(deltaTime, X);
+            mainCamera.updatePos(deltaTime*2.0f, X);
             break;
         case (SDL_SCANCODE_Z):
-            mainCamera.updatePos(deltaTime, Y);
+            mainCamera.updatePos(deltaTime*2.0f, Y);
             break;
         case (SDL_SCANCODE_X):
-            mainCamera.updatePos(-deltaTime, Y);
+            mainCamera.updatePos(-deltaTime*2.0f, Y);
             break;
         // Simple camera rotation controls
         case (SDL_SCANCODE_LEFT):
-            mainCamera.turnLeftRight(-deltaTime);
+            mainCamera.turnLeftRight(-deltaTime*2.0f);
             break;
         case (SDL_SCANCODE_RIGHT):
-            mainCamera.turnLeftRight(deltaTime);
+            mainCamera.turnLeftRight(deltaTime*2.0f);
             break;
         case (SDL_SCANCODE_UP):
-            mainCamera.turnUpDown(-deltaTime);
+            mainCamera.turnUpDown(-deltaTime*2.0f);
             break;
         case (SDL_SCANCODE_DOWN):
-            mainCamera.turnUpDown(deltaTime);
+            mainCamera.turnUpDown(deltaTime*2.0f);
             break;
         default: // If unrecognized, default to doing nothing
             break;

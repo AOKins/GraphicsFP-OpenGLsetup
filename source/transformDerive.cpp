@@ -22,7 +22,7 @@ glm::mat3 getRotataionN(float angle, glm::vec3 axis);
 // Input: bank, heading, pitch - euler angles for rotation
 // Output: A 4x4 matrix of rotation is returned
 glm::mat4 getRotationMatrix(float bank, float heading, float pitch) {
-    return getRotationZ(bank) * getRotationX(pitch) * getRotationY(heading);
+    return getRotationY(heading) * getRotationZ(pitch) * getRotationX(bank);
 }
 
 // Generate rotation matrix that is for rotation around X axis given angle
