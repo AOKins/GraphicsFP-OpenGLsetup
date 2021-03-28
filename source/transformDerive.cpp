@@ -6,7 +6,7 @@
 // Generate rotation matrix using euler angles, relies on getRotationY, getRotationX, and getRotationZ methods
 // Input: bank, heading, pitch - euler angles for rotation
 // Output: A 4x4 matrix of rotation is returned
-glm::mat4 getRotationMatrix(float bank, float heading, float pitch);
+glm::mat4 getRotationMatrix(float x, float y, float z);
 
 // Generate rotation matrix that is for rotation around Y axis given angle
 glm::mat4 getRotationY(float angle);
@@ -19,10 +19,10 @@ glm::mat4 getRotationZ(float angle);
 glm::mat3 getRotataionN(float angle, glm::vec3 axis);
 
 // Generate rotation matrix using euler angles, relies on getRotationY, getRotationX, and getRotationZ methods
-// Input: bank, heading, pitch - euler angles for rotation
+// Input: x, y, z - euler angles for rotation
 // Output: A 4x4 matrix of rotation is returned
-glm::mat4 getRotationMatrix(float bank, float heading, float pitch) {
-    return getRotationY(heading) * getRotationZ(pitch) * getRotationX(bank);
+glm::mat4 getRotationMatrix(float x, float y, float z) {
+    return getRotationY(y) * getRotationZ(z) * getRotationX(x);
 }
 
 // Generate rotation matrix that is for rotation around X axis given angle

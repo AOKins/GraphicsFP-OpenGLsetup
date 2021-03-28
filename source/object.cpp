@@ -17,7 +17,7 @@ object::object(std::string filePath) {
     load_from_file(filePath);
 }
 
-// Method used in constructor to properly load contents of .obj file (implementation largely based on Scott's example)
+// Method used in constructor to properly load contents of .obj file (implementation largely from Scott's example)
 // Input is string to where the file is
 // Output is vertices,uvs, and normals vectors in struct are set according to file contents
 void object::load_from_file(std::string filePath) {

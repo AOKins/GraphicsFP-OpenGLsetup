@@ -191,7 +191,6 @@ void application::render(double ctime, double ltime) {
             }
         }
 
-
         // Updating the buffer data
         // First argument specifies that this is an array
         // Second argument gives size of the array
@@ -212,7 +211,7 @@ void application::render(double ctime, double ltime) {
 
         // Creating the scale matrix to appriopriately set the size of the object
         glm::mat4 scaleMatrix = glm::mat4x4(objects[i].scale);
-        scaleMatrix[3].w = 1.0f;
+        scaleMatrix[3].w = 1.0f; // Correcting the w componenet
 
         // Setting scale matrix into shader
         shaderApp->setMat4("scale", scaleMatrix);

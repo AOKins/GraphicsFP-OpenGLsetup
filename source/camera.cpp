@@ -1,80 +1,93 @@
 #include "../headers/camera.h"
 #include "transformDerive.cpp"
+#include <iostream>
 
 camera::camera() {
     this->position = glm::vec3(0.0f, 0.0f,1.0f);
-    this->front = glm::vec3(0.0f, 0.0f, -0.1f);
+    this->direction = glm::vec3(0.0f, 0.0f,-1.0f);
+    this->up = glm::vec3(0.0f, 1.0f, 0.0f);
     this->fov = M_PI/2; // Default camera fov is 90
 
     // Defaulting the camera to 0 orientation
     this->bank = 0;
     this->pitch = 0;
-    this->heading = 0;
+    this->heading = -M_PI/2.0f;
 
     // Setting derived values by calling their update methods
-    this->updateDirection();
-    this->updateRight();
-    this->updateUp();
     this->updateView();
 }
 
-// Setter for the front vector with argument being the new front (facing orientation)
-void camera::setFront(glm::vec3 new_orientation) {
-    this->front = new_orientation;
-    this->updateDirection();
-    this->updateRight();
-    this->updateUp();
-    this->updateView();
-}
 
 // Setter for position
-void camera::setPos(glm::vec3 new_pos) {
+void camera::setPos(glm::vec4 new_pos) {
     this->position = new_pos;
     // With position changed, need to update the view
     this->updateView();
 }
 
-// Setter for changing position along a given axis (currently there is no consideration for *relative* coordinate changes)
-void camera::updatePos(double offset, AXIS axis) {
-    switch(axis) {
-        case(X):
-            position.x += offset;
-            break;
-        case(Y):
-            position.y += offset;
-            break;
-        case(Z):
-            position.z += offset;
-            break;
-    }
-    this->updateView();    // With position changed, need to update the view
+
+void camera::moveFoward(float offset) {
+    glm::vec3 forward_dir = glm::vec4(1.0f,0.0f,0.0f,1.0f) * getRotationY(this->heading);
+    this->position = this->position + offset * forward_dir;
+    updateView();
 }
 
-// Getter for position data
-glm::vec3 camera::getPos() {
-    return this->position;
+void camera::moveBackward(float offset) {
+    glm::vec3 forward_dir = glm::vec4(1.0f,0.0f,0.0f,1.0f) * getRotationY(this->heading);
+    this->position = this->position - offset * forward_dir;
+    updateView();
 }
 
-// Getter for front (direction camera is facing)
-glm::vec3 camera::getFront() {
-    return this->front;
+void camera::moveLeft(float offset) {
+    glm::vec3 right_dir = glm::vec4(0.0f,0.0f,1.0f,1.0f) * getRotationY(this->heading);
+    this->position = this->position - offset * right_dir;
+    updateView();
 }
 
-// Method updating the direction which is normalized difference between position and front
-void camera::updateDirection() {
-    this->direction = glm::normalize(this->position - this->front);
+void camera::moveRight(float offset) {
+    glm::vec3 right_dir = glm::vec4(0.0f,0.0f,1.0f,1.0f) * getRotationY(this->heading);
+    this->position = this->position + offset * right_dir;
+    updateView();
 }
+
+void camera::moveUp(float offset) {
+    this->position = this->position + offset * this->up;
+    updateView();
+}
+
+void camera::moveDown(float offset) {
+    this->position = this->position - offset * this->up;
+    updateView();
+}
+
+
+
 
 void camera::updateView() {
-    this->view = glm::lookAt(this->position, this->front + this->position, this->up);
+    this->up = this->abs_up;// * getRotationX(this->pitch);
+    // Rotation is a bit different because the main axis is along Z as opposed to X
+    this->direction = this->abs_foward * getRotationZ(this->pitch) * getRotationY(this->heading);
+    this->view = glm::lookAt(this->position, this->direction + this->position, this->up);
 }
 
-void camera::updateRight() {
-    this->right = glm::normalize(glm::cross(this->abs_up, this->direction));
+
+void camera::turnRight(float degrees) {
+    this->heading = this->heading + degrees;
+    if (this->heading > 2*M_PI) {
+        this->heading -= 2*M_PI;
+    }
+    updateView();
 }
 
-void camera::updateUp() {
-    this->up = glm::cross(this->direction, this->right);
+void camera::turnUp(float degrees) {
+    this->pitch = this->pitch + degrees;
+    if (this->pitch > M_PI/2.1f) {
+        this->pitch = M_PI/2.1f;
+    }
+    else if (this->pitch < -M_PI/2.1f) {
+        this->pitch = -M_PI/2.1f;
+    }
+    updateView();
 }
 
 glm::mat4 camera::getView() {
@@ -88,27 +101,3 @@ void camera::setFOV(float new_fov) {
 float camera::getFOV() {
     return this->fov;
 }
-
-void camera::turnLeftRight(float angle) {
-    this->heading = this->heading + angle;
-    if (this->heading >= 2*M_PI) {
-        this->heading -= 2*M_PI;
-    }
-    else if (this->heading <= -2*M_PI) {
-        this->heading += 2*M_PI;
-    }
-    setFront(abs_front * getRotationMatrix(this->bank, this->heading, this->pitch));
-
-}
-
-void camera::turnUpDown(float angle) {
-    this->pitch = this->pitch + angle;
-    if (this->pitch >= M_PI/1.9f) {
-        this->pitch = M_PI/1.9f;
-    }
-    else if (this->pitch <= -M_PI/1.9f) {
-        this->pitch = -M_PI/1.9f;
-    }
-    setFront(abs_front * getRotationMatrix(this->bank, this->heading, this->pitch));
-}
-

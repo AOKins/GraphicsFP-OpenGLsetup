@@ -41,35 +41,35 @@ void application::onKeyPress(SDL_KeyboardEvent * key_event, double deltaTime) {
             break;
         // Movement inputs
         case (SDL_SCANCODE_W):
-            mainCamera.updatePos(-deltaTime*2.0f, Z);
+            mainCamera.moveFoward(deltaTime*2.0f);
             break;
         case (SDL_SCANCODE_S):
-            mainCamera.updatePos(deltaTime*2.0f, Z);
+            mainCamera.moveFoward(-deltaTime*2.0f);
             break;
         case (SDL_SCANCODE_A):
-            mainCamera.updatePos(-deltaTime*2.0f, X);
+            mainCamera.moveLeft(deltaTime*2.0f);
             break;
         case (SDL_SCANCODE_D):
-            mainCamera.updatePos(deltaTime*2.0f, X);
+            mainCamera.moveLeft(-deltaTime*2.0f);
             break;
         case (SDL_SCANCODE_Z):
-            mainCamera.updatePos(deltaTime*2.0f, Y);
+            mainCamera.moveUp(deltaTime*2.0f);
             break;
         case (SDL_SCANCODE_X):
-            mainCamera.updatePos(-deltaTime*2.0f, Y);
+            mainCamera.moveUp(-deltaTime*2.0f);
             break;
         // Simple camera rotation controls
-        case (SDL_SCANCODE_LEFT):
-            mainCamera.turnLeftRight(-deltaTime*2.0f);
-            break;
         case (SDL_SCANCODE_RIGHT):
-            mainCamera.turnLeftRight(deltaTime*2.0f);
+            mainCamera.turnRight(deltaTime*2.0f);
+            break;
+        case (SDL_SCANCODE_LEFT):
+            mainCamera.turnRight(-deltaTime*2.0f);
             break;
         case (SDL_SCANCODE_UP):
-            mainCamera.turnUpDown(-deltaTime*2.0f);
+            mainCamera.turnUp(deltaTime*2.0f);
             break;
         case (SDL_SCANCODE_DOWN):
-            mainCamera.turnUpDown(deltaTime*2.0f);
+            mainCamera.turnUp(-deltaTime*2.0f);
             break;
         default: // If unrecognized, default to doing nothing
             break;
