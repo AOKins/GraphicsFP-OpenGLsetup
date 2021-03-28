@@ -4,7 +4,6 @@
 
 camera::camera() {
     this->position = glm::vec3(0.0f, 0.0f,1.0f);
-    this->direction = glm::vec3(0.0f, 0.0f,-1.0f);
     this->up = glm::vec3(0.0f, 1.0f, 0.0f);
     this->fov = M_PI/2; // Default camera fov is 90
 
@@ -21,6 +20,24 @@ camera::camera() {
 void camera::setPos(glm::vec4 new_pos) {
     this->position = new_pos;
     // With position changed, need to update the view
+    this->updateView();
+}
+
+// Setter for heading
+void camera::setHeading(float angle) {
+    this->heading = angle;
+    this->updateView();
+}
+
+// Setter for bank
+void camera::setBank(float angle) {
+    this->bank = angle;
+    this->updateView();
+}
+
+// Setter for pitch
+void camera::setPitch(float angle) {
+    this->pitch = angle;
     this->updateView();
 }
 
@@ -74,8 +91,8 @@ void camera::turnUp(float degrees) {
 void camera::updateView() {
     this->up = this->abs_up;// * getRotationX(this->pitch);
     // Rotation is a bit different because the main axis is along Z as opposed to X
-    this->direction = this->abs_foward * getRotationZ(this->pitch) * getRotationY(this->heading);
-    this->view = glm::lookAt(this->position, this->direction + this->position, this->up);
+    glm::vec3 direction = this->abs_foward * getRotationZ(this->pitch) * getRotationY(this->heading);
+    this->view = glm::lookAt(this->position, direction + this->position, this->up);
 }
 
 // Simple getters for view matrix

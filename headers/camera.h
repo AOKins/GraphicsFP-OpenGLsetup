@@ -10,7 +10,6 @@ class camera {
 private:
     // Camera properties for position and orientation
     glm::vec3 position;
-    glm::vec3 direction; // vector for direction the camera is pointing
     glm::vec3 up;    // Direction that is up to the camera's perspective
 
     float bank, heading, pitch; // Orientation of the camera in radians
@@ -31,6 +30,10 @@ public:
     // Simple Setters
     void setPos(glm::vec4 new_pos);
     void setFOV(float new_pers);
+
+    void setHeading(float new_heading);
+    void setBank(float new_bank);
+    void setPitch(float new_pitch);
 
     // Simple Getters
     glm::vec4 getDirection();
