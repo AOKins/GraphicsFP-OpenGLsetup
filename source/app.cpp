@@ -13,7 +13,7 @@
 application::application() {
     this->running = false;
     // Default screen resolution is 
-    this->window_width = 900;
+    this->window_width = 1352;
     this->window_height = 760;
 
     // Call initialize
@@ -171,25 +171,41 @@ void application::render(double ctime, double ltime) {
             case(2):
                 objects[i].x = -10.0f * glm::cos(-ctime/100.0f) + 5.0f;
                 objects[i].z = 5.0f*glm::sin(ctime/100.0f) - 5.0f;
-                objects[i].y = 0.1f * glm::cos(ctime/2.0f) + 1.0f;
+                objects[i].y = 0.1f * glm::cos(ctime/20.0f) + 1.0f;
 
                 dx = -0.1f * glm::sin(-ctime/100.0f);
                 dz = 0.05f * glm::cos(ctime/100.0f);
+                dy = -0.005f*glm::sin(ctime/2.0f);
                 break;
             default:
                 break;
         }
         
-        // If one of the three ship objects
-        if (i <= 2) {
+        // Managing bounds of dz for atan in heading
+        if (dz != 0.0f) {
             objects[i].heading = glm::atan(dx / dz) - M_PI/2.0f;
-            objects[i].pitch   = glm::atan(dy / pow(dx*dx+dz*dz,0.5f));
-
-            // Correcting orientations due to domain range of arctan()
-            if (dz < 0) {
-                objects[i].heading += M_PI;
-            }
         }
+        else {
+            // if dz = 0, then set it to a really small value to preseve heading orientation
+            dz = 0.000001f;
+            objects[i].heading = glm::atan(dx / dz) - M_PI/2.0f;
+        }
+
+        // Managing bounds of dz and dx for atan in pitch
+        if (dx != 0.0f && dz != 0.0f) {
+            objects[i].pitch = glm::atan(dy / pow(dx*dx+dz*dz,0.5f) );
+        }
+        else {
+            // if the radius is zero, then set one of the directions as a really small value to preserve pitch orientation
+            dz = 0.000001f;
+            objects[i].pitch = 0.0f;
+        }
+
+        // Correcting heading orientations due to domain range of arctan()
+        if (dz < 0) {
+            objects[i].heading += M_PI;
+        }
+        
 
         // Updating the buffer data
         // First argument specifies that this is an array
