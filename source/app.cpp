@@ -7,7 +7,9 @@
 #include "input.cpp"
 #include "object.cpp"
 #include "camera.cpp"
-#include "transformDerive.cpp"
+#include "./functions/transformDerive.cpp"
+
+#define GL_CHECK_ERR assert(glGetError() == GL_NO_ERROR);
 
 // Default constructor, calls initialize and sets running to false
 application::application() {
@@ -45,13 +47,18 @@ void application::initialize() {
     // Setting viewport to be same as window itself
     glViewport(0, 0, window_width, window_height);
 
-    // Creating default shader (uses files in /shaders folder)
-    shaderApp = new shader();
+    // Creating shaders for objects and skyCube (uses files in /shaders folder)
+    objectsShader = new shader("./shaders/vertex.shader","./shaders/fragment.shader");
+    skyCubeShader = new shader("./shaders/skyCube_vertex.shader", "./shaders/skyCube_fragment.shader");
 }
 
 // Start the application, ending with call to loop()
 void application::start() {
     this->running = true;
+    // Correcting main camera to the aspect ratio of the window
+    mainCamera.setAspect(float(window_width)/float(window_height));
+
+    // Object Stuff //
 
     // Loading objects, hardcoding their scales to correspond canon sizes (0.1 is 1km)
     this->objects.push_back(object("./resources/Enterprise.obj"));
@@ -106,6 +113,7 @@ void application::start() {
         // Enabling the arrays that have been created to be used in the vertex shader
         glEnableVertexAttribArray(0);
     }
+    // End of Object Stuff //
 
     // Call the loop method to 
     loop();
@@ -216,27 +224,27 @@ void application::render(double ctime, double ltime) {
         glBufferData(GL_ARRAY_BUFFER, objects[i].vertices.size() * sizeof(objects[i].vertices[i]), objects[i].vertices.data(), GL_DYNAMIC_DRAW);
 
         // Setting camera transform
-        shaderApp->setMat4("camera", mainCamera.getView());
+        objectsShader->setMat4("camera", mainCamera.getView());
         // Setting perspective transform
-        shaderApp->setMat4("perspective", glm::perspective(mainCamera.getFOV(), float(window_width) / float(window_height), 0.1f, 100.0f));
+        objectsShader->setMat4("perspective", mainCamera.getPerspective());
 
         // Setting the translation transform for the obejct
         glm::mat4 translation(1.0f);
         translation = glm::translate(translation, glm::vec3(objects[i].x, objects[i].y, objects[i].z));
-        shaderApp->setMat4("translation", translation);
+        objectsShader->setMat4("translation", translation);
 
         // Creating the scale matrix to appriopriately set the size of the object
         glm::mat4 scaleMatrix = glm::mat4x4(objects[i].scale);
         scaleMatrix[3].w = 1.0f; // Correcting the w componenet
 
         // Setting scale matrix into shader
-        shaderApp->setMat4("scale", scaleMatrix);
+        objectsShader->setMat4("scale", scaleMatrix);
         // Setting the orientation of the object (rotating to correctly according to it's bank, heading, and pitch)
-        shaderApp->setMat4("ori", getRotationMatrix(objects[i].bank, objects[i].heading, objects[i].pitch));
+        objectsShader->setMat4("ori", getRotationMatrix(objects[i].bank, objects[i].heading, objects[i].pitch));
 
         // Now dealing with actively rendering the triangles //
         // Using the one shader program created in setup, identifying with the id value in the app's struct
-        glUseProgram(shaderApp->shaderID);
+        glUseProgram(objectsShader->shaderID);
 
         // Call to draw the tirangle, starting at index 0 and number of vertices to render for triangles (using size of entire array divided by size of each vertex)
         glBindVertexArray(vertexArrayID[i]);
@@ -265,7 +273,8 @@ bool application::isRunning(){
 // Simple deconstructor that deletes the shader and triangle data
 application::~application() {
     // Clear up everything
-    delete this->shaderApp;
+    delete this->objectsShader;
+    delete this->skyCubeShader;
     delete [] vertexArrayID;
     delete [] vertexBufferID;
     delete [] elementBufferID;

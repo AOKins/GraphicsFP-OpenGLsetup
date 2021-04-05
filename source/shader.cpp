@@ -2,8 +2,7 @@
 #include <fstream>
 #include <iostream>
 
-// Default constructor uses load_from_file method to load shader code
-shader::shader() {
+shader::shader(const char * vertexName, const char * fragmentName) {
     int success;
     char errorLog[512];
     GLuint vertexID, fragmentID;
@@ -12,24 +11,24 @@ shader::shader() {
     // Setting to create new vertex shader, returning id of the shader object
     vertexID = glCreateShader(GL_VERTEX_SHADER);
 
-    const GLchar * vertex_source = load_from_file("shaders/vertex.shader");
+    const GLchar * vertex_source = load_from_file(vertexName);
     
     // Sending the source code for the vertex shader
     glShaderSource(vertexID, 1, &vertex_source, NULL);
-    
+
     // Compiling the source code that has been sent
     glCompileShader(vertexID);
-
+    
     glGetShaderiv(vertexID, GL_COMPILE_STATUS, &success);
     if (!success) {
         glGetShaderInfoLog(vertexID, 512, NULL, errorLog);
         std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILURE\n" << errorLog;
     }
-    
+
     // Creating and compiling fragment shader
     fragmentID = glCreateShader(GL_FRAGMENT_SHADER);
 
-    const GLchar * frag_source = load_from_file("shaders/fragment.shader");
+    const GLchar * frag_source = load_from_file(fragmentName);
     
     // Sending the source code for the fragment shader
     glShaderSource(fragmentID, 1, &frag_source, NULL);
@@ -37,24 +36,22 @@ shader::shader() {
     // Compiling the source code that has been sent
     glCompileShader(fragmentID);
 
-    glGetShaderiv(vertexID, GL_COMPILE_STATUS, &success);
+    glGetShaderiv(fragmentID, GL_COMPILE_STATUS, &success);
     if (!success) {
         glGetShaderInfoLog(vertexID, 512, NULL, errorLog);
         std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILURE\n" << errorLog;
     }
 
     // Creating shader program, attaching vertex and fragment shaders to be then finally linked
-    shaderID = glCreateProgram();
-    glAttachShader(shaderID, vertexID);
-    glAttachShader(shaderID, fragmentID);
-    glLinkProgram(shaderID);
+    this->shaderID = glCreateProgram();
+    glAttachShader(this->shaderID, vertexID);
+    glAttachShader(this->shaderID, fragmentID);
+    glLinkProgram(this->shaderID);
     // Now that shader program has been setup, can delete shader objects to clean up unused resources
     glDeleteShader(vertexID);
     glDeleteShader(fragmentID);
 
     this->cancel = false;
-    setBool("cancel", this->cancel);
-    setInt("render_mode", 0); // Defaulting to render mode 0
 }
 
 // Really simple load_from_file method to read file contents with given path

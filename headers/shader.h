@@ -11,9 +11,10 @@ struct shader {
     // ID values
     GLuint shaderID;
     bool cancel;
-    // Simple default constructor and destructor
-    shader();
+    // Simple default destructor
     ~shader();
+    // Constructor with given file names for the shaders, appends them to "./shaders/" filepath
+    shader(const char * vertexName, const char * fragmentName);
 
     // Helpful method to read form a file, used to load shader source content
     const char* load_from_file(const char * filePath);

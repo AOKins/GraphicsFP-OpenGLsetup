@@ -18,8 +18,9 @@ protected:
     bool running;
 
     SDL_Window * window;
-    SDL_GLContext context;    
-    shader * shaderApp;
+    SDL_GLContext context;
+    shader * objectsShader; 
+    shader * skyCubeShader;
 
     GLuint * vertexArrayID;
     GLuint * vertexBufferID;

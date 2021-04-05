@@ -14,10 +14,15 @@ private:
 
     float bank, heading, pitch; // Orientation of the camera in radians
     float fov; // Field of view of the camera
+    float aspect;
+    float clip_far;
+    float clip_near;
 
-    glm::mat4 view; // Matrix for storing resulting projection and perspective for rendering
+    glm::mat4 view; // Matrix for storing resulting projection and translation for rendering
+    glm::mat4 projection; // Projection without translation (used in skybox case for example)
+    glm::mat4 perspective; // Perspective/Projection for camera orientation
 
-    // Private methods used by setters to update view transformation matrix when values change
+    // Private methods used by setters to update view transformation matrices when values change
     void updateView();
 
     // Direction that is taken to be absolute up and forward reference points
@@ -30,7 +35,9 @@ public:
     // Simple Setters
     void setPos(glm::vec4 new_pos);
     void setFOV(float new_pers);
-
+    void setAspect(float new_ratio);
+    void setClipNear(float new_clipNear);
+    void setClipFar(float new_clipFar);
     void setHeading(float new_heading);
     void setBank(float new_bank);
     void setPitch(float new_pitch);
@@ -38,10 +45,16 @@ public:
     // Simple Getters
     glm::vec4 getDirection();
     glm::vec4 getUp();
+    float getAspect();
+    float getClipNear();
+    float getClipFar();
+
     float getFOV();
 
     // View uses glm::lookat() with this camera's position and target
     glm::mat4 getView();
+
+    glm::mat4 getPerspective();
 
     // Camera control methods for changing view //
     // Note: camera currently works somewhat first person perspective, maintaining up in the +y direction

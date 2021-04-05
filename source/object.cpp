@@ -1,5 +1,5 @@
 #include "../headers/object.h"
-#include "pop_substr.cpp"
+#include "./functions/pop_substr.cpp"
 #include <fstream>
 
 // Constructor
