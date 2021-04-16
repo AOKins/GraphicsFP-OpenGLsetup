@@ -18,7 +18,6 @@ shader::shader(const char * vertexName, const char * fragmentName) {
 
     // Compiling the source code that has been sent
     glCompileShader(vertexID);
-    
     glGetShaderiv(vertexID, GL_COMPILE_STATUS, &success);
     if (!success) {
         glGetShaderInfoLog(vertexID, 512, NULL, errorLog);
@@ -59,18 +58,23 @@ shader::shader(const char * vertexName, const char * fragmentName) {
 // Output: returns const char array of file contents
 const char* shader::load_from_file(const char * filePath) {
     char * fileContent;
-    std::ifstream fileStream;
-    fileStream.open(filePath);
-    int i = 0;
-    // Read each character at a time, storing the result into fileContent array
-    while (!fileStream.eof()) {
-        fileStream.read(fileContent + i, 1);
-        ++i;
-    }
-    // Ending with zero character to designate end of string
-    fileContent[i-1] = '\0';
+    FILE * file;
+    size_t size;
+    file = fopen(filePath, "rb");
 
-    fileStream.close();
+    if (!file) return 0;
+
+    fseek(file, 0, SEEK_END);
+    size = ftell(file);
+    fseek(file,0,SEEK_SET);    
+    fileContent = new char [size + 1];
+
+    if (!fileContent) return 0;
+
+    fread(fileContent, 1, size, file);
+    fileContent[size] = 0;
+    fclose(file);
+
     return fileContent;
 }
 
