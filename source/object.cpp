@@ -1,5 +1,6 @@
 #include "../headers/object.h"
 #include "./functions/pop_substr.cpp"
+#include "./functions/transformDerive.cpp"
 #include <fstream>
 
 // Constructor
@@ -8,16 +9,16 @@ object::object(std::string filePath) {
     this->bank = 0;
     this->heading = 0;
     this->pitch = 0;
-    this->x = 0;
-    this->y = 0;
-    this->z = 0;
+    this->position = glm::vec3(0,0,-1);
     // Default scale is 1.0
     this->scale = 1.0f;
+    
     // Load from file for other data
     load_from_file(filePath);
+    updateMatrices();
 }
 
-// Method used in constructor to properly load contents of .obj file (implementation largely from Scott's example)
+// Method used in constructor to properly load contents of .obj file (implementation largely (98%) from Scott Griffith's example)
 // Input is string to where the file is
 // Output is vertices,uvs, and normals vectors in struct are set according to file contents
 void object::load_from_file(std::string filePath) {
@@ -142,4 +143,82 @@ void object::load_from_file(std::string filePath) {
             this->normals.push_back(tempNorm[tempFace[i+5]-1]); //n1
             this->normals.push_back(tempNorm[tempFace[i+8]-1]); //n1
         }
+}
+
+// Getter for bank angle
+float object::getBank() {
+    return this->bank;
+}
+
+// Getter for heading angle
+float object::getHeading() {
+    return this->heading;
+}
+
+// Getter for pitch angle
+float object::getPitch() {
+    return this->pitch;
+}
+
+// Getter for the current position
+glm::vec3 object::getPosition() {
+    return this->position;
+}
+
+// Getter for the scale
+float object::getScale() {
+    return this->scale;
+}
+
+// Getter for the translation matrix for this object
+glm::mat4 object::getTranslation() {
+    return this->translation;
+}
+
+// Getter for the rotation matrix for this object
+glm::mat4 object::getRotation() {
+    return this->rotation;
+}
+
+// Getter for the getToWorld matrix for this object
+glm::mat4 object::getToWorld() {
+    return this->toWorld;
+}
+
+// Method that should called whenever changing position or orientation values for the object 
+void object::updateMatrices() {
+    // Derive orientation
+    this->rotation = getRotationMatrix(this->bank, this->heading, this->pitch); //
+    this->translation = glm::mat4(
+        glm::vec4(1.0, 0.0, 0.0, 0.0),
+        glm::vec4(0.0, 1.0, 0.0, 0.0),
+        glm::vec4(0.0, 0.0, 1.0, 0.0),
+        glm::vec4(this->position,1.0f));
+    // Derive toWorld matrix using orientation and translation
+    this->toWorld = this->translation * this->rotation;
+}
+
+void object::setBank(float new_bank) {
+    this->bank = new_bank;
+    updateMatrices();
+}
+
+void object::setHeading(float new_heading) {
+    this->heading = new_heading;
+    updateMatrices();
+}
+
+void object::setPitch(float new_pitch) {
+    this->pitch = new_pitch;
+    updateMatrices();
+}
+
+void object::setScale(float new_scale) {
+    this->scale = new_scale;
+    updateMatrices();
+}
+
+void object::setPosition(glm::vec3 new_pos) {
+    this->position = new_pos;
+    updateMatrices();
 }

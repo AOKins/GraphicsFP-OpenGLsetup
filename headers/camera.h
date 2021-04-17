@@ -56,6 +56,10 @@ public:
 
     glm::mat4 getPerspective();
 
+    glm::mat4 getProjection();
+
+    glm::vec3 getPosition();
+
     // Camera control methods for changing view //
     // Note: camera currently works somewhat first person perspective, maintaining up in the +y direction
 

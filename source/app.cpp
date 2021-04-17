@@ -9,6 +9,9 @@
 #include "camera.cpp"
 #include "./functions/transformDerive.cpp"
 
+#include "skyBox.cpp"
+
+
 #define GL_CHECK_ERR assert(glGetError() == GL_NO_ERROR);
 
 // Default constructor, calls initialize and sets running to false
@@ -22,9 +25,8 @@ application::application() {
     initialize();
 }
 
-// Sets up the window and context, also initialization of GLEW
-void application::initialize() {
-    
+// Sets up the window and context, also initialization of GLEW and SDL
+void application::initialize() { 
     // Create window for app
     this->window = SDL_CreateWindow("Main Window", 10, 100, window_width, window_height, SDL_WINDOW_OPENGL);
     if (window == NULL) {
@@ -58,26 +60,12 @@ void application::start() {
     // Correcting main camera to the aspect ratio of the window
     mainCamera.setAspect(float(window_width)/float(window_height));
 
-    // Object Stuff //
+    // SkyBox //
+    this->mainSkyBox = new skyBox("./shaders/skyCube_vertex.shader", "./shaders/skyCube_fragment.shader");
 
-    // Loading objects, hardcoding their scales to correspond canon sizes (0.1 is 1km)
-    this->objects.push_back(object("./resources/Enterprise.obj"));
-    this->objects[0].scale = 0.0290f;
-    
-    this->objects.push_back(object("./resources/KlingonBOP.obj"));
-    // The Bird-of-Prey Size Paradox https://www.ex-astris-scientia.org/articles/bop-size.htm
-    this->objects[1].scale = 0.0110f;
-    this->objects.push_back(object("./resources/RomulanBOP.obj"));
-    this->objects[2].scale = 0.0192f;
-    this->objects.push_back(object("./resources/Planet_Ring.obj"));
-    // Making it big
-    this->objects[3].scale = 0.1f;
-    // Setting planet object's position somewhere far away (but not TOO far away!)
-    this->objects[3].x = 0.75;
-    this->objects[3].y = -0.0f;
-    this->objects[3].z = -00.0f;
-    this->objects[3].heading = M_PI/3;
-    
+    // Object Stuff //
+    this->objects.push_back(object("./resources/test_cube.obj"));
+
     // Setting the arrays for buffer id values of each item
       vertexArrayID = new GLuint[objects.size()];
      vertexBufferID = new GLuint[objects.size()];
@@ -144,77 +132,15 @@ void application::render(double ctime, double ltime) {
     glEnable(GL_DEPTH_TEST);
     // Setting the background color buffer, first argument specifies the buffer, second argument is 0 as only this one buffer is being modified, 
     glClearBufferfv(GL_COLOR, 0, bg_color);
-
-    float dx, dz, dy; // Delta values for holding change in x and z (using derivatives!), useful for deriving heading rotation
     
+    // Render the skybox
+    this->mainSkyBox->renderSkyBox(mainCamera.getPerspective(), mainCamera.getProjection());
+    
+    // Using the one object shader program created in setup, identifying with the id value in the app's struct
+    glUseProgram(objectsShader->shaderID);
+
     // Render each item
     for (int i = 0; i < objects.size(); i++) {
-        dx = 0.0f;
-        dy = 0.0f;
-        dz = 0.0f;
-
-        // Position and orientation values dependent on object
-        switch (i) {
-            // Enterprise position and orientation setting
-            case(0):
-                // Position update
-                objects[i].x = 1.5f * glm::sin(ctime/12.0f);
-                objects[i].z = 1.5f * glm::sin(ctime/12.0f) * glm::cos(ctime/12.0f);
-                // Updating heading by the change in x / z to help indicate direction going
-                dx = glm::cos(ctime/12.0f);
-                dz = glm::cos(ctime/6.0f);
-                break;
-            // Klingon Bird of Prey position and orientation setting
-            case(1):
-                // Position update
-                objects[i].x = glm::sin(ctime/2.0f + 1.0f) + 0.75f;
-                objects[i].z = glm::cos(ctime/2.0f + 1.0f);
-                objects[i].y = 0.5f * glm::cos(ctime/2.0f + 1.0f);
-
-                dx = 0.5f * glm::cos(ctime/2.0f + 1.0f);
-                dz = -0.5f * glm::sin(ctime/2.0f + 1.0f);
-                dy = -0.25f * glm::sin(ctime/2.0f + 1.0f);
-                break;
-            // Romulan Bird of Prey position and orientation setting
-            case(2):
-                objects[i].x = -10.0f * glm::cos(-ctime/100.0f) + 5.0f;
-                objects[i].z = 5.0f*glm::sin(ctime/100.0f) - 5.0f;
-                objects[i].y = 0.1f * glm::cos(ctime/20.0f) + 1.0f;
-
-                dx = -0.1f * glm::sin(-ctime/100.0f);
-                dz = 0.05f * glm::cos(ctime/100.0f);
-                dy = -0.005f*glm::sin(ctime/2.0f);
-                break;
-            default:
-                break;
-        }
-        
-        // Managing bounds of dz for atan in heading
-        if (dz != 0.0f) {
-            objects[i].heading = glm::atan(dx / dz) - M_PI/2.0f;
-        }
-        else {
-            // if dz = 0, then set it to a really small value to preseve heading orientation
-            dz = 0.000001f;
-            objects[i].heading = glm::atan(dx / dz) - M_PI/2.0f;
-        }
-
-        // Managing bounds of dz and dx for atan in pitch
-        if (dx != 0.0f && dz != 0.0f) {
-            objects[i].pitch = glm::atan(dy / pow(dx*dx+dz*dz,0.5f) );
-        }
-        else {
-            // if the radius is zero, then set one of the directions as a really small value to preserve pitch orientation
-            dz = 0.000001f;
-            objects[i].pitch = 0.0f;
-        }
-
-        // Correcting heading orientations due to domain range of arctan()
-        if (dz < 0) {
-            objects[i].heading += M_PI;
-        }
-        
-
         // Updating the buffer data
         // First argument specifies that this is an array
         // Second argument gives size of the array
@@ -229,28 +155,23 @@ void application::render(double ctime, double ltime) {
         objectsShader->setMat4("perspective", mainCamera.getPerspective());
 
         // Setting the translation transform for the obejct
-        glm::mat4 translation(1.0f);
-        translation = glm::translate(translation, glm::vec3(objects[i].x, objects[i].y, objects[i].z));
-        objectsShader->setMat4("translation", translation);
+        objectsShader->setMat4("translation", objects[i].getTranslation());
 
         // Creating the scale matrix to appriopriately set the size of the object
-        glm::mat4 scaleMatrix = glm::mat4x4(objects[i].scale);
+        glm::mat4 scaleMatrix = glm::mat4x4(objects[i].getScale());
         scaleMatrix[3].w = 1.0f; // Correcting the w componenet
 
         // Setting scale matrix into shader
         objectsShader->setMat4("scale", scaleMatrix);
         // Setting the orientation of the object (rotating to correctly according to it's bank, heading, and pitch)
-        objectsShader->setMat4("ori", getRotationMatrix(objects[i].bank, objects[i].heading, objects[i].pitch));
+        objectsShader->setMat4("ori", objects[i].getRotation());
 
         // Now dealing with actively rendering the triangles //
-        // Using the one shader program created in setup, identifying with the id value in the app's struct
-        glUseProgram(objectsShader->shaderID);
 
         // Call to draw the tirangle, starting at index 0 and number of vertices to render for triangles (using size of entire array divided by size of each vertex)
         glBindVertexArray(vertexArrayID[i]);
         glDrawArrays(GL_TRIANGLES, 0, objects[i].vertices.size());
     }
-
     // Swapping buffers to update display
     SDL_GL_SwapWindow(window);
 }
@@ -278,4 +199,5 @@ application::~application() {
     delete [] vertexArrayID;
     delete [] vertexBufferID;
     delete [] elementBufferID;
+    delete this->mainSkyBox;
 }

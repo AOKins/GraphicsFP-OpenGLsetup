@@ -12,6 +12,7 @@
 #include "object.h"
 #include "shader.h"
 #include "camera.h"
+#include "skyBox.h"
 
 class application {
 protected: 
@@ -36,8 +37,11 @@ protected:
     // Camera that user controls
     camera mainCamera;
 
+    // SkyBox container
+    skyBox * mainSkyBox;
+
     // Background color
-    GLfloat bg_color[4] = {0.01f,0.001f,0.01f,0.0f};
+    GLfloat bg_color[4] = {0.1f,0.1f,0.1f,0.0f};
 
 public:
     // Default constructor, calls initialize and sets running to false

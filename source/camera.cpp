@@ -19,6 +19,10 @@ camera::camera() {
     this->updateView();
 }
 
+glm::vec3 camera::getPosition() {
+    return this->position;
+}
+
 // Only sets new ratio if it is greater than 0
 void camera::setAspect(float new_ratio) {
     if (new_ratio > 0) {
@@ -114,7 +118,7 @@ void camera::turnUp(float degrees) {
     updateView();
 }
 
-// Private method, should be used whenever changing position or orientation to update the view matrix for rendering
+// Private method, should be used whenever changing position or orientation to update the view matrices for rendering
 void camera::updateView() {
     this->up = this->abs_up;// * getRotationX(this->pitch);
     // Rotation is a bit different because the main axis is along Z as opposed to X
@@ -141,6 +145,10 @@ glm::mat4 camera::getView() {
 
 glm::mat4 camera::getPerspective() {
     return this->perspective;
+}
+
+glm::mat4 camera::getProjection() {
+    return this->projection;
 }
 
 // Simple setter for fov
