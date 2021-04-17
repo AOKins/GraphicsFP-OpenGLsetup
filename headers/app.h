@@ -21,11 +21,7 @@ protected:
     SDL_Window * window;
     SDL_GLContext context;
     shader * objectsShader; 
-    shader * skyCubeShader;
 
-    GLuint * vertexArrayID;
-    GLuint * vertexBufferID;
-    GLuint * elementBufferID;
     // Dimensions of the window
     int window_width, window_height;
     // Tracker for number of mouse clicks made (left increases, right decreases)

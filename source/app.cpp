@@ -51,7 +51,6 @@ void application::initialize() {
 
     // Creating shaders for objects and skyCube (uses files in /shaders folder)
     objectsShader = new shader("./shaders/vertex.shader","./shaders/fragment.shader");
-    skyCubeShader = new shader("./shaders/skyCube_vertex.shader", "./shaders/skyCube_fragment.shader");
 }
 
 // Start the application, ending with call to loop()
@@ -63,15 +62,11 @@ void application::start() {
     // SkyBox //
     this->mainSkyBox = new skyBox("./shaders/skyCube_vertex.shader", "./shaders/skyCube_fragment.shader", "./resources/Skycube/");
 
-    // Setting the arrays for buffer id values of each item
-      vertexArrayID = new GLuint[objects.size()];
-     vertexBufferID = new GLuint[objects.size()];
-    elementBufferID = new GLuint[objects.size()];
-
     // Object Stuff //
-    this->objects.push_back(object("./resources/cube_Borg_textured.obj","./resources/borg_texture.bmp"));
-    this->objects.push_back(object("./resources/cube_Borg_textured.obj","./resources/borg_texture.bmp"));
-    this->objects[1].setPosition(glm::vec3(3.0f,1.0f,-2.0f));
+//    this->objects.push_back(object("./resources/cube_Borg_textured.obj","./resources/borg_texture.bmp"));
+//    this->objects.push_back(object("./resources/cube_Borg_textured.obj","./resources/borg_texture.bmp"));
+//    this->objects[1].setPosition(glm::vec3(3.0f,1.0f,-2.0f));
+    this->objects.push_back(object("./resources/Enerprise.obj"));//,"./resources/borg_texture.bmp"));
     // End of Object Stuff //
 
     // Call the loop method to 
@@ -153,6 +148,5 @@ bool application::isRunning(){
 application::~application() {
     // Clear up everything
     delete this->objectsShader;
-    delete this->skyCubeShader;
     delete this->mainSkyBox;
 }

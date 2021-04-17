@@ -1,6 +1,6 @@
 #version 450 core  
 
-in vec4 cube_vertex;
+in vec4 position;
 
 uniform mat4 perspective;
 uniform mat4 projection;
@@ -8,8 +8,8 @@ uniform mat4 projection;
 out vec4 tex_cords;
 
 void main(void) {
-    tex_cords = cube_vertex;
+    tex_cords = position;
 
     //All modifications are pulled in via attributes    
-    gl_Position = perspective * projection * cube_vertex;
+    gl_Position = perspective * projection * position;
 }
