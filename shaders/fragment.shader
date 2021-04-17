@@ -2,8 +2,10 @@
 
 out vec4 color;
 
-in vec4 fragColor;
+uniform sampler2D twoDTex; 
+
+in vec2 vs_uv;
 
 void main(void) {
-   color = fragColor;
+   color = texture(twoDTex, vs_uv);
 }

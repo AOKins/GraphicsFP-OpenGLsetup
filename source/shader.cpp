@@ -51,6 +51,10 @@ shader::shader(const char * vertexName, const char * fragmentName) {
     glDeleteShader(fragmentID);
 
     this->cancel = false;
+
+    this->vertexID = glGetAttribLocation(this->shaderID,"position");
+    this->uvID = glGetAttribLocation(this->shaderID,"obj_uv");
+
 }
 
 // Really simple load_from_file method to read file contents with given path
@@ -102,4 +106,12 @@ void shader::setFloat(const std::string &name, float value) const {
 // 4x4 matrix uniform
 void shader::setMat4(const std::string &name, glm::mat4 matrix) const {
     glUniformMatrix4fv(glGetUniformLocation(shaderID, name.c_str()), 1, GL_FALSE, glm::value_ptr(matrix));
+}
+
+GLuint shader::getVertexID() {
+    return this->vertexID;
+}
+
+GLuint shader::getUvID() {
+    return this->uvID;
 }

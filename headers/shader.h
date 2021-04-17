@@ -8,7 +8,7 @@
 
 struct shader {
     // ID values
-    GLuint shaderID;
+    GLuint shaderID, vertexID, uvID;
     bool cancel;
     // Simple default destructor
     ~shader();
@@ -23,6 +23,11 @@ struct shader {
     void setInt(const std::string &name, int value) const;
     void setFloat(const std::string &name, float value) const;
     void setMat4(const std::string &name, glm::mat4 matrix) const;
+
+    GLuint getVertexID();
+    GLuint getUvID();
+
+    void load_textures(std::string textDirectory);
 };
 
 #endif

@@ -11,7 +11,7 @@ private:
     // Shader for the SkyBox object only
     shader * skyBoxShader;
 
-    GLuint vertexArray_id, vertexBuffer_id, elementBuffer_id;
+    GLuint vertexArray_id, vertexBuffer_id, elementBuffer_id, texture_ID;
 
     bool textured;
 
@@ -86,6 +86,7 @@ public:
     ~skyBox();
 
     void loadTextures(const char * directory);
+    void loadSideTexture(GLint texture_ID, GLenum side, const char * filePath);
 
     void renderSkyBox(glm::mat4 perspective = glm::mat4(), glm::mat4 projection = glm::mat4());
 };

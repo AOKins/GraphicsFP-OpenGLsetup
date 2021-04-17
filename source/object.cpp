@@ -1,11 +1,13 @@
 #include "../headers/object.h"
 #include "./functions/pop_substr.cpp"
 #include "./functions/transformDerive.cpp"
+#include "stbi_include.cpp"
+
 #include <fstream>
 
 // Constructor
-object::object(std::string filePath) {
-    // Initializes orientation as 0 and position in origin
+object::object(std::string objPath, std::string textPath) {
+    this->position = glm::vec3();
     this->bank = 0;
     this->heading = 0;
     this->pitch = 0;
@@ -14,8 +16,52 @@ object::object(std::string filePath) {
     this->scale = 1.0f;
     
     // Load from file for other data
-    load_from_file(filePath);
+    load_from_file(objPath);
     updateMatrices();
+
+    // OpenGL stuff //
+    glCreateVertexArrays(1, &this->vertexArray_ID);
+    glCreateBuffers(1, &this->verticesBuff_ID);
+    glCreateBuffers(1, &this->elementBuff_ID);
+
+    //For each object in objects, set up openGL buffers
+    glBindVertexArray(this->vertexArray_ID);
+    glBindBuffer(GL_ARRAY_BUFFER, this->verticesBuff_ID);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->elementBuff_ID);
+
+    // Send triangle data to the buffer, specifing that it is to the array buffer, providing size and address, followed by the usage (which here is as static drawing)
+    glBufferData(GL_ARRAY_BUFFER, this->vertices.size() * sizeof(this->vertices[0]), this->vertices.data() , GL_STATIC_DRAW);
+    // Setting attributes to the vertex array so that it knows how to uses the vertex array
+    // resource that was used in this usage and acquirng this current state of understanding is https://learnopengl.com/Getting-started/Hello-Triangle
+    // first argument setting input variable being attributed which is zero as the location for the vertices data is set to 0 in the shader (location = 0 for position)
+    // second argument specifies number of values (the vertex data is comprised of 4 data points as well as color)
+    // third argument gives size of each value (floats)
+    // fourth sets to normalize the data if true
+    // fifth argument gives the distance between each set of data
+    // sixth gives offset in the buffer to start off with (which is 0 as there is no need for offsetting) 
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, (GLvoid*)0);
+
+    // Enabling the arrays that have been created to be used in the vertex shader
+    glEnableVertexAttribArray(0);
+
+    if (textPath != "") {
+        load_texture(textPath);
+        glGenBuffers(1, &this->uvBuff_ID);
+        glBindBuffer(GL_ARRAY_BUFFER, this->uvBuff_ID);
+        glBufferData(GL_ARRAY_BUFFER, this->uvs.size() * sizeof(this->uvs[0]),
+                    this->uvs.data(),
+                    GL_STATIC_DRAW
+        );
+        this->textured = true;
+    }
+    else {
+        this->textured = false;
+    }
+
+}
+
+object::~object() {
+    glDeleteVertexArrays(1, &this->vertexArray_ID);
 }
 
 // Method used in constructor to properly load contents of .obj file (implementation largely (98%) from Scott Griffith's example)
@@ -145,6 +191,27 @@ void object::load_from_file(std::string filePath) {
         }
 }
 
+
+void object::load_texture(std::string textPath) {
+    unsigned char * imgData;
+    int imgWidth;
+    int imgHeight;
+    int num_channels;
+
+    imgData = stbi_load(textPath.c_str(), &imgWidth, &imgHeight, &num_channels, 4);
+        
+    glGenTextures(1, &this->texture_ID);
+    glBindTexture(GL_TEXTURE_2D, this->texture_ID);
+    glTexImage2D(GL_TEXTURE_2D, // type of texture (2d image)
+                0, GL_RGBA, // simple detail with RGB and A values
+                imgWidth, imgHeight, // Given dimensions of the image
+                0, GL_RGBA, GL_UNSIGNED_BYTE, // no border, input is RGBA that is comprised of unsigned bytes
+                imgData); // pointer to the data itself
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    delete [] imgData;
+}
+
 // Getter for bank angle
 float object::getBank() {
     return this->bank;
@@ -221,4 +288,43 @@ void object::setScale(float new_scale) {
 void object::setPosition(glm::vec3 new_pos) {
     this->position = new_pos;
     updateMatrices();
+}
+
+bool object::isTextured() {
+    return this->textured;
+}
+
+void object::renderObject(int vertexID, int uvID) {
+    // Linking vertex buffer
+    glEnableVertexAttribArray(vertexID); //Recall the vertex ID
+    glBindBuffer(GL_ARRAY_BUFFER, this->verticesBuff_ID);//Link object buffer to vertex_ID
+    glVertexAttribPointer( // Index into the buffer
+            vertexID,  // Attribute in question
+            4,         // Number of elements per vertex call (vec4)
+            GL_FLOAT,  // Type of element
+            GL_FALSE,  // Normalize? Nope
+            0,         // No stride (steps between indexes)
+            0);        // initial offset
+
+    // Linking UV buffer for textures (if textured)
+    // If is textured we will need to bind that
+    if (this->isTextured()) {
+        glBindTexture(GL_TEXTURE_2D, this->texture_ID);
+
+        glEnableVertexAttribArray(uvID); //Recall the vertex ID
+        glBindBuffer(GL_ARRAY_BUFFER, this->uvBuff_ID);//Link object buffer to vertex_ID
+        glVertexAttribPointer( //Index into the buffer
+                uvID, //Attribute in question
+                2,         //Number of elements per vertex call (vec2)
+                GL_FLOAT,  //Type of element
+                GL_FALSE,  //Normalize? Nope
+                0,         //No stride (steps between indexes)
+                0);       //initial offset
+    }
+    glDrawArrays( GL_TRIANGLES, 0, this->vertices.size());
+}
+
+
+GLuint object::getVertexArrayID() {
+    return this->vertexArray_ID;
 }
