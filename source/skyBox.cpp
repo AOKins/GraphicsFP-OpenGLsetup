@@ -49,7 +49,6 @@ void skyBox::renderSkyBox(glm::mat4 perspective, glm::mat4 projection) {
             0,         // No stride (steps between indexes)
             0);        // initial offset
 
-
     this->skyBoxShader->setMat4("perspective", perspective);
     this->skyBoxShader->setMat4("projection", projection);    
     
@@ -85,7 +84,6 @@ void skyBox::loadTextures(const char * directory) {
     glTexParameteri( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE );
     glTexParameteri( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
     glTexParameteri( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );   
-
 }
 
 void skyBox::loadSideTexture(GLint texture_ID, GLenum side, const char * filePath) {
@@ -112,7 +110,8 @@ void skyBox::loadSideTexture(GLint texture_ID, GLenum side, const char * filePat
     delete [] imgData;
 }
 
-// Destructor
+// Destructor for skyBox
 skyBox::~skyBox() {
+    // Only need to explicitly delete the shader
     delete this->skyBoxShader;
 }

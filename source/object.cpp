@@ -265,35 +265,42 @@ void object::updateMatrices() {
     this->toWorld = this->translation * this->rotation;
 }
 
+// Setter for bank
 void object::setBank(float new_bank) {
     this->bank = new_bank;
     updateMatrices();
 }
 
+// Setter for heading
 void object::setHeading(float new_heading) {
     this->heading = new_heading;
     updateMatrices();
 }
 
+// Setter for pitch
 void object::setPitch(float new_pitch) {
     this->pitch = new_pitch;
     updateMatrices();
 }
 
+// Setter for scale
 void object::setScale(float new_scale) {
     this->scale = new_scale;
     updateMatrices();
 }
 
+// Setter for position
 void object::setPosition(glm::vec3 new_pos) {
     this->position = new_pos;
     updateMatrices();
 }
 
+// Returns if this object is textured or not
 bool object::isTextured() {
     return this->textured;
 }
 
+// Method for handling the rendering of this object
 void object::renderObject(int vertexID, int uvID) {
     // Linking vertex buffer
     glEnableVertexAttribArray(vertexID); //Recall the vertex ID
@@ -324,7 +331,7 @@ void object::renderObject(int vertexID, int uvID) {
     glDrawArrays( GL_TRIANGLES, 0, this->vertices.size());
 }
 
-
+// Getter for vertexArray for given object
 GLuint object::getVertexArrayID() {
     return this->vertexArray_ID;
 }

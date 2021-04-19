@@ -104,6 +104,7 @@ void shader::setMat4(const std::string &name, glm::mat4 matrix) const {
     glUniformMatrix4fv(glGetUniformLocation(shaderID, name.c_str()), 1, GL_FALSE, glm::value_ptr(matrix));
 }
 
+// Getter for attribute location of given name
 GLuint shader::getLocation(const std::string &name) {
     return glGetAttribLocation(this->shaderID, name.c_str());
 }

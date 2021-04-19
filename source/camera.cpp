@@ -2,6 +2,7 @@
 #include "./functions/transformDerive.cpp"
 #include <math.h>
 
+// Default constructor for camera
 camera::camera() {
     this->position = glm::vec3(0.0f, 0.0f,1.0f);
     this->up = glm::vec3(0.0f, 1.0f, 0.0f);
@@ -143,10 +144,12 @@ glm::mat4 camera::getView() {
     return this->view;
 }
 
+// Simple getters for perspective matrix
 glm::mat4 camera::getPerspective() {
     return this->perspective;
 }
 
+// Simple getters for projection matrix
 glm::mat4 camera::getProjection() {
     return this->projection;
 }

@@ -72,7 +72,6 @@ public:
     void onKeyPress(SDL_KeyboardEvent * key_event, double deltaTime);    
     
     void close();
-
 };
 
 #endif
