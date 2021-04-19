@@ -248,8 +248,8 @@ glm::mat4 object::getRotation() {
 }
 
 // Getter for the getToWorld matrix for this object
-glm::mat4 object::getToWorld() {
-    return this->toWorld;
+glm::mat4 object::getToSpace() {
+    return this->toSpace;
 }
 
 // Method that should called whenever changing position or orientation values for the object 
@@ -262,7 +262,7 @@ void object::updateMatrices() {
         glm::vec4(0.0, 0.0, 1.0, 0.0),
         glm::vec4(this->position,1.0f));
     // Derive toWorld matrix using orientation and translation
-    this->toWorld = this->translation * this->rotation;
+    this->toSpace = this->translation * this->rotation;
 }
 
 // Setter for bank

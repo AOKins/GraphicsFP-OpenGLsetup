@@ -26,7 +26,7 @@ class object {
 
     glm::mat4 translation;
     glm::mat4 rotation;
-    glm::mat4 toWorld;
+    glm::mat4 toSpace;
     
     void updateMatrices();
 
@@ -52,7 +52,7 @@ public:
     float getScale();
     glm::mat4 getTranslation();
     glm::mat4 getRotation();
-    glm::mat4 getToWorld();
+    glm::mat4 getToSpace();
     GLuint getVertexArrayID();
     GLuint getVertexBufferID();
     GLuint getUvBufferID();
