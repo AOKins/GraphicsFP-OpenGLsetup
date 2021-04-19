@@ -42,7 +42,7 @@ object::object(std::string objPath, std::string textPath) {
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, (GLvoid*)0);
 
     // Enabling the arrays that have been created to be used in the vertex shader
-    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(this->vertexArray_ID);
 
     if (textPath != "") {
         load_texture(textPath);

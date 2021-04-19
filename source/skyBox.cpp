@@ -17,6 +17,7 @@ skyBox::skyBox(const char* vertexPath, const char* fragmentPath, const char* tex
     // Sending the data and setting attributes
     glBufferData(GL_ARRAY_BUFFER, 36 * sizeof(this->points[0]), &points, GL_STATIC_DRAW);
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, (GLvoid*)0);
+    glEnableVertexAttribArray(this->vertexArray_id);
 
     // Setup texture buffer
     if (texturePath != "") {
@@ -34,8 +35,21 @@ skyBox::skyBox(const char* vertexPath, const char* fragmentPath, const char* tex
 void skyBox::renderSkyBox(glm::mat4 perspective, glm::mat4 projection) {
     glDepthMask(GL_FALSE);
     
+    GLuint vertexID = this->skyBoxShader->getLocation("position");
+
     glUseProgram(this->skyBoxShader->shaderID);
-    
+    glEnableVertexAttribArray(vertexID);
+
+    glBindBuffer(GL_ARRAY_BUFFER, this->vertexBuffer_id);//Link object buffer to vertex_ID
+    glVertexAttribPointer( // Index into the buffer
+            vertexID,  // Attribute in question
+            4,         // Number of elements per vertex call (vec4)
+            GL_FLOAT,  // Type of element
+            GL_FALSE,  // Normalize? Nope
+            0,         // No stride (steps between indexes)
+            0);        // initial offset
+
+
     this->skyBoxShader->setMat4("perspective", perspective);
     this->skyBoxShader->setMat4("projection", projection);    
     

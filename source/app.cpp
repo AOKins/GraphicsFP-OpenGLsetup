@@ -63,10 +63,10 @@ void application::start() {
     this->mainSkyBox = new skyBox("./shaders/skyCube_vertex.shader", "./shaders/skyCube_fragment.shader", "./resources/Skycube/");
 
     // Object Stuff //
-//    this->objects.push_back(object("./resources/cube_Borg_textured.obj","./resources/borg_texture.bmp"));
-//    this->objects.push_back(object("./resources/cube_Borg_textured.obj","./resources/borg_texture.bmp"));
-//    this->objects[1].setPosition(glm::vec3(3.0f,1.0f,-2.0f));
-    this->objects.push_back(object("./resources/Enerprise.obj"));//,"./resources/borg_texture.bmp"));
+    this->objects.push_back(object("./resources/cube_Borg_textured.obj","./resources/borg_texture.bmp"));
+    this->objects.push_back(object("./resources/cube_Borg_textured.obj","./resources/borg_texture.bmp"));
+    this->objects[0].setPosition(glm::vec3(3.0f,1.0f,-2.0f));
+    this->objects.push_back(object("./resources/Planet_Ring.obj","./resources/borg_texture.bmp"));
     // End of Object Stuff //
 
     // Call the loop method to 
@@ -125,7 +125,7 @@ void application::render(double ctime, double ltime) {
         objectsShader->setMat4("ori", objects[i].getRotation());
 
         // Render the object
-        objects[i].renderObject(objectsShader->getVertexID(), objectsShader->getUvID());
+        objects[i].renderObject(objectsShader->getLocation("position"),objectsShader->getLocation("obj_uv"));
     }
     // Swapping buffers to update display
     SDL_GL_SwapWindow(window);
