@@ -16,21 +16,17 @@ object::object(std::string objPath, std::string textPath) {
     this->scale = 1.0f;
     // Default parent object as NULL
     this->parentObj = NULL;
-
     // Load from file for other data
     load_from_file(objPath);
     updateMatrices();
-
     // OpenGL stuff //
     glCreateVertexArrays(1, &this->vertexArray_ID);
     glCreateBuffers(1, &this->verticesBuff_ID);
     glCreateBuffers(1, &this->elementBuff_ID);
-
     //For each object in objects, set up openGL buffers
     glBindVertexArray(this->vertexArray_ID);
     glBindBuffer(GL_ARRAY_BUFFER, this->verticesBuff_ID);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->elementBuff_ID);
-
     // Send triangle data to the buffer, specifing that it is to the array buffer, providing size and address, followed by the usage (which here is as static drawing)
     glBufferData(GL_ARRAY_BUFFER, this->vertices.size() * sizeof(this->vertices[0]), this->vertices.data() , GL_STATIC_DRAW);
     // Setting attributes to the vertex array so that it knows how to uses the vertex array
@@ -42,7 +38,6 @@ object::object(std::string objPath, std::string textPath) {
     // fifth argument gives the distance between each set of data
     // sixth gives offset in the buffer to start off with (which is 0 as there is no need for offsetting) 
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, (GLvoid*)0);
-
     // Enabling the arrays that have been created to be used in the vertex shader
     glEnableVertexAttribArray(this->vertexArray_ID);
 

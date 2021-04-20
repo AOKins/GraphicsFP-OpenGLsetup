@@ -32,9 +32,10 @@ skyBox::skyBox(const char* vertexPath, const char* fragmentPath, const char* tex
 }
 
 // Method for encapsulating the render behavior of the skybox
+// Elements for optimization followed by https://learnopengl.com/code_viewer_gh.php?code=src/4.advanced_opengl/6.1.cubemaps_skybox/cubemaps_skybox.cpp
 void skyBox::renderSkyBox(glm::mat4 perspective, glm::mat4 projection) {
-    glDepthMask(GL_FALSE);
-    
+    glDepthFunc(GL_LEQUAL);
+
     GLuint vertexID = this->skyBoxShader->getLocation("position");
 
     glUseProgram(this->skyBoxShader->shaderID);
@@ -52,14 +53,14 @@ void skyBox::renderSkyBox(glm::mat4 perspective, glm::mat4 projection) {
     this->skyBoxShader->setMat4("perspective", perspective);
     this->skyBoxShader->setMat4("projection", projection);    
     
-    if (this->textured) {
-        glActiveTexture( GL_TEXTURE0 ); //Make sure we are using the CUBE_MAP texture we already set up
-        glBindTexture( GL_TEXTURE_CUBE_MAP, this->texture_ID ); //Link to the texture
-    }
+    glActiveTexture( GL_TEXTURE0 ); //Make sure we are using the CUBE_MAP texture we already set up
+    glBindTexture(GL_TEXTURE_CUBE_MAP, this->texture_ID); //Link to the texture
+    
     glBindVertexArray(this->vertexArray_id);
     glDrawArrays(GL_TRIANGLES, 0, 36);
 
-    glDepthMask(GL_TRUE);
+    glDepthFunc(GL_LESS);
+    
 }
 
 

@@ -8,9 +8,7 @@
 #include "object.cpp"
 #include "camera.cpp"
 #include "./functions/transformDerive.cpp"
-
 #include "skyBox.cpp"
-
 
 #define GL_CHECK_ERR assert(glGetError() == GL_NO_ERROR);
 
@@ -63,7 +61,7 @@ void application::start() {
     this->mainSkyBox = new skyBox("./shaders/skyCube_vertex.shader", "./shaders/skyCube_fragment.shader", "./resources/Skycube/");
 
     // Object Stuff //
-
+    this->objects.push_back(object("./resources/test.obj","./resources/test.bmp"));
     // End of Object Stuff //
 
     // Call the loop method to 
@@ -80,10 +78,8 @@ void application::loop() {
     while (this->running) {
         // Get current time in milliseconds
         currTime = double(SDL_GetTicks()) / 1000.0f;
-
         // Check for keyboard inputs that we want continous (like movement)
         this->continuousKeyInput(currTime - lastTime);
-
         while(SDL_PollEvent(&event)) {
             this->event(&event, currTime - lastTime);
         }
@@ -96,21 +92,21 @@ void application::loop() {
 // Handles the actual rendering behavior (including manage of triangle data)
 void application::render(double ctime, double ltime) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    // Render the skybox
-    this->mainSkyBox->renderSkyBox(mainCamera.getPerspective(), mainCamera.getProjection());
+    glEnable(GL_DEPTH_TEST);
 
     // Using the one object shader program created in setup, identifying with the id value in the app's struct
     glUseProgram(objectsShader->shaderID);
-    glEnable(GL_DEPTH_TEST);
     // Setting camera transform
     objectsShader->setMat4("camera", mainCamera.getView());
     // Setting perspective transform
     objectsShader->setMat4("perspective", mainCamera.getPerspective());
-    // Render the object
+    // Render the objects with object shader
     for (int i = 0; i < objects.size(); i++) {
         objects[i].renderObject(objectsShader);
     }
+    // Render the skybox
+    this->mainSkyBox->renderSkyBox(mainCamera.getPerspective(), mainCamera.getProjection());
+
     // Swapping buffers to update display
     SDL_GL_SwapWindow(window);
 }

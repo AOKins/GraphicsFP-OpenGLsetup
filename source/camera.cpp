@@ -10,12 +10,10 @@ camera::camera() {
     this->aspect = float(16)/float(9); // Default ratio to 16:9
     this->clip_far = 100.0f;
     this->clip_near = 0.1f;
-    
     // Defaulting the camera to 0 orientation
     this->bank = 0;
     this->pitch = 0;
     this->heading = -M_PI/2.0f;
-
     // Setting derived values by calling their update methods
     this->updateView();
 }
@@ -46,7 +44,6 @@ void camera::setClipNear(float new_clipNear) {
         this->clip_near = new_clipNear;
     }
 }
-
 
 // Setter for position
 void camera::setPos(glm::vec4 new_pos) {
@@ -126,7 +123,6 @@ void camera::updateView() {
     glm::vec3 direction = this->abs_foward * getRotationZ(this->pitch) * getRotationY(this->heading);
     // Update view matrix (projection + translation)
     this->view = glm::lookAt(this->position, direction + this->position, this->up);
-
     // Setting projection to have projection contents of view matrix, but ommitting translation elements
     this->projection = glm::mat4(
         glm::vec4(view[0]),
@@ -134,7 +130,6 @@ void camera::updateView() {
         glm::vec4(view[2]),
         glm::vec4(0,0,0,1)
     );
-
     // Update perspective matrix
     this->perspective = glm::perspective(this->fov, this->aspect, this->clip_near, this->clip_far);
 }
