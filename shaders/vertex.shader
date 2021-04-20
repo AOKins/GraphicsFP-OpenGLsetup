@@ -13,5 +13,5 @@ uniform mat4 perspective;
 
 void main() {
    gl_Position =  (perspective * camera * toSpace * scale * position) / position.w;
-   vs_uv = obj_uv * -1;
+   vs_uv = obj_uv * vec2(1.0,-1.0);
 }
