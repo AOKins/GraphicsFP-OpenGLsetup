@@ -6,7 +6,7 @@
 #include <fstream>
 
 // Constructor
-object::object(std::string objPath, std::string textPath) {
+object::object(std::string objPath, std::string textPath, shader * objShader) {
     this->position = glm::vec3();
     this->bank = 0;
     this->heading = 0;
@@ -18,15 +18,22 @@ object::object(std::string objPath, std::string textPath) {
     this->parentObj = NULL;
     // Load from file for other data
     load_from_file(objPath);
+    deriveFacePoints();
     updateMatrices();
     // OpenGL stuff //
+
+    GLuint vertexID = objShader->getLocation("position");
+    GLuint uvID     = objShader->getLocation("obj_uv");
+    GLuint normalID = objShader->getLocation("normalVertex");
+    
+    glCreateBuffers(1, &this->elementBuff_ID);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->elementBuff_ID);
+    // Setting up verticies data
     glCreateVertexArrays(1, &this->vertexArray_ID);
     glCreateBuffers(1, &this->verticiesBuff_ID);
-    glCreateBuffers(1, &this->elementBuff_ID);
     //For each object in objects, set up openGL buffers
     glBindVertexArray(this->vertexArray_ID);
     glBindBuffer(GL_ARRAY_BUFFER, this->verticiesBuff_ID);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->elementBuff_ID);
     // Send triangle data to the buffer, specifing that it is to the array buffer, providing size and address, followed by the usage (which here is as static drawing)
     glBufferData(GL_ARRAY_BUFFER, this->verticies.size() * sizeof(this->verticies[0]), this->verticies.data() , GL_STATIC_DRAW);
     // Setting attributes to the vertex array so that it knows how to uses the vertex array
@@ -37,9 +44,21 @@ object::object(std::string objPath, std::string textPath) {
     // fourth sets to normalize the data if true
     // fifth argument gives the distance between each set of data
     // sixth gives offset in the buffer to start off with (which is 0 as there is no need for offsetting) 
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, (GLvoid*)0);
+    glVertexAttribPointer(vertexID, 4, GL_FLOAT, GL_FALSE, 0, (GLvoid*)0);
     // Enabling the arrays that have been created to be used in the vertex shader
     glEnableVertexAttribArray(this->vertexArray_ID);
+
+
+    glCreateVertexArrays(1, &this->normalArray_ID);
+    glCreateBuffers(1, &this->normalBuff_ID);
+
+    glBindVertexArray(this->normalArray_ID);
+    glBindBuffer(GL_ARRAY_BUFFER, this->normalBuff_ID);
+
+    glBufferData(GL_ARRAY_BUFFER, this->normals.size() * sizeof(this->normals[0]), this->normals.data() , GL_STATIC_DRAW);
+
+    glVertexAttribPointer(normalID, 4, GL_FLOAT, GL_FALSE, 0, (GLvoid*)0);
+    glEnableVertexAttribArray(this->normalArray_ID);
 
     if (textPath != "") {
         load_texture(textPath);
@@ -54,7 +73,59 @@ object::object(std::string objPath, std::string textPath) {
     else {
         this->textured = false;
     }
+}
 
+// Method for handling the rendering of this object
+void object::renderObject(shader * objShader) {
+    GLuint vertexID = objShader->getLocation("position");
+    GLuint normalID = objShader->getLocation("normal");
+    GLuint uvID = objShader->getLocation("obj_uv");
+
+    glm::mat4 resultToSpace;
+
+    if (this->parentObj != NULL) {
+        resultToSpace = this->parentObj->getToSpace() * 
+                        this->getHierarchyTranslation() * 
+                        this->getToSpace();
+    }
+    else {
+        resultToSpace = this->getToSpace();        // Setting the toSpace transform for the object
+    }
+    
+    objShader->setMat4("toSpace", resultToSpace);
+
+    // Creating the scale matrix to appriopriately set the size of the object
+    glm::mat4 scaleMatrix = glm::mat4x4(this->getScale());
+    scaleMatrix[3].w = 1.0f; // Correcting the w componenet
+    // Setting scale matrix into shader
+    objShader->setMat4("scale", scaleMatrix);
+
+    // Linking vertex buffer
+    glEnableVertexAttribArray(vertexID); //Recall the vertex ID
+    glBindBuffer(GL_ARRAY_BUFFER, this->verticiesBuff_ID);//Link object buffer to vertex_ID
+    glVertexAttribPointer( // Index into the buffer
+            vertexID,  // Attribute in question
+            4,         // Number of elements per vertex call (vec4)
+            GL_FLOAT,  // Type of element
+            GL_FALSE,  // Normalize? Nope
+            0,         // No stride (steps between indexes)
+            0);        // initial offset
+    // Linking UV buffer for textures (if textured)
+    // If is textured we will need to bind that
+    if (this->isTextured()) {
+        glBindTexture(GL_TEXTURE_2D, this->texture_ID);
+
+        glEnableVertexAttribArray(uvID); //Recall the vertex ID
+        glBindBuffer(GL_ARRAY_BUFFER, this->uvBuff_ID);//Link object buffer to vertex_ID
+        glVertexAttribPointer( //Index into the buffer
+                uvID, //Attribute in question
+                2,         //Number of elements per vertex call (vec2)
+                GL_FLOAT,  //Type of element
+                GL_FALSE,  //Normalize? Nope
+                0,         //No stride (steps between indexes)
+                0);       //initial offset
+    }
+    glDrawArrays(GL_TRIANGLES, 0, this->verticies.size());
 }
 
 object::~object() {
@@ -188,7 +259,6 @@ void object::load_from_file(std::string filePath) {
         }
 }
 
-
 void object::load_texture(std::string textPath) {
     unsigned char * imgData;
     int imgWidth;
@@ -233,25 +303,18 @@ void object::deriveFacePoints() {
 // Calculate distance from camera/player to object face
 // Input: camera position, object face id
 // Output: distance
-float object::getDistanceFromFace(glm::vec3 point, int face_id)
-{
+float object::getDistanceFromFace(glm::vec3 point, int face_id) {
     // If invalid index, returnning large distance as temporary handler
     if (face_id > facePoints.size()-1 || face_id < 0) {
         return 999.9f;
-    }
-    else {
+    } else { // Calculate the distance
         float distance;
-        // Calculate the distance
-        // Get the world space coordinate for the face
-        glm::vec4 faceWorld = (facePoints[face_id] * this->rotation) + glm::vec4(this->position, 0.0f);
-        // Get the normal with orientation considered
-        glm::vec4 normalWorld = faceNormals[face_id] * this->rotation;
-        // Use the dot product to get the distance
-        distance = glm::dot((glm::vec4(point, 1.0f) - (faceWorld)), (normalWorld));
+        glm::vec4 faceWorld = (facePoints[face_id] * this->rotation) + glm::vec4(this->position, 0.0f); // Get the world space coordinate for the face
+        glm::vec4 normalWorld = faceNormals[face_id] * this->rotation;                                  // Get the normal with orientation considered
+        distance = glm::dot((glm::vec4(point, 1.0f) - (faceWorld)), (normalWorld));                     // Use the dot product to get the distance
         return distance;
     }
 }
-
 
 // Getter for bank angle
 float object::getBank() {
@@ -291,7 +354,6 @@ glm::mat4 object::getHierarchyTranslation() {
         glm::vec4(0.0, 0.0, 1.0, 0.0),
         glm::vec4(this->hierTranslate,1.0f));
 }
-
 
 // Getter for the rotation matrix for this object
 glm::mat4 object::getRotation() {
@@ -359,58 +421,4 @@ GLuint object::getVertexArrayID() {
 void object::setParent(object * new_parent, glm::vec3 setHierTranslate = glm::vec3(0,0,0)) {
     this->parentObj = new_parent;
     this->hierTranslate = setHierTranslate;
-}
-
-// Method for handling the rendering of this object
-void object::renderObject(shader * objShader) {
-    GLuint vertexID = objShader->getLocation("position");
-    GLuint uvID = objShader->getLocation("obj_uv");
-
-    glm::mat4 resultToSpace;
-
-    if (this->parentObj != NULL) {
-        resultToSpace = this->parentObj->getToSpace() * 
-                        this->getHierarchyTranslation() * 
-                        this->getToSpace();
-    }
-    else {
-        // Setting the toSpace transform for the object
-        resultToSpace = this->getToSpace();
-    }
-    
-    objShader->setMat4("toSpace", resultToSpace);
-
-    // Creating the scale matrix to appriopriately set the size of the object
-    glm::mat4 scaleMatrix = glm::mat4x4(this->getScale());
-    scaleMatrix[3].w = 1.0f; // Correcting the w componenet
-    // Setting scale matrix into shader
-    objShader->setMat4("scale", scaleMatrix);
-
-    // Linking vertex buffer
-    glEnableVertexAttribArray(vertexID); //Recall the vertex ID
-    glBindBuffer(GL_ARRAY_BUFFER, this->verticiesBuff_ID);//Link object buffer to vertex_ID
-    glVertexAttribPointer( // Index into the buffer
-            vertexID,  // Attribute in question
-            4,         // Number of elements per vertex call (vec4)
-            GL_FLOAT,  // Type of element
-            GL_FALSE,  // Normalize? Nope
-            0,         // No stride (steps between indexes)
-            0);        // initial offset
-
-    // Linking UV buffer for textures (if textured)
-    // If is textured we will need to bind that
-    if (this->isTextured()) {
-        glBindTexture(GL_TEXTURE_2D, this->texture_ID);
-
-        glEnableVertexAttribArray(uvID); //Recall the vertex ID
-        glBindBuffer(GL_ARRAY_BUFFER, this->uvBuff_ID);//Link object buffer to vertex_ID
-        glVertexAttribPointer( //Index into the buffer
-                uvID, //Attribute in question
-                2,         //Number of elements per vertex call (vec2)
-                GL_FLOAT,  //Type of element
-                GL_FALSE,  //Normalize? Nope
-                0,         //No stride (steps between indexes)
-                0);       //initial offset
-    }
-    glDrawArrays(GL_TRIANGLES, 0, this->verticies.size());
 }

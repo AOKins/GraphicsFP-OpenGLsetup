@@ -47,8 +47,6 @@ void application::initialize() {
     // Setting viewport to be same as window itself
     glViewport(0, 0, window_width, window_height);
 
-    // Creating shaders for objects and skyCube (uses files in /shaders folder)
-    objectsShader = new shader("./shaders/vertex.shader","./shaders/fragment.shader");
 }
 
 // Start the application, ending with call to loop()
@@ -57,11 +55,13 @@ void application::start() {
     // Correcting main camera to the aspect ratio of the window
     mainCamera.setAspect(float(window_width)/float(window_height));
 
+    // Creating shaders for objects and skyCube (uses files in /shaders folder)
+    objectsShader = new shader("./shaders/lightVertex.shader","./shaders/lightFragment.shader");
     // SkyBox //
     this->mainSkyBox = new skyBox("./shaders/skyCube_vertex.shader", "./shaders/skyCube_fragment.shader", "./resources/Skycube/");
 
     // Object Stuff //
-    this->objects.push_back(object("./resources/test.obj","./resources/test.bmp"));
+    this->objects.push_back(object("./resources/test.obj","./resources/test.bmp", this->objectsShader));
     // End of Object Stuff //
 
     // Call the loop method to 

@@ -19,10 +19,10 @@ class object {
     float scale; // Scaler for the object
 
     bool textured;
-
-    GLuint vertexArray_ID;
-    GLuint verticiesBuff_ID;
-    GLuint uvBuff_ID;
+    // IDs for the vertex arrays
+    GLuint vertexArray_ID, normalArray_ID;
+    // IDs for the buffers themselves
+    GLuint verticiesBuff_ID, normalBuff_ID, uvBuff_ID;
     GLuint texture_ID;
     GLuint elementBuff_ID;
 
@@ -47,7 +47,7 @@ public:
 
     // Constuctor that takes in string to where the .obj file is located and optional texture image file
     // Defaults the orientation to 0,0,0 as well as position
-    object(std::string filePath, std::string textPath = "");
+    object(std::string objPath, std::string textPath, shader * objShader);
     ~object();
     // Method used in constructor to properly load contents of .obj file
     void load_from_file(std::string filePath);

@@ -8,7 +8,7 @@
 class light {
 protected:
     glm::vec3 position; // Point location of the light
-    GLfloat color[3]; // RGB color values from light
+    glm::vec3 color; // RGB color values from light
 public:
     light();
     light(glm::vec3 iPos, glm::vec3 iColor);
