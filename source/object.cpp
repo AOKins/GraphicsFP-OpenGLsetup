@@ -21,17 +21,17 @@ object::object(std::string objPath, std::string textPath) {
     updateMatrices();
     // OpenGL stuff //
     glCreateVertexArrays(1, &this->vertexArray_ID);
-    glCreateBuffers(1, &this->verticesBuff_ID);
+    glCreateBuffers(1, &this->verticiesBuff_ID);
     glCreateBuffers(1, &this->elementBuff_ID);
     //For each object in objects, set up openGL buffers
     glBindVertexArray(this->vertexArray_ID);
-    glBindBuffer(GL_ARRAY_BUFFER, this->verticesBuff_ID);
+    glBindBuffer(GL_ARRAY_BUFFER, this->verticiesBuff_ID);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->elementBuff_ID);
     // Send triangle data to the buffer, specifing that it is to the array buffer, providing size and address, followed by the usage (which here is as static drawing)
-    glBufferData(GL_ARRAY_BUFFER, this->vertices.size() * sizeof(this->vertices[0]), this->vertices.data() , GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, this->verticies.size() * sizeof(this->verticies[0]), this->verticies.data() , GL_STATIC_DRAW);
     // Setting attributes to the vertex array so that it knows how to uses the vertex array
     // resource that was used in this usage and acquirng this current state of understanding is https://learnopengl.com/Getting-started/Hello-Triangle
-    // first argument setting input variable being attributed which is zero as the location for the vertices data is set to 0 in the shader (location = 0 for position)
+    // first argument setting input variable being attributed which is zero as the location for the verticies data is set to 0 in the shader (location = 0 for position)
     // second argument specifies number of values (the vertex data is comprised of 4 data points as well as color)
     // third argument gives size of each value (floats)
     // fourth sets to normalize the data if true
@@ -63,7 +63,7 @@ object::~object() {
 
 // Method used in constructor to properly load contents of .obj file (implementation largely (98%) from Scott Griffith's example)
 // Input is string to where the file is
-// Output is vertices,uvs, and normals vectors in struct are set according to file contents
+// Output is verticies,uvs, and normals vectors in struct are set according to file contents
 void object::load_from_file(std::string filePath) {
     //File to load in
         std::ifstream in(filePath, std::ios::in);
@@ -77,7 +77,7 @@ void object::load_from_file(std::string filePath) {
 
         //Temp vectors to hold data
         //These will need to be indexed into the output vectors based on face info
-        std::vector<glm::vec4> tempVert; // from vertices lines 'v <x> <y> <z>'
+        std::vector<glm::vec4> tempVert; // from verticies lines 'v <x> <y> <z>'
         //This might need to be a more complicated structure, we can get away with strict indexing
         std::vector<GLuint> tempFace; // from face line 'f <v1>/<t1>/<n1> <v2>/<t2>/<n2> <v3>/<t3>/<n3>', should be indexes
         std::vector<glm::vec2> tempUVs; // from texture line 'vt <x> <y>'
@@ -156,7 +156,7 @@ void object::load_from_file(std::string filePath) {
         } //end of line parsing
 
         //Clear out output vectors (just to be safe)
-        this->vertices.clear();
+        this->verticies.clear();
         this->uvs.clear();
         this->normals.clear();
 
@@ -168,13 +168,13 @@ void object::load_from_file(std::string filePath) {
         // Faces striping: <v1>/<t1>/<n1> <v2>/<t2>/<n2> <v3>/<t3>/<n3>
         //Because the data in tempFace is striped buy sets of three triplets, step forward by 9 each time
         for(int i = 0; i < tempFace.size(); i += 9 ){
-            //Pull data into vertices
+            //Pull data into verticies
             //                                   VVV Index offset pattern
             //                          VVV Holds vertex index to pull from tempVery (offset from starting at 1 to 0)    
             //                 VVV Indexed vertex info
-            this->vertices.push_back(tempVert[tempFace[i+0]-1]); //v1
-            this->vertices.push_back(tempVert[tempFace[i+3]-1]); //v2
-            this->vertices.push_back(tempVert[tempFace[i+6]-1]); //v3
+            this->verticies.push_back(tempVert[tempFace[i+0]-1]); //v1
+            this->verticies.push_back(tempVert[tempFace[i+3]-1]); //v2
+            this->verticies.push_back(tempVert[tempFace[i+6]-1]); //v3
 
             //Pull data into uvs
             this->uvs.push_back(tempUVs[tempFace[i+1]-1]); //uv1
@@ -208,6 +208,50 @@ void object::load_texture(std::string textPath) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     delete [] imgData;
 }
+
+// Takes every three verticies in verticies array and stores the average of them inside average vector
+// Input: none
+// Output: normals for every face of object
+void object::deriveFacePoints() {
+    // Clear if there was anything in there already
+    this->facePoints.clear();
+    this->faceNormals.clear();
+    // Allocate space needeed
+    this->facePoints = std::vector<glm::vec4>(this->verticies.size()/3, glm::vec4(0.0f,0.0f,0.0f,0.0f));
+    this->faceNormals = std::vector<glm::vec4>(this->normals.size()/3, glm::vec4(0.0f,0.0f,0.0f,0.0f));
+    // Store the average for each face vertex point (group of three verticies) to get facePoint
+    for (int i = 0; i < verticies.size() / 3; i++) {
+        facePoints[i] = verticies[3*i]   / 3.0f;
+        facePoints[i] += verticies[3*i+1] / 3.0f;
+        facePoints[i] += verticies[3*i+2] / 3.0f;
+        facePoints[i][3] = 0.0f;
+        // The normal of a given face is the normalized sum of each vertex's normal
+        faceNormals[i] = glm::normalize(normals[3*i] + normals[3*i+1] + normals[3*i+2]);
+    }
+}
+
+// Calculate distance from camera/player to object face
+// Input: camera position, object face id
+// Output: distance
+float object::getDistanceFromFace(glm::vec3 point, int face_id)
+{
+    // If invalid index, returnning large distance as temporary handler
+    if (face_id > facePoints.size()-1 || face_id < 0) {
+        return 999.9f;
+    }
+    else {
+        float distance;
+        // Calculate the distance
+        // Get the world space coordinate for the face
+        glm::vec4 faceWorld = (facePoints[face_id] * this->rotation) + glm::vec4(this->position, 0.0f);
+        // Get the normal with orientation considered
+        glm::vec4 normalWorld = faceNormals[face_id] * this->rotation;
+        // Use the dot product to get the distance
+        distance = glm::dot((glm::vec4(point, 1.0f) - (faceWorld)), (normalWorld));
+        return distance;
+    }
+}
+
 
 // Getter for bank angle
 float object::getBank() {
@@ -344,7 +388,7 @@ void object::renderObject(shader * objShader) {
 
     // Linking vertex buffer
     glEnableVertexAttribArray(vertexID); //Recall the vertex ID
-    glBindBuffer(GL_ARRAY_BUFFER, this->verticesBuff_ID);//Link object buffer to vertex_ID
+    glBindBuffer(GL_ARRAY_BUFFER, this->verticiesBuff_ID);//Link object buffer to vertex_ID
     glVertexAttribPointer( // Index into the buffer
             vertexID,  // Attribute in question
             4,         // Number of elements per vertex call (vec4)
@@ -368,5 +412,5 @@ void object::renderObject(shader * objShader) {
                 0,         //No stride (steps between indexes)
                 0);       //initial offset
     }
-    glDrawArrays(GL_TRIANGLES, 0, this->vertices.size());
+    glDrawArrays(GL_TRIANGLES, 0, this->verticies.size());
 }

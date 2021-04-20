@@ -1,5 +1,5 @@
-#ifndef _OBJFILE_H_
-#define _OBJFILE_H_
+#ifndef _OBJECT_H_
+#define _OBJECT_H_
 
 #include <string>
 #include <vector>
@@ -21,7 +21,7 @@ class object {
     bool textured;
 
     GLuint vertexArray_ID;
-    GLuint verticesBuff_ID;
+    GLuint verticiesBuff_ID;
     GLuint uvBuff_ID;
     GLuint texture_ID;
     GLuint elementBuff_ID;
@@ -38,9 +38,12 @@ class object {
 
 public:
     // Publicly accessible vertices, terxture vertices, and normals
-    std::vector<glm::vec4> vertices;
+    std::vector<glm::vec4> verticies;
     std::vector<glm::vec2> uvs;
     std::vector<glm::vec4> normals;
+
+    std::vector<glm::vec4> facePoints;
+    std::vector<glm::vec4> faceNormals;
 
     // Constuctor that takes in string to where the .obj file is located and optional texture image file
     // Defaults the orientation to 0,0,0 as well as position
@@ -50,6 +53,14 @@ public:
     void load_from_file(std::string filePath);
     void load_texture(std::string textPath);
     
+    // Method used in constructor to derive contents for facePoints and faceNormals
+    void deriveFacePoints();
+    // Method for getting the distance from a point to a given face
+    // Input: c_pos - 3D point to check
+    //        face_id - the given face to check
+    // Output: distance from the face
+    float getDistanceFromFace(glm::vec3 c_pos, int face_id);
+
     // Getters //
     glm::vec3 getPosition();
     
