@@ -301,7 +301,19 @@ bool object::isTextured() {
 }
 
 // Method for handling the rendering of this object
-void object::renderObject(int vertexID, int uvID) {
+void object::renderObject(shader * objShader) {
+    GLuint vertexID = objShader->getLocation("position");
+    GLuint uvID = objShader->getLocation("obj_uv");
+
+    // Setting the toSpace transform for the obejct
+    objShader->setMat4("toSpace", this->getToSpace());
+
+    // Creating the scale matrix to appriopriately set the size of the object
+    glm::mat4 scaleMatrix = glm::mat4x4(this->getScale());
+    scaleMatrix[3].w = 1.0f; // Correcting the w componenet
+    // Setting scale matrix into shader
+    objShader->setMat4("scale", scaleMatrix);
+
     // Linking vertex buffer
     glEnableVertexAttribArray(vertexID); //Recall the vertex ID
     glBindBuffer(GL_ARRAY_BUFFER, this->verticesBuff_ID);//Link object buffer to vertex_ID
@@ -328,7 +340,7 @@ void object::renderObject(int vertexID, int uvID) {
                 0,         //No stride (steps between indexes)
                 0);       //initial offset
     }
-    glDrawArrays( GL_TRIANGLES, 0, this->vertices.size());
+    glDrawArrays(GL_TRIANGLES, 0, this->vertices.size());
 }
 
 // Getter for vertexArray for given object

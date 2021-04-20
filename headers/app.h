@@ -71,6 +71,8 @@ public:
     // Handler for when a key press is made
     void onKeyPress(SDL_KeyboardEvent * key_event, double deltaTime);    
     
+    void continuousKeyInput(double deltaTime);
+    
     void close();
 };
 

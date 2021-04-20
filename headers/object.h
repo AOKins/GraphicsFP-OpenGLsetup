@@ -3,6 +3,8 @@
 
 #include <string>
 #include <vector>
+#include "shader.h"
+
 #include <glm/glm.hpp>
 #include <GL/gl.h>
 
@@ -30,6 +32,8 @@ class object {
     
     void updateMatrices();
 
+    object * parentObj;
+
 public:
     // Publicly accessible vertices, terxture vertices, and normals
     std::vector<glm::vec4> vertices;
@@ -45,19 +49,23 @@ public:
     void load_texture(std::string textPath);
     
     // Getters //
+    glm::vec3 getPosition();
+    
     float getBank();
     float getHeading();
     float getPitch();
-    glm::vec3 getPosition();
     float getScale();
+    
     glm::mat4 getTranslation();
     glm::mat4 getRotation();
     glm::mat4 getToSpace();
+
     GLuint getVertexArrayID();
     GLuint getVertexBufferID();
     GLuint getUvBufferID();
     GLuint getElementBufferID();
     GLuint getTextureID();
+    
     bool isTextured();
 
     // Setters //
@@ -67,7 +75,7 @@ public:
     void setPosition(glm::vec3 new_pos);
     void setScale(float new_scale);
 
-    void renderObject(int vertexID, int uvID);
+    void renderObject(shader * objShader);
 };
 
 #endif

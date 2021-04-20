@@ -50,39 +50,47 @@ void application::onKeyPress(SDL_KeyboardEvent * key_event, double deltaTime) {
             mainCamera.setHeading(-M_PI/2.0f);
             mainCamera.setPitch(M_PI/2.1f);
             break;
-        // Movement inputs
-        case (SDL_SCANCODE_W):
-            mainCamera.moveFoward(deltaTime*2.0f);
-            break;
-        case (SDL_SCANCODE_S):
-            mainCamera.moveFoward(-deltaTime*2.0f);
-            break;
-        case (SDL_SCANCODE_A):
-            mainCamera.moveLeft(deltaTime*2.0f);
-            break;
-        case (SDL_SCANCODE_D):
-            mainCamera.moveLeft(-deltaTime*2.0f);
-            break;
-        case (SDL_SCANCODE_Z):
-            mainCamera.moveUp(deltaTime*2.0f);
-            break;
-        case (SDL_SCANCODE_X):
-            mainCamera.moveUp(-deltaTime*2.0f);
-            break;
-        // Simple camera rotation controls
-        case (SDL_SCANCODE_RIGHT):
-            mainCamera.turnRight(deltaTime*2.0f);
-            break;
-        case (SDL_SCANCODE_LEFT):
-            mainCamera.turnRight(-deltaTime*2.0f);
-            break;
-        case (SDL_SCANCODE_UP):
-            mainCamera.turnUp(deltaTime*2.0f);
-            break;
-        case (SDL_SCANCODE_DOWN):
-            mainCamera.turnUp(-deltaTime*2.0f);
-            break;
+        
         default: // If unrecognized, default to doing nothing
             break;
+    }
+}
+
+// Handler for keyboard presses that are discrete presses (like WASD movement)
+// Input: checks status for various keys
+// Output: responds accordingly
+void application::continuousKeyInput(double deltaTime) {
+    const Uint8 * keyboardState = SDL_GetKeyboardState(NULL);
+    // Movement inputs
+    if (keyboardState[SDL_SCANCODE_W] == SDL_PRESSED) {
+        mainCamera.moveFoward(deltaTime*2.0f);
+    }
+    if (keyboardState[SDL_SCANCODE_S] == SDL_PRESSED) {
+        mainCamera.moveFoward(-deltaTime*2.0f);
+    }
+    if (keyboardState[SDL_SCANCODE_A] == SDL_PRESSED) {
+        mainCamera.moveLeft(deltaTime*2.0f);
+    }
+    if (keyboardState[SDL_SCANCODE_D] == SDL_PRESSED) {
+        mainCamera.moveLeft(-deltaTime*2.0f);
+    }
+    if (keyboardState[SDL_SCANCODE_SPACE] == SDL_PRESSED) {
+        mainCamera.moveUp(deltaTime*2.0f);
+    }
+    if (keyboardState[SDL_SCANCODE_LCTRL] == SDL_PRESSED) {
+        mainCamera.moveUp(-deltaTime*2.0f);
+    }
+    // Camera look-around keyboard controls
+    if (keyboardState[SDL_SCANCODE_RIGHT] == SDL_PRESSED) {
+        mainCamera.turnRight(deltaTime*2.0f);
+    }
+    if (keyboardState[SDL_SCANCODE_LEFT] == SDL_PRESSED) {
+        mainCamera.turnRight(-deltaTime*2.0f);
+    }
+    if (keyboardState[SDL_SCANCODE_UP] == SDL_PRESSED) {
+        mainCamera.turnUp(deltaTime*2.0f);
+    }
+    if (keyboardState[SDL_SCANCODE_DOWN] == SDL_PRESSED) {
+        mainCamera.turnUp(-deltaTime*2.0f);
     }
 }

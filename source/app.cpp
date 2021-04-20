@@ -66,7 +66,7 @@ void application::start() {
     this->objects.push_back(object("./resources/cube_Borg_textured.obj","./resources/borg_texture.bmp"));
     this->objects.push_back(object("./resources/cube_Borg_textured.obj","./resources/borg_texture.bmp"));
     this->objects[0].setPosition(glm::vec3(3.0f,1.0f,-2.0f));
-    this->objects.push_back(object("./resources/Planet_Ring.obj","./resources/borg_texture.bmp"));
+//    this->objects.push_back(object("./resources/Planet_Ring.obj","./resources/borg_texture.bmp"));
     // End of Object Stuff //
 
     // Call the loop method to 
@@ -83,6 +83,10 @@ void application::loop() {
     while (this->running) {
         // Get current time in milliseconds
         currTime = double(SDL_GetTicks()) / 1000.0f;
+
+        // Check for keyboard inputs that we want continous (like movement)
+        this->continuousKeyInput(currTime - lastTime);
+
         while(SDL_PollEvent(&event)) {
             this->event(&event, currTime - lastTime);
         }
@@ -95,37 +99,20 @@ void application::loop() {
 // Handles the actual rendering behavior (including manage of triangle data)
 void application::render(double ctime, double ltime) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    // Setting the background color buffer, first argument specifies the buffer, second argument is 0 as only this one buffer is being modified, 
-    glClearBufferfv(GL_COLOR, 0, bg_color);
-    
+
     // Render the skybox
     this->mainSkyBox->renderSkyBox(mainCamera.getPerspective(), mainCamera.getProjection());
-    
+
     // Using the one object shader program created in setup, identifying with the id value in the app's struct
     glUseProgram(objectsShader->shaderID);
-   
     glEnable(GL_DEPTH_TEST);
-    // Render each item
-    
     // Setting camera transform
     objectsShader->setMat4("camera", mainCamera.getView());
     // Setting perspective transform
     objectsShader->setMat4("perspective", mainCamera.getPerspective());
+    // Render the object
     for (int i = 0; i < objects.size(); i++) {
-        // Setting the translation transform for the obejct
-        objectsShader->setMat4("translation", objects[i].getTranslation());
-
-        // Creating the scale matrix to appriopriately set the size of the object
-        glm::mat4 scaleMatrix = glm::mat4x4(objects[i].getScale());
-        scaleMatrix[3].w = 1.0f; // Correcting the w componenet
-
-        // Setting scale matrix into shader
-        objectsShader->setMat4("scale", scaleMatrix);
-        // Setting the orientation of the object (rotating to correctly according to it's bank, heading, and pitch)
-        objectsShader->setMat4("ori", objects[i].getRotation());
-
-        // Render the object
-        objects[i].renderObject(objectsShader->getLocation("position"),objectsShader->getLocation("obj_uv"));
+        objects[i].renderObject(objectsShader);
     }
     // Swapping buffers to update display
     SDL_GL_SwapWindow(window);
