@@ -63,10 +63,16 @@ void application::start() {
     this->mainSkyBox = new skyBox("./shaders/skyCube_vertex.shader", "./shaders/skyCube_fragment.shader", "./resources/Skycube/");
 
     // Object Stuff //
-    this->objects.push_back(object("./resources/cube_Borg_textured.obj","./resources/borg_texture.bmp"));
+/*    this->objects.push_back(object("./resources/cube_Borg_textured.obj","./resources/borg_texture.bmp"));
     this->objects.push_back(object("./resources/cube_Borg_textured.obj","./resources/borg_texture.bmp"));
     this->objects[0].setPosition(glm::vec3(3.0f,1.0f,-2.0f));
 //    this->objects.push_back(object("./resources/Planet_Ring.obj","./resources/borg_texture.bmp"));
+*/
+    this->objects.push_back(object("./resources/test.obj","./resources/test.bmp"));
+//    this->objects.push_back(object("./resources/robot/robot_lowerArm.obj","./resources/robot/robot_lower_texture.bmp"));/*
+    
+    
+    
     // End of Object Stuff //
 
     // Call the loop method to 
