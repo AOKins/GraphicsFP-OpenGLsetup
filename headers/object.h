@@ -32,7 +32,9 @@ class object {
     
     void updateMatrices();
 
+    // Properties relating to connecting this object to a parent object for more complex objects
     object * parentObj;
+    glm::vec3 hierTranslate;
 
 public:
     // Publicly accessible vertices, terxture vertices, and normals
@@ -56,7 +58,8 @@ public:
     float getPitch();
     float getScale();
     
-    glm::mat4 getTranslation();
+    glm::mat4 getObjectTranslation();
+    glm::mat4 getHierarchyTranslation();
     glm::mat4 getRotation();
     glm::mat4 getToSpace();
 
@@ -74,7 +77,10 @@ public:
     void setPitch(float new_pitch);
     void setPosition(glm::vec3 new_pos);
     void setScale(float new_scale);
+    // Setter for parent object with option argument for translation
+    void setParent(object * new_parent, glm::vec3 setHierTranslate);
 
+    // Method for handling the rendering of this object with a given shader
     void renderObject(shader * objShader);
 };
 

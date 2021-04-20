@@ -39,18 +39,6 @@ void application::onKeyPress(SDL_KeyboardEvent * key_event, double deltaTime) {
         case (SDL_SCANCODE_F6):
             mainCamera.setFOV(mainCamera.getFOV()+deltaTime*2.0f);
             break;
-        // Setting position and orientation values for specific camera angles to showcase 3D environement
-        case (SDL_SCANCODE_1):
-            mainCamera.setPos(glm::vec4(0.0f,0.0f,1.0f,0.0f));
-            mainCamera.setHeading(-M_PI/2.0f);
-            mainCamera.setPitch(0.0f);
-            break;
-        case (SDL_SCANCODE_2):
-            mainCamera.setPos(glm::vec4(0.0f,1.0f,0.0f,0.0f));
-            mainCamera.setHeading(-M_PI/2.0f);
-            mainCamera.setPitch(M_PI/2.1f);
-            break;
-        
         default: // If unrecognized, default to doing nothing
             break;
     }

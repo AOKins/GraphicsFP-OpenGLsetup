@@ -14,7 +14,9 @@ object::object(std::string objPath, std::string textPath) {
     this->position = glm::vec3(0,0,-1);
     // Default scale is 1.0
     this->scale = 1.0f;
-    
+    // Default parent object as NULL
+    this->parentObj = NULL;
+
     // Load from file for other data
     load_from_file(objPath);
     updateMatrices();
@@ -238,9 +240,19 @@ float object::getScale() {
 }
 
 // Getter for the translation matrix for this object
-glm::mat4 object::getTranslation() {
+glm::mat4 object::getObjectTranslation() {
     return this->translation;
 }
+
+// Getter for the translation matrix for this object
+glm::mat4 object::getHierarchyTranslation() {
+    return glm::mat4(
+        glm::vec4(1.0, 0.0, 0.0, 0.0),
+        glm::vec4(0.0, 1.0, 0.0, 0.0),
+        glm::vec4(0.0, 0.0, 1.0, 0.0),
+        glm::vec4(this->hierTranslate,1.0f));
+}
+
 
 // Getter for the rotation matrix for this object
 glm::mat4 object::getRotation() {
@@ -300,13 +312,34 @@ bool object::isTextured() {
     return this->textured;
 }
 
+// Getter for vertexArray for given object
+GLuint object::getVertexArrayID() {
+    return this->vertexArray_ID;
+}
+
+void object::setParent(object * new_parent, glm::vec3 setHierTranslate = glm::vec3(0,0,0)) {
+    this->parentObj = new_parent;
+    this->hierTranslate = setHierTranslate;
+}
+
 // Method for handling the rendering of this object
 void object::renderObject(shader * objShader) {
     GLuint vertexID = objShader->getLocation("position");
     GLuint uvID = objShader->getLocation("obj_uv");
 
-    // Setting the toSpace transform for the obejct
-    objShader->setMat4("toSpace", this->getToSpace());
+    glm::mat4 resultToSpace;
+
+    if (this->parentObj != NULL) {
+        resultToSpace = this->parentObj->getToSpace() * 
+                        this->getHierarchyTranslation() * 
+                        this->getToSpace();
+    }
+    else {
+        // Setting the toSpace transform for the object
+        resultToSpace = this->getToSpace();
+    }
+    
+    objShader->setMat4("toSpace", resultToSpace);
 
     // Creating the scale matrix to appriopriately set the size of the object
     glm::mat4 scaleMatrix = glm::mat4x4(this->getScale());
@@ -341,9 +374,4 @@ void object::renderObject(shader * objShader) {
                 0);       //initial offset
     }
     glDrawArrays(GL_TRIANGLES, 0, this->vertices.size());
-}
-
-// Getter for vertexArray for given object
-GLuint object::getVertexArrayID() {
-    return this->vertexArray_ID;
 }
