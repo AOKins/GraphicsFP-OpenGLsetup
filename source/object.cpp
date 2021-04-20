@@ -11,7 +11,7 @@ object::object(std::string objPath, std::string textPath) {
     this->bank = 0;
     this->heading = 0;
     this->pitch = 0;
-    this->position = glm::vec3(0,0,-1);
+    this->position = glm::vec3(0,0,0);
     // Default scale is 1.0
     this->scale = 1.0f;
     // Default parent object as NULL
