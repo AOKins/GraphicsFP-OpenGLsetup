@@ -61,7 +61,10 @@ void application::start() {
     this->mainSkyBox = new skyBox("./shaders/skyCube_vertex.shader", "./shaders/skyCube_fragment.shader", "./resources/Skycube/");
 
     // Object Stuff //
-    this->objects.push_back(object("./resources/test.obj","./resources/test.bmp", this->objectsShader));
+    this->objects.push_back(object("./resources/test_Sphere.obj","./resources/Untitled.bmp", this->objectsShader));
+    this->objects.push_back(object("./resources/test_Sphere.obj","./resources/Untitled.bmp", this->objectsShader));
+    this->objects[1].setPosition(glm::vec3(2.0,2.0,-2.0));
+    this->objects[1].setScale(0.05);
     // End of Object Stuff //
 
     // Call the loop method to 
@@ -100,6 +103,7 @@ void application::render(double ctime, double ltime) {
     objectsShader->setMat4("camera", mainCamera.getView());
     // Setting perspective transform
     objectsShader->setMat4("perspective", mainCamera.getPerspective());
+    objectsShader->setVec3("cameraPos", mainCamera.getPosition());
     // Render the objects with object shader
     for (int i = 0; i < objects.size(); i++) {
         objects[i].renderObject(objectsShader);

@@ -78,7 +78,7 @@ object::object(std::string objPath, std::string textPath, shader * objShader) {
 // Method for handling the rendering of this object
 void object::renderObject(shader * objShader) {
     GLuint vertexID = objShader->getLocation("position");
-    GLuint normalID = objShader->getLocation("normal");
+    GLuint normalID = objShader->getLocation("normalVertex");
     GLuint uvID = objShader->getLocation("obj_uv");
 
     glm::mat4 resultToSpace;
@@ -110,6 +110,17 @@ void object::renderObject(shader * objShader) {
             GL_FALSE,  // Normalize? Nope
             0,         // No stride (steps between indexes)
             0);        // initial offset
+
+    glEnableVertexAttribArray(normalID); //Recall the vertex ID
+    glBindBuffer(GL_ARRAY_BUFFER, this->verticiesBuff_ID);//Link object buffer to vertex_ID
+    glVertexAttribPointer( // Index into the buffer
+            normalID,  // Attribute in question
+            4,         // Number of elements per vertex call (vec4)
+            GL_FLOAT,  // Type of element
+            GL_FALSE,  // Normalize? Nope
+            0,         // No stride (steps between indexes)
+            0);        // initial offset
+
     // Linking UV buffer for textures (if textured)
     // If is textured we will need to bind that
     if (this->isTextured()) {
