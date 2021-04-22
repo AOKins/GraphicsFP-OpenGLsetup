@@ -5,7 +5,7 @@ in vec4 normalVertex;
 in vec2 obj_uv;
 
 out vec4 vs_vertex;
-out vec4 world_vertex;
+out vec4 cameraS_vertex;
 out vec2 vs_uv;
 out vec4 v_normal;
 
@@ -30,6 +30,6 @@ void main() {
     lightPos = vec4(2,2,-2,1.0);
 
     vs_vertex = (toSpace * scale * position) / position.w;
-    world_vertex = vs_vertex; 
-    gl_Position = perspective * camera * world_vertex;
+    cameraS_vertex = perspective * camera * vs_vertex; 
+    gl_Position = cameraS_vertex;
 }
