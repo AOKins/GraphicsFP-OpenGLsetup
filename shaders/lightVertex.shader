@@ -7,7 +7,7 @@ in vec2 obj_uv;
 out vec4 vs_vertex;
 out vec4 cameraS_vertex;
 out vec2 vs_uv;
-out vec4 v_normal;
+out vec4 vs_normal;
 
 out vec4 lightPos;
 
@@ -24,10 +24,10 @@ void main() {
     mat4 toOri = toSpace / toSpace[3].w;
     toOri[3] = vec4(0,0,0,1); // Removing translation component
     
-    v_normal = toOri * normalVertex;
-    v_normal = normalize(v_normal / v_normal.w);
+    vs_normal =  toOri * normalVertex;
+    vs_normal = normalize(vs_normal / vs_normal.w);
 
-    lightPos = vec4(2,2,-2,1.0);
+    lightPos = vec4(0,0,0,1.0);
 
     vs_vertex = (toSpace * scale * position) / position.w;
     cameraS_vertex = perspective * camera * vs_vertex; 
