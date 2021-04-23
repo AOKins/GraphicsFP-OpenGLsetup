@@ -22,10 +22,10 @@ uniform mat4 perspective;
 void main() {
     vs_uv = obj_uv * vec2(1.0,-1.0);
 
-    mat4 toOri = toSpace / toSpace[3].w;
+    mat4 toOri = toSpace;
     toOri[3] = vec4(0,0,0,1); // Removing translation component
     
-    vec4 normal4d =  toOri * normalVertex;
+    vec4 normal4d = toOri * normalVertex;
     normal4d = normal4d / normal4d.w;
     vs_normal = normalize(normal4d.xyz);
 
