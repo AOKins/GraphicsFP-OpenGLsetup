@@ -10,6 +10,8 @@ in vec3 vs_normal; // The normal for the vertex (in world orientation)
 in vec4 cameraS_vertex;
 
 in vec4 lightPos;
+in vec3 lightColor;
+in float lightIntensity;
 
 uniform vec3 cameraPos;
 
@@ -56,6 +58,7 @@ void main(void) {
     vec3 L_diffuse = vec3(1.0, 1.0, 1.0);  // Scattered light color
     vec3 L_specular = vec3(1.0, 1.0, 1.0); // Color of shininess of object
 
+
     // Deriving a normalized vector from the vertex point to the light source
     vec3 L = normalize(vec3(lightPos.xyz) - vec3(vs_vertex.xyz));
     float cosTheta = max(dot(L, normalize(vs_normal) ),0);
@@ -67,7 +70,7 @@ void main(void) {
         I_diffuse = calcDiffuse(L_diffuse, K_diffuse, L, cosTheta);
     }
     
-    I = I_ambient + (I_diffuse + I_specular) / length(lightPos - vs_vertex);
+    I = (I_ambient + lightIntensity * (I_diffuse + I_specular) / length(lightPos - vs_vertex)) * lightColor;
     vec4 textColor = texture(twoDTex, vs_uv);
     color = textColor * vec4(I, 1.0);
 }

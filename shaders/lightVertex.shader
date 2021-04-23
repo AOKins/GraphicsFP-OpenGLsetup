@@ -10,7 +10,8 @@ out vec2 vs_uv;
 out vec3 vs_normal;
 
 out vec4 lightPos;
-
+out vec3 lightColor;
+out float lightIntensity;
 
 uniform mat4 toSpace;
 uniform mat4 scale;
@@ -28,7 +29,9 @@ void main() {
     normal4d = normal4d / normal4d.w;
     vs_normal = normalize(normal4d.xyz);
 
-    lightPos = vec4(0,0,0,1.0);
+    lightPos = vec4(0,100,0,1.0);
+    lightColor = vec3(1.0,0.0,0.0);
+    lightIntensity = 500;
 
     vs_vertex = (toSpace * scale * position) / position.w;
     cameraS_vertex = perspective * camera * vs_vertex; 
