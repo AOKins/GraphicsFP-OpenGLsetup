@@ -6,7 +6,7 @@ uniform sampler2D twoDTex;
 
 in vec2 vs_uv;     // UV coordinate
 in vec4 vs_vertex; // Where the vertex is in world space
-in vec4 vs_normal; // The normal for the vertex (in world orientation)
+in vec3 vs_normal; // The normal for the vertex (in world orientation)
 in vec4 cameraS_vertex;
 
 in vec4 lightPos;
@@ -24,7 +24,7 @@ vec3 calcSpecular(vec3 lightColor, float coeff, float alpha, vec3 L, float cosTh
     vec3 result;
     
     vec3 v = normalize(cameraPos-vs_vertex.xyz);
-    vec3 r = 2 * cosTheta * normalize(vs_normal.xyz) - L;
+    vec3 r = 2 * cosTheta * normalize(vs_normal) - L;
 
     float cosPhi = max(dot(v,r),0.0);
 
@@ -58,7 +58,7 @@ void main(void) {
 
     // Deriving a normalized vector from the vertex point to the light source
     vec3 L = normalize(vec3(lightPos.xyz) - vec3(vs_vertex.xyz));
-    float cosTheta = max(dot(L, normalize(vs_normal.xyz) ),0);
+    float cosTheta = max(dot(L, normalize(vs_normal) ),0);
 
     I_ambient = calcAmbient(L_ambient, K_ambient);
     
@@ -67,9 +67,7 @@ void main(void) {
         I_diffuse = calcDiffuse(L_diffuse, K_diffuse, L, cosTheta);
     }
     
-    float attenuation = 1.0 / length(lightPos - vs_vertex); //Attenuation factor based on distance from light source
-    
-    I = I_ambient + (I_diffuse + I_specular)*attenuation;
+    I = I_ambient + (I_diffuse + I_specular) / length(lightPos - vs_vertex);
     vec4 textColor = texture(twoDTex, vs_uv);
     color = textColor * vec4(I, 1.0);
 }
