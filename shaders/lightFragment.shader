@@ -23,7 +23,7 @@ vec3 calcAmbient(vec3 lightColor, float coefficient) {
 vec3 calcSpecular(vec3 lightColor, float coeff, float alpha, vec3 L, float cosTheta) {
     vec3 result;
     
-    vec3 v = (cameraPos-vs_vertex.xyz);
+    vec3 v = normalize(cameraPos-vs_vertex.xyz);
     vec3 r = 2 * cosTheta * normalize(vs_normal.xyz) - L;
 
     float cosPhi = max(dot(v,r),0.0);
@@ -46,10 +46,10 @@ void main(void) {
     vec3 I_ambient, I_diffuse, I_specular;
 
     //Material properties
-    float K_ambient = 0.05; // Ambient reflection coeff.
-    float K_diffuse = 0.75; // Diffuse reflection coeff.
-    float K_specular = 0.99; // Specular reflection coeff.
-    float alpha = 2.0;    // Specular exponent (m_gls)
+    float K_ambient = 0.01; // Ambient reflection coeff.
+    float K_diffuse = 0.55; // Diffuse reflection coeff.
+    float K_specular = 0.95; // Specular reflection coeff.
+    float alpha = 200.0;    // Specular exponent (m_gls)
 
     //   These could be pulled in via attributes, but for now, we will define them here
     vec3 L_ambient = vec3(1.0, 1.0, 1.0); // around the scene light color
@@ -66,8 +66,10 @@ void main(void) {
         I_specular = calcSpecular(L_specular, K_specular, alpha, L, cosTheta);
         I_diffuse = calcDiffuse(L_diffuse, K_diffuse, L, cosTheta);
     }
-
-    I = I_ambient + I_diffuse + I_specular;
+    
+    float attenuation = 1.0 / length(lightPos - vs_vertex); //Attenuation factor based on distance from light source
+    
+    I = I_ambient + (I_diffuse + I_specular)*attenuation;
     vec4 textColor = texture(twoDTex, vs_uv);
     color = textColor * vec4(I, 1.0);
 }
