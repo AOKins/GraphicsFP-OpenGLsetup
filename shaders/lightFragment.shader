@@ -24,7 +24,7 @@ vec3 calcSpecular(vec3 lightColor, float coeff, float alpha, vec3 L, float cosTh
     vec3 result;
     
     vec3 v = (cameraPos-vs_vertex.xyz);
-    vec3 r = 2*cosTheta*normalize(vs_normal.xyz) - L;
+    vec3 r = 2 * cosTheta * normalize(vs_normal.xyz) - L;
 
     float cosPhi = max(dot(v,r),0.0);
 
@@ -48,8 +48,8 @@ void main(void) {
     //Material properties
     float K_ambient = 0.05; // Ambient reflection coeff.
     float K_diffuse = 0.75; // Diffuse reflection coeff.
-    float K_specular = 1.0; // Specular reflection coeff.
-    float alpha = 200.0;    // Specular exponent (m_gls)
+    float K_specular = 0.99; // Specular reflection coeff.
+    float alpha = 2.0;    // Specular exponent (m_gls)
 
     //   These could be pulled in via attributes, but for now, we will define them here
     vec3 L_ambient = vec3(1.0, 1.0, 1.0); // around the scene light color
@@ -58,7 +58,7 @@ void main(void) {
 
     // Deriving a normalized vector from the vertex point to the light source
     vec3 L = normalize(vec3(lightPos.xyz) - vec3(vs_vertex.xyz));
-    float cosTheta = max(dot(L,normalize(vs_normal.xyz)),0);
+    float cosTheta = max(dot(L, normalize(vs_normal.xyz) ),0);
 
     I_ambient = calcAmbient(L_ambient, K_ambient);
     

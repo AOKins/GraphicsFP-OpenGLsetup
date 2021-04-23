@@ -61,7 +61,7 @@ void application::start() {
     this->mainSkyBox = new skyBox("./shaders/skyCube_vertex.shader", "./shaders/skyCube_fragment.shader", "./resources/Skycube/");
 
     // Object Stuff //
-    this->objects.push_back(object("./resources/test_Sphere.obj","./resources/Untitled.bmp", this->objectsShader));
+    this->objects.push_back(object("./resources/test_cube.obj","./resources/Untitled.bmp", this->objectsShader));
     this->objects.push_back(object("./resources/test_cube.obj","./resources/Untitled.bmp", this->objectsShader));
     this->objects[1].setScale(0.125);
     // End of Object Stuff //
