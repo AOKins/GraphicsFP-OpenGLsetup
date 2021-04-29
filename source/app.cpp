@@ -10,6 +10,8 @@
 #include "./functions/transformDerive.cpp"
 #include "skyBox.cpp"
 
+#include "ship.cpp"
+
 #define GL_CHECK_ERR assert(glGetError() == GL_NO_ERROR);
 
 // Default constructor, calls initialize and sets running to false
@@ -56,16 +58,12 @@ void application::start() {
     mainCamera.setAspect(float(window_width)/float(window_height));
 
     // Creating shaders for objects and skyCube (uses files in /shaders folder)
-    objectsShader = new shader("./shaders/lightVertex.shader","./shaders/lightFragment.shader");
+    objectsShader = new shader("./shaders/vertex.shader","./shaders/fragment.shader");
     // SkyBox //
     this->mainSkyBox = new skyBox("./shaders/skyCube_vertex.shader", "./shaders/skyCube_fragment.shader", "./resources/Skycube/");
 
     // Object Stuff //
-    this->objects.push_back(object("./resources/test_Sphere.obj","./resources/Untitled.bmp", this->objectsShader));
-    this->objects.push_back(object("./resources/test_Sphere.obj","./resources/Untitled.bmp", this->objectsShader));
-    this->objects.push_back(object("./resources/test_Sphere.obj","./resources/Untitled.bmp", this->objectsShader));
-    this->objects[0].setScale(0.125);
-    // End of Object Stuff //
+    this->myShip = ship(objectsShader);
 
     // Call the loop method to 
     loop();
@@ -105,13 +103,8 @@ void application::render(double ctime, double ltime) {
     objectsShader->setMat4("perspective", mainCamera.getPerspective());
     // Setting camera position for lighting
     objectsShader->setVec3("cameraPos", mainCamera.getPosition());
-    // Render the objects with object shader
-    for (int i = 0; i < objects.size(); i++) {
-        if (i > 0) {
-            objects[i].setPosition(glm::vec3(i*i*sin(ctime),0,i*i*cos(ctime)));
-        }
-        objects[i].renderObject(objectsShader);
-    }
+    // Render the ship
+    this->myShip.renderShip(objectsShader, ctime, ltime);
     // Render the skybox
     this->mainSkyBox->renderSkyBox(mainCamera.getPerspective(), mainCamera.getProjection());
 

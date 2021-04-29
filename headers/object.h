@@ -32,7 +32,7 @@ class object {
     
     void updateMatrices();
 
-    // Properties relating to connecting this object to a parent object for more complex objects
+    // Property to connecting this object to a parent object for more complex objects
     object * parentObj;
     glm::vec3 hierTranslate;
 
@@ -45,6 +45,7 @@ public:
     std::vector<glm::vec4> facePoints;
     std::vector<glm::vec4> faceNormals;
 
+    object();
     // Constuctor that takes in string to where the .obj file is located and optional texture image file
     // Defaults the orientation to 0,0,0 as well as position
     object(std::string objPath, std::string textPath, shader * objShader);
@@ -89,7 +90,7 @@ public:
     void setPosition(glm::vec3 new_pos);
     void setScale(float new_scale);
     // Setter for parent object with option argument for translation
-    void setParent(object * new_parent, glm::vec3 setHierTranslate);
+    void setParent(object * new_parent, glm::vec3 setHierTranslate = glm::vec3(0,0,0));
 
     // Method for handling the rendering of this object with a given shader
     void renderObject(shader * objShader);

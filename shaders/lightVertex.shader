@@ -29,8 +29,8 @@ void main() {
     normal4d = normal4d / normal4d.w;
     vs_normal = normalize(normal4d.xyz);
 
-    lightPos = vec4(0,100,0,1.0);
-    lightColor = vec3(1.0,0.0,0.0);
+    lightPos = vec4(100,0,0,1.0);
+    lightColor = vec3(1.0,1.0,1.0);
     lightIntensity = 500;
 
     vs_vertex = (toSpace * scale * position) / position.w;

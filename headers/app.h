@@ -13,6 +13,7 @@
 #include "shader.h"
 #include "camera.h"
 #include "skyBox.h"
+#include "ship.h"
 
 class application {
 protected: 
@@ -29,6 +30,7 @@ protected:
 
     // Vector that holds object data
     std::vector<object> objects;
+    ship myShip;
 
     // Camera that user controls
     camera mainCamera;

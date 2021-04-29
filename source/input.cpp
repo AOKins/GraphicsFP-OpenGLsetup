@@ -39,6 +39,9 @@ void application::onKeyPress(SDL_KeyboardEvent * key_event, double deltaTime) {
         case (SDL_SCANCODE_F6):
             mainCamera.setFOV(mainCamera.getFOV()+deltaTime*2.0f);
             break;
+        case (SDL_SCANCODE_O):
+            myShip.changeStatus();
+            break;
         default: // If unrecognized, default to doing nothing
             break;
     }

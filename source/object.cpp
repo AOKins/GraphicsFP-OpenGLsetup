@@ -5,6 +5,17 @@
 
 #include <fstream>
 
+object::object() {
+    this->position = glm::vec3();
+    this->bank = 0;
+    this->heading = 0;
+    this->pitch = 0;
+    this->position = glm::vec3(0,0,0);
+    this->scale = 1;
+    this->parentObj = NULL;
+    updateMatrices();
+}
+
 // Constructor
 object::object(std::string objPath, std::string textPath, shader * objShader) {
     this->position = glm::vec3();
@@ -83,16 +94,8 @@ void object::renderObject(shader * objShader) {
 
     glm::mat4 resultToSpace;
 
-    if (this->parentObj != NULL) {
-        resultToSpace = this->parentObj->getToSpace() * 
-                        this->getHierarchyTranslation() * 
-                        this->getToSpace();
-    }
-    else {
-        resultToSpace = this->getToSpace();        // Setting the toSpace transform for the object
-    }
     
-    objShader->setMat4("toSpace", resultToSpace);
+    objShader->setMat4("toSpace", this->getToSpace());
 
     // Creating the scale matrix to appriopriately set the size of the object
     glm::mat4 scaleMatrix = glm::mat4x4(this->getScale());
@@ -363,7 +366,7 @@ glm::mat4 object::getHierarchyTranslation() {
         glm::vec4(1.0, 0.0, 0.0, 0.0),
         glm::vec4(0.0, 1.0, 0.0, 0.0),
         glm::vec4(0.0, 0.0, 1.0, 0.0),
-        glm::vec4(this->hierTranslate,1.0f));
+        glm::vec4(this->hierTranslate,1.0));
 }
 
 // Getter for the rotation matrix for this object
@@ -373,7 +376,15 @@ glm::mat4 object::getRotation() {
 
 // Getter for the getToWorld matrix for this object
 glm::mat4 object::getToSpace() {
-    return this->toSpace;
+    if (this->parentObj != NULL) {
+        
+        return this->parentObj->getToSpace() * 
+               this->getHierarchyTranslation() * 
+               this->toSpace;
+    }
+    else {
+        return this->toSpace;
+    }
 }
 
 // Method that should called whenever changing position or orientation values for the object 
@@ -429,7 +440,7 @@ GLuint object::getVertexArrayID() {
     return this->vertexArray_ID;
 }
 
-void object::setParent(object * new_parent, glm::vec3 setHierTranslate = glm::vec3(0,0,0)) {
+void object::setParent(object * new_parent, glm::vec3 setHierTranslate) {
     this->parentObj = new_parent;
     this->hierTranslate = setHierTranslate;
 }
