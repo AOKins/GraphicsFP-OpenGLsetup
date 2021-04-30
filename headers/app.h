@@ -30,7 +30,7 @@ protected:
 
     // Vector that holds object data
     std::vector<object> objects;
-    ship myShip;
+    ship * myShip;
 
     // Camera that user controls
     camera mainCamera;

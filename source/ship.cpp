@@ -11,11 +11,11 @@ ship::ship() {
 
 ship::ship(shader * objShader) {
     this->objects.clear();
-    this->objects.push_back(new object("./resources/main_shipPart.obj","./resources/test.bmp", objShader));
-    this->objects.push_back(new object("./resources/nacelle_shipPart.obj","./resources/test.bmp", objShader));
-    this->objects.push_back(new object("./resources/nacelle_shipPart.obj","./resources/test.bmp", objShader));
-    this->objects.push_back(new object("./resources/frontNacelle_shipPart.obj","./resources/test.bmp", objShader));
-    this->objects.push_back(new object("./resources/frontNacelle_shipPart.obj","./resources/test.bmp", objShader));
+    this->objects.push_back(new object("./resources/main_shipPart.obj","./resources/ship_texture.bmp", objShader));
+    this->objects.push_back(new object("./resources/nacelle_shipPart.obj","./resources/ship_texture.bmp", objShader));
+    this->objects.push_back(new object("./resources/nacelle_shipPart.obj","./resources/ship_texture.bmp", objShader));
+    this->objects.push_back(new object("./resources/frontNacelle_shipPart.obj","./resources/front_texture.bmp", objShader));
+    this->objects.push_back(new object("./resources/frontNacelle_shipPart.obj","./resources/front_texture.bmp", objShader));
     
 
     this->mainComponent = objects[0];
@@ -54,10 +54,11 @@ void ship::setHeading(float new_heading) {
 }
 
 void ship::renderShip(shader * objShader, double ctime, double ltime) {
-    this->frontNacelleLeft->setBank(15*ctime);
-    this->frontNacelleRight->setBank(-15*ctime);
+    this->frontNacelleLeft->setBank(25*ctime);
+    this->frontNacelleRight->setBank(-25*ctime);
 
     this->setPos(glm::vec3(sin(ctime), 0,0));
+    this->setHeading(ctime/20.0f);
 
     updateNacelleOri(ctime - ltime);
 

@@ -63,7 +63,7 @@ void application::start() {
     this->mainSkyBox = new skyBox("./shaders/skyCube_vertex.shader", "./shaders/skyCube_fragment.shader", "./resources/Skycube/");
 
     // Object Stuff //
-    this->myShip = ship(objectsShader);
+    this->myShip = new ship(objectsShader);
 
     // Call the loop method to 
     loop();
@@ -104,7 +104,7 @@ void application::render(double ctime, double ltime) {
     // Setting camera position for lighting
     objectsShader->setVec3("cameraPos", mainCamera.getPosition());
     // Render the ship
-    this->myShip.renderShip(objectsShader, ctime, ltime);
+    this->myShip->renderShip(objectsShader, ctime, ltime);
     // Render the skybox
     this->mainSkyBox->renderSkyBox(mainCamera.getPerspective(), mainCamera.getProjection());
 
@@ -115,6 +115,7 @@ void application::render(double ctime, double ltime) {
 // Handle closing the application
 void application::close() {
     this->running = false;
+    delete this->myShip;
     // Closing window and closing library
     SDL_DestroyWindow(window);
     SDL_Quit();
