@@ -377,7 +377,6 @@ glm::mat4 object::getRotation() {
 // Getter for the getToWorld matrix for this object
 glm::mat4 object::getToSpace() {
     if (this->parentObj != NULL) {
-        
         return this->parentObj->getToSpace() * 
                this->getHierarchyTranslation() * 
                this->toSpace;

@@ -13,9 +13,10 @@ enum ENGINE_POS {
 
 struct ship {
 private:
-    object mainComponent;
-    object mainNacelleLeft, mainNacelleRight;
-    object frontNacelleLeft, frontNacelleRight;
+    object * mainComponent;
+    object * mainNacelleLeft, * mainNacelleRight;
+    object * frontNacelleLeft, * frontNacelleRight;
+    std::vector<object*> objects;
     ENGINE_POS status;
 
     void updateNacelleOri(double deltaTime);
@@ -23,6 +24,7 @@ private:
 public:
     ship();
     ship(shader * objShader);
+    ~ship();
 
     void setPos(glm::vec3 new_pos);
     void setHeading(float new_heading);
