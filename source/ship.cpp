@@ -11,11 +11,11 @@ ship::ship() {
 
 ship::ship(shader * objShader) {
     this->objects.clear();
-    this->objects.push_back(new object("./resources/main_shipPart.obj","./resources/ship_texture.bmp", objShader));
-    this->objects.push_back(new object("./resources/nacelle_shipPart.obj","./resources/ship_texture.bmp", objShader));
-    this->objects.push_back(new object("./resources/nacelle_shipPart.obj","./resources/ship_texture.bmp", objShader));
-    this->objects.push_back(new object("./resources/frontNacelle_shipPart.obj","./resources/front_texture.bmp", objShader));
-    this->objects.push_back(new object("./resources/frontNacelle_shipPart.obj","./resources/front_texture.bmp", objShader));
+    this->objects.push_back(new object("./resources/mainBody.obj","./resources/ship_texture.bmp", objShader));
+    this->objects.push_back(new object("./resources/nacelle_body.obj","./resources/ship_texture.bmp", objShader));
+    this->objects.push_back(new object("./resources/nacelle_body.obj","./resources/ship_texture.bmp", objShader));
+    this->objects.push_back(new object("./resources/nacelle_front.obj","./resources/front_texture.bmp", objShader));
+    this->objects.push_back(new object("./resources/nacelle_front.obj","./resources/front_texture.bmp", objShader));
     
 
     this->mainComponent = objects[0];
@@ -29,15 +29,15 @@ ship::ship(shader * objShader) {
     this->frontNacelleRight = objects[4];
     this->frontNacelleRight->name = "front right Nacelle";
 
-    this->mainNacelleRight->setParent(this->mainComponent, glm::vec3(-0.7,0,0.40));
-    this->mainNacelleLeft->setParent(this->mainComponent, glm::vec3(-0.7,0,-0.40));
-    this->frontNacelleRight->setParent(this->mainNacelleRight, glm::vec3(0.636404,1.91865,0));
-    this->frontNacelleLeft->setParent(this->mainNacelleLeft, glm::vec3(0.636404,1.91865,0));
+    this->mainNacelleRight->setParent(this->mainComponent, glm::vec3(-1,0.2,0.1));
+    this->mainNacelleLeft->setParent(this->mainComponent, glm::vec3(-1,0.2,-0.1));
+    this->frontNacelleRight->setParent(this->mainNacelleRight, glm::vec3(1.67493,1.80568,0));
+    this->frontNacelleLeft->setParent(this->mainNacelleLeft, glm::vec3(1.67493,1.80568,0));
 
     this->status = OFF;
     if (this->status == ON) {
-        this->mainNacelleRight->setBank(0.8);
-        this->mainNacelleLeft->setBank(-0.8);
+        this->mainNacelleRight->setBank(1.2);
+        this->mainNacelleLeft->setBank(-1.2);
     }
     else {
         this->mainNacelleRight->setBank(M_PI/2);
@@ -57,10 +57,11 @@ void ship::renderShip(shader * objShader, double ctime, double ltime) {
     this->frontNacelleLeft->setBank(25*ctime);
     this->frontNacelleRight->setBank(-25*ctime);
 
-    this->setPos(glm::vec3(sin(ctime), 0,0));
-    this->setHeading(ctime/20.0f);
 
     updateNacelleOri(ctime - ltime);
+
+    this->mainNacelleLeft->setPosition(glm::vec3(sin(10*ctime)/40.0f,sin(10*2*ctime)/40.0f,sin(10*3*ctime)/40.0f));
+    this->mainNacelleRight->setPosition(glm::vec3(sin(10*ctime)/40.0f,sin(10*2*ctime)/40.0f,sin(10*3*ctime)/40.0f));
 
     for (int i = 0; i < objects.size(); i++) {
         objects[i]->renderObject(objShader);
@@ -95,8 +96,8 @@ void ship::updateNacelleOri(double deltaTime) {
     }
     else if (this->status == TRANSITION_ON) {
         curr_Bank -= deltaTime;
-        if (curr_Bank < 0.8) {
-            curr_Bank = 0.8;
+        if (curr_Bank < 1.2) {
+            curr_Bank = 1.2;
             this->status = ON;
         }
     }

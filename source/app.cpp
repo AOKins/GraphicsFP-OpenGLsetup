@@ -58,13 +58,14 @@ void application::start() {
     mainCamera.setAspect(float(window_width)/float(window_height));
 
     // Creating shaders for objects and skyCube (uses files in /shaders folder)
-    objectsShader = new shader("./shaders/vertex.shader","./shaders/fragment.shader");
+    objectsShader = new shader("./shaders/lightVertex.shader","./shaders/lightFragment.shader");
     // SkyBox //
     this->mainSkyBox = new skyBox("./shaders/skyCube_vertex.shader", "./shaders/skyCube_fragment.shader", "./resources/Skycube/");
 
     // Object Stuff //
     this->myShip = new ship(objectsShader);
-
+    this->objects.push_back(object("./resources/simpleCube.obj","./resources/front_texture.bmp",objectsShader));
+    this->objects[0].setPosition(glm::vec3(10,0,1));
     // Call the loop method to 
     loop();
 }
@@ -105,6 +106,12 @@ void application::render(double ctime, double ltime) {
     objectsShader->setVec3("cameraPos", mainCamera.getPosition());
     // Render the ship
     this->myShip->renderShip(objectsShader, ctime, ltime);
+
+    // Render other objects
+    for (int i = 0; i < objects.size();i++) {
+        objects[i].renderObject(objectsShader);
+    }
+
     // Render the skybox
     this->mainSkyBox->renderSkyBox(mainCamera.getPerspective(), mainCamera.getProjection());
 
