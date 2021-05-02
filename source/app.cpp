@@ -77,6 +77,9 @@ void application::start() {
     this->lightColors.push_back(glm::vec3(1,0,1));
     this->lightIntensities.push_back(20);
 
+    this->lightPos.push_back(glm::vec4(10,10,1,1));
+    this->lightColors.push_back(glm::vec3(0,1,1));
+    this->lightIntensities.push_back(20);
     // Call the loop method to 
     loop();
 }
@@ -116,11 +119,14 @@ void application::render(double ctime, double ltime) {
     // Setting camera position for lighting
     objectsShader->setVec3("cameraPos", mainCamera.getPosition());
 
+    lightPos[0] = glm::vec4(0,15*sin(ctime),15*cos(ctime),1);
+
+
     int numLights = lightPos.size();
-    objectsShader->setInt("lightCount", numLights);
-    objectsShader->setVec4("Lpos", lightPos[0]);
-    objectsShader->setVec3("Lcolor", lightColors[0]);
-    objectsShader->setFloat("Linten", lightIntensities[0]);
+    objectsShader->setInt("LightCount", numLights);
+    objectsShader->setNvec4("Lpos", numLights, lightPos[0]);
+    objectsShader->setNvec3("Lcolor", numLights, lightColors[0]);
+    objectsShader->setNfloat("Linten",numLights, lightIntensities[0]);
     
     // Render the ship
     this->myShip->renderShip(objectsShader, ctime, ltime);

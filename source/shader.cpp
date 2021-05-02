@@ -100,15 +100,15 @@ void shader::setFloat(const std::string &name, float value) const {
     glUniform1f(glGetUniformLocation(shaderID, name.c_str()), value); 
 }
 
-void shader::setNfloat(const std::string &name, int n, float start) const { 
+void shader::setNfloat(const std::string &name, int n, float &start) const { 
     glUniform1fv(glGetUniformLocation(shaderID, name.c_str()), n, &start); 
 }
 
-void shader::setNvec3(const std::string &name, int n, glm::vec3 start) const {
+void shader::setNvec3(const std::string &name, int n, glm::vec3 &start) const {
     glUniform3fv(glGetUniformLocation(shaderID, name.c_str()), n, glm::value_ptr(start)); 
 }
 
-void shader::setNvec4(const std::string &name, int n, glm::vec4 start) const {
+void shader::setNvec4(const std::string &name, int n, glm::vec4 &start) const {
     glUniform4fv(glGetUniformLocation(shaderID, name.c_str()), n, glm::value_ptr(start)); 
 }
 
@@ -122,7 +122,7 @@ void shader::setVec4(const std::string &name, glm::vec4 value) const {
 
 template<typename T>
 void shader::setNvalue(const std::string &name, int n, T &start) const {
-    glUniform1i(glGetUniformLocation(shaderID, name.c_str()), start);
+    glUniform1fv(glGetUniformLocation(shaderID, name.c_str()),n, start);
 }
 
 

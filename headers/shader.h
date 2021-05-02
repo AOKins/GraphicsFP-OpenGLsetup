@@ -28,9 +28,9 @@ struct shader {
     void setVec3(const std::string &name, glm::vec3 value) const;
     void setVec4(const std::string &name, glm::vec4 value) const;
 
-    void setNfloat(const std::string &name, int n, float start) const;
-    void setNvec3(const std::string &name, int n, glm::vec3 start) const;
-    void setNvec4(const std::string &name, int n, glm::vec4 start) const;
+    void setNfloat(const std::string &name, int n, float &start) const;
+    void setNvec3(const std::string &name, int n, glm::vec3 &start) const;
+    void setNvec4(const std::string &name, int n, glm::vec4 &start) const;
     template<typename T>
     void setNvalue(const std::string &name, int n, T &start) const;
 

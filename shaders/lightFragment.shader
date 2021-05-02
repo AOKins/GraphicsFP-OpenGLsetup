@@ -9,10 +9,10 @@ in vec4 vs_vertex; // Where the vertex is in world space
 in vec3 vs_normal; // The normal for the vertex (in world orientation)
 in vec4 cameraS_vertex;
 
-uniform vec4 Lpos;
-uniform vec3 Lcolor;
-uniform float Linten;
 uniform int LightCount;
+uniform vec4 Lpos[32];
+uniform vec3 Lcolor[32];
+uniform float Linten[32];
 
 
 // Where the camera is (used in light model)
@@ -45,8 +45,10 @@ vec3 calcDiffuse(vec3 lightColor, float coeff, vec3 L, float cosTheta) {
 }
 
 void main(void) {
-    vec3 I; // Resulting illumination value
+    // Final I value from all light sources
+    vec3 I_result;
 
+    vec3 I; // Resulting illumination value from a light
     // Components of light to be derived then added into resulting value
     vec3 I_ambient, I_diffuse, I_specular;
 
@@ -56,28 +58,46 @@ void main(void) {
     float K_specular = 0.95; // Specular reflection coeff.
     float alpha = 200.0;    // Specular exponent (m_gls)
 
-    vec4  lightPos = Lpos;
-    vec3  lightColor = Lcolor;
-    float lightIntensity = Linten;
+    // Variables to hold values from uniforms for a given light index
+    vec4 lightPos;
+    vec3 lightColor;
+    float lightIntensity;
 
-    //   These could be pulled in via attributes, but for now, we will define them here
-    vec3 L_ambient = vec3(1.0, 1.0, 1.0); // around the scene light color
-    vec3 L_diffuse = vec3(1.0, 1.0, 1.0);  // Scattered light color
-    vec3 L_specular = vec3(1.0, 1.0, 1.0); // Color of shininess of object
+    // Get number of lights, but cap at 32
+    int maxLights = min(LightCount,32);
+
+    for(int i=0;i<2;i++) {
+        if(i < maxLights){
+            lightPos = Lpos[i];
+            lightColor = Lcolor[i];
+            lightIntensity = Linten[i];
 
 
-    // Deriving a normalized vector from the vertex point to the light source
-    vec3 L = normalize(vec3(lightPos.xyz) - vec3(vs_vertex.xyz));
-    float cosTheta = max(dot(L, normalize(vs_normal) ),0);
+            //   These could be pulled in via attributes, but for now, we will define them here
+            vec3 L_ambient = vec3(1.0, 1.0, 1.0); // around the scene light color
+            vec3 L_diffuse = vec3(1.0, 1.0, 1.0);  // Scattered light color
+            vec3 L_specular = vec3(1.0, 1.0, 1.0); // Color of shininess of object
 
-    I_ambient = calcAmbient(L_ambient, K_ambient);
-    
-    if (cosTheta > 0) {
-        I_specular = calcSpecular(L_specular, K_specular, alpha, L, cosTheta);
-        I_diffuse = calcDiffuse(L_diffuse, K_diffuse, L, cosTheta);
+
+            // Deriving a normalized vector from the vertex point to the light source
+            vec3 L = normalize(vec3(lightPos.xyz) - vec3(vs_vertex.xyz));
+            float cosTheta = max(dot(L, normalize(vs_normal) ),0);
+
+            if (cosTheta > 0) {
+                I_specular = calcSpecular(L_specular, K_specular, alpha, L, cosTheta);
+                I_diffuse = calcDiffuse(L_diffuse, K_diffuse, L, cosTheta);
+            }
+
+            I = (lightIntensity * (I_diffuse + I_specular) / length(lightPos - vs_vertex)) * lightColor;
+            I_result = I_result + I;
+
+        }
     }
-    
-    I = (I_ambient + lightIntensity * (I_diffuse + I_specular) / length(lightPos - vs_vertex)) * lightColor;
+
+    // Calculate ambient light once
+    I_ambient = calcAmbient(L_ambient, K_ambient);
+
+    // Now apply the resulting texture and light values to the output color    
     vec4 textColor = texture(twoDTex, vs_uv);
-    color = textColor * vec4(I, 1.0);
+    color = textColor * vec4(I_result+I_ambient, 1.0);
 }
