@@ -57,7 +57,7 @@ void application::onKeyPress(SDL_KeyboardEvent * key_event, double deltaTime) {
         case (SDL_SCANCODE_4):
             myShip->setInstability(4);
             break;
-        case (SDL_SCANCODE_F):
+        case (SDL_SCANCODE_F): // "fire torpedo", in the future when restructuring thing will want to have this behavior be encapsulated in abstract ship class
             fireTorpedo();
             break;
         default: // If unrecognized, default to doing nothing

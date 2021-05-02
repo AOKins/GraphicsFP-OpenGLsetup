@@ -83,9 +83,9 @@ public:
     
     void close();
 
-    // Method for creating torpedo light to emulate "firing"
+    // Method for creating torpedo light to emulate "firing", would want to later restructure things to enable this to be encapsulated by more abstract representations
     void fireTorpedo();
-    // Method for updating torpedo light positions
+    // Method for updating torpedo light positions, would want to later restructure things to enable this to be encapsulated by more abstract representations
     void updateTorpedoLights(double delta);
 };
 

@@ -64,6 +64,7 @@ void application::start() {
 
     // Object Stuff (including ship) //
     this->myShip = new ship(objectsShader);
+    // Demo spheres to give more reference points to show light effects
     this->objects.clear();
     this->objects.push_back(object("./resources/simpleSphere.obj","./resources/simpleTest.bmp",objectsShader));
     this->objects[0].setPosition(glm::vec3(3,0,2));
@@ -142,9 +143,7 @@ void application::render(double ctime, double ltime) {
 
     if (lightMove) {
         updateTorpedoLights(ctime - ltime);
-
         lightPos[2] = glm::vec4(0,10*sin(ctime), 10*cos(ctime),1);
-
     }
 
     int numLights = lightPos.size();
@@ -209,6 +208,7 @@ void application::fireTorpedo() {
     this->lightAlpha.push_back(200);
 }
 
+// Method for torpedo light movement, would want to later restructure things to enable this to be encapsulated by more abstract representations
 void application::updateTorpedoLights(double delta) {
     // Remove lights that exceed a distance (far enough away that they are considered gone)
     for (int i = lightPos.size()-1; i > 3; i--) {

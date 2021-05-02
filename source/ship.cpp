@@ -17,8 +17,7 @@ ship::ship(shader * objShader) {
     this->objects.push_back(new object("./resources/nacelle_body.obj","./resources/ship_texture.bmp", objShader));
     this->objects.push_back(new object("./resources/nacelle_front.obj","./resources/front_texture.bmp", objShader));
     this->objects.push_back(new object("./resources/nacelle_front.obj","./resources/front_texture.bmp", objShader));
-    
-
+    // Setting component pointers to the corresponding objectsm assigning debug names
     this->mainComponent = objects[0];
     this->mainComponent->name = "mainComponent";
     this->mainNacelleLeft = objects[1];
@@ -29,7 +28,7 @@ ship::ship(shader * objShader) {
     this->frontNacelleLeft->name = "front left Nacelle";
     this->frontNacelleRight = objects[4];
     this->frontNacelleRight->name = "front right Nacelle";
-
+    // Setting the hierarchy for animations
     this->mainNacelleRight->setParent(this->mainComponent, glm::vec3(-1,0.2,0.1));
     this->mainNacelleLeft->setParent(this->mainComponent, glm::vec3(-1,0.2,-0.1));
     this->frontNacelleRight->setParent(this->mainNacelleRight, glm::vec3(1.67493,1.80568,0));
@@ -90,6 +89,7 @@ void ship::changeStatus() {
 void ship::updateNacelleOri(double cTime, double lTime) {
     float deltaTime = cTime - lTime;
     float curr_Bank = this->mainNacelleRight->getBank();
+    // Update the bank according to transition mode, changing status if reached end angle
     if (this->status == TRANSITION_OFF) {
         curr_Bank += deltaTime;
         if (curr_Bank > M_PI/2) {
@@ -104,13 +104,18 @@ void ship::updateNacelleOri(double cTime, double lTime) {
             this->status = ON;
         }
     }
+    // Setting the bank
     this->mainNacelleLeft->setBank(-curr_Bank);
     this->mainNacelleRight->setBank(curr_Bank);
 
-    
-    if (this->instability) {
+    // Have instability motion if instability is nonzero, otherwise maintain no offset position
+    if (this->instability > 0.0f) {
         this->mainNacelleLeft->setPosition(glm::vec3(sin(cTime*this->instability)/100.0f,sin(2*cTime*this->instability)/100.0f,sin(3*cTime*this->instability)/100.0f));
         this->mainNacelleRight->setPosition(glm::vec3(sin(2*cTime*this->instability)/100.0f,sin(4*cTime*this->instability)/100.0f,sin(cTime*this->instability)/100.0f));
+    }
+    else {
+        this->mainNacelleLeft->setPosition(glm::vec3(0,0,0));
+        this->mainNacelleRight->setPosition(glm::vec3(0,0,0));
     }
 }
 

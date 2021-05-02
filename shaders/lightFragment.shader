@@ -1,3 +1,5 @@
+// Fragment shader with attempt to simulate light sources
+// Methodologies based on Scott Griffith's example
 #version 450 core
 
 out vec4 color;

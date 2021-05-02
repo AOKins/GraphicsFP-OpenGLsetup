@@ -1,3 +1,5 @@
+// Fragment shader with attempt to simulate light sources
+// Methodologies based on Scott Griffith's example
 #version 450 core
 // Taking in position, normal for that point, and UV
 in vec4 position;
