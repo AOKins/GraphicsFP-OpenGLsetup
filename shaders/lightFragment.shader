@@ -57,44 +57,36 @@ void main(void) {
     float K_diffuse = 0.55; // Diffuse reflection coeff.
     float K_specular = 0.95; // Specular reflection coeff.
     float alpha = 200.0;    // Specular exponent (m_gls)
+    //   These could be pulled in via attributes, but for now, we will define them here
+    vec3 L_ambient = vec3(1.0, 1.0, 1.0); // around the scene light color
+    vec3 L_diffuse = vec3(1.0, 1.0, 1.0);  // Scattered light color
+    vec3 L_specular = vec3(1.0, 1.0, 1.0); // Color of shininess of object
 
-    // Variables to hold values from uniforms for a given light index
     vec4 lightPos;
     vec3 lightColor;
     float lightIntensity;
 
-    // Get number of lights, but cap at 32
     int maxLights = min(LightCount,32);
 
-    for(int i=0;i<2;i++) {
-        if(i < maxLights){
-            lightPos = Lpos[i];
-            lightColor = Lcolor[i];
-            lightIntensity = Linten[i];
+    for(int i=0;i<maxLights;i++) {
+        // Get the values
+        lightPos = Lpos[i];
+        lightColor = Lcolor[i];
+        lightIntensity = Linten[i];
 
+        // Deriving a normalized vector from the vertex point to the light source
+        vec3 L = normalize(vec3(lightPos.xyz) - vec3(vs_vertex.xyz));
+        float cosTheta = max(dot(L, normalize(vs_normal) ),0);
 
-            //   These could be pulled in via attributes, but for now, we will define them here
-            vec3 L_ambient = vec3(1.0, 1.0, 1.0); // around the scene light color
-            vec3 L_diffuse = vec3(1.0, 1.0, 1.0);  // Scattered light color
-            vec3 L_specular = vec3(1.0, 1.0, 1.0); // Color of shininess of object
-
-
-            // Deriving a normalized vector from the vertex point to the light source
-            vec3 L = normalize(vec3(lightPos.xyz) - vec3(vs_vertex.xyz));
-            float cosTheta = max(dot(L, normalize(vs_normal) ),0);
-
-            if (cosTheta > 0) {
-                I_specular = calcSpecular(L_specular, K_specular, alpha, L, cosTheta);
-                I_diffuse = calcDiffuse(L_diffuse, K_diffuse, L, cosTheta);
-            }
-
-            I = (lightIntensity * (I_diffuse + I_specular) / length(lightPos - vs_vertex)) * lightColor;
-            I_result = I_result + I;
-
+        if (cosTheta > 0) {
+            I_specular = calcSpecular(L_specular, K_specular, alpha, L, cosTheta);
+            I_diffuse = calcDiffuse(L_diffuse, K_diffuse, L, cosTheta);
         }
-    }
 
-    // Calculate ambient light once
+        I = (lightIntensity * (I_diffuse + I_specular) / length(lightPos - vs_vertex)) * lightColor;
+        I_result = I_result + I;
+    }
+    
     I_ambient = calcAmbient(L_ambient, K_ambient);
 
     // Now apply the resulting texture and light values to the output color    

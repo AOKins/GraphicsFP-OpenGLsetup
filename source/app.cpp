@@ -75,11 +75,11 @@ void application::start() {
     
     this->lightPos.push_back(glm::vec4(1,10,1,1));
     this->lightColors.push_back(glm::vec3(1,0,1));
-    this->lightIntensities.push_back(20);
+    this->lightIntensities.push_back(10);
 
     this->lightPos.push_back(glm::vec4(10,10,1,1));
     this->lightColors.push_back(glm::vec3(0,1,1));
-    this->lightIntensities.push_back(20);
+    this->lightIntensities.push_back(10);
     // Call the loop method to 
     loop();
 }
@@ -119,7 +119,7 @@ void application::render(double ctime, double ltime) {
     // Setting camera position for lighting
     objectsShader->setVec3("cameraPos", mainCamera.getPosition());
 
-    lightPos[0] = glm::vec4(0,15*sin(ctime),15*cos(ctime),1);
+    lightPos[0] = glm::vec4(0,10*sin(ctime),10*cos(ctime),1);
 
 
     int numLights = lightPos.size();
