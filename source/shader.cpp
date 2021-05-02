@@ -1,6 +1,7 @@
 #include "../headers/shader.h"
 #include <fstream>
 #include <iostream>
+#include <type_traits>
 
 shader::shader(const char * vertexName, const char * fragmentName) {
     int success;
@@ -99,9 +100,31 @@ void shader::setFloat(const std::string &name, float value) const {
     glUniform1f(glGetUniformLocation(shaderID, name.c_str()), value); 
 }
 
-void shader::setVec3(const std::string &name, glm::vec3 vector) const {
-    glUniform3fv(glGetUniformLocation(shaderID, name.c_str()), 1, glm::value_ptr(vector)); 
+void shader::setNfloat(const std::string &name, int n, float start) const { 
+    glUniform1fv(glGetUniformLocation(shaderID, name.c_str()), n, &start); 
 }
+
+void shader::setNvec3(const std::string &name, int n, glm::vec3 start) const {
+    glUniform3fv(glGetUniformLocation(shaderID, name.c_str()), n, glm::value_ptr(start)); 
+}
+
+void shader::setNvec4(const std::string &name, int n, glm::vec4 start) const {
+    glUniform4fv(glGetUniformLocation(shaderID, name.c_str()), n, glm::value_ptr(start)); 
+}
+
+void shader::setVec3(const std::string &name, glm::vec3 value) const {
+    glUniform3fv(glGetUniformLocation(shaderID, name.c_str()), 1, glm::value_ptr(value)); 
+}
+
+void shader::setVec4(const std::string &name, glm::vec4 value) const {
+    glUniform4fv(glGetUniformLocation(shaderID, name.c_str()), 1, glm::value_ptr(value)); 
+}
+
+template<typename T>
+void shader::setNvalue(const std::string &name, int n, T &start) const {
+    glUniform1i(glGetUniformLocation(shaderID, name.c_str()), start);
+}
+
 
 // 4x4 matrix uniform
 void shader::setMat4(const std::string &name, glm::mat4 matrix) const {

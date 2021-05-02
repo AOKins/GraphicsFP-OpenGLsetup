@@ -9,10 +9,13 @@ in vec4 vs_vertex; // Where the vertex is in world space
 in vec3 vs_normal; // The normal for the vertex (in world orientation)
 in vec4 cameraS_vertex;
 
-in vec4 lightPos;
-in vec3 lightColor;
-in float lightIntensity;
+uniform vec4 Lpos;
+uniform vec3 Lcolor;
+uniform float Linten;
+uniform int LightCount;
 
+
+// Where the camera is (used in light model)
 uniform vec3 cameraPos;
 
 
@@ -52,6 +55,10 @@ void main(void) {
     float K_diffuse = 0.55; // Diffuse reflection coeff.
     float K_specular = 0.95; // Specular reflection coeff.
     float alpha = 200.0;    // Specular exponent (m_gls)
+
+    vec4  lightPos = Lpos;
+    vec3  lightColor = Lcolor;
+    float lightIntensity = Linten;
 
     //   These could be pulled in via attributes, but for now, we will define them here
     vec3 L_ambient = vec3(1.0, 1.0, 1.0); // around the scene light color

@@ -30,6 +30,10 @@ protected:
 
     // Vector that holds object data
     std::vector<object> objects;
+    std::vector<glm::vec4> lightPos;
+    std::vector<glm::vec3> lightColors;
+    std::vector<float> lightIntensities;
+
     ship * myShip;
 
     // Camera that user controls
@@ -37,10 +41,6 @@ protected:
 
     // SkyBox container
     skyBox * mainSkyBox;
-
-    // Background color
-    GLfloat bg_color[4] = {0.1f,0.1f,0.1f,0.0f};
-
 public:
     // Default constructor, calls initialize and sets running to false
     application();

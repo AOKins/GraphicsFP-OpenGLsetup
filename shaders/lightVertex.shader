@@ -14,10 +14,8 @@ out vec3 lightColor;
 out float lightIntensity;
 
 uniform mat4 toSpace;
-uniform mat4 scale;
 uniform mat4 camera;
 uniform mat4 perspective;
-
 
 void main() {
     vs_uv = obj_uv * vec2(1.0,-1.0);
@@ -29,11 +27,7 @@ void main() {
     normal4d = normal4d / normal4d.w;
     vs_normal = normalize(normal4d.xyz);
 
-    lightPos = vec4(0,200,0,1.0);
-    lightColor = vec3(1.0,1.0,1.0);
-    lightIntensity = 1000;
-
-    vs_vertex = (toSpace * scale * position) / position.w;
+    vs_vertex = (toSpace * position) / position.w;
     cameraS_vertex = perspective * camera * vs_vertex; 
     gl_Position = cameraS_vertex;
 }

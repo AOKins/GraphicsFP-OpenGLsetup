@@ -57,11 +57,12 @@ void ship::renderShip(shader * objShader, double ctime, double ltime) {
     this->frontNacelleLeft->setBank(25*ctime);
     this->frontNacelleRight->setBank(-25*ctime);
 
+    float instability = 1.0f/100.0f;
 
     updateNacelleOri(ctime - ltime);
 
-    this->mainNacelleLeft->setPosition(glm::vec3(sin(10*ctime)/40.0f,sin(10*2*ctime)/40.0f,sin(10*3*ctime)/40.0f));
-    this->mainNacelleRight->setPosition(glm::vec3(sin(10*ctime)/40.0f,sin(10*2*ctime)/40.0f,sin(10*3*ctime)/40.0f));
+    this->mainNacelleLeft ->setPosition(glm::vec3(instability*sin(100*ctime),instability*sin(200*ctime),instability*sin(300*ctime)));
+    this->mainNacelleRight->setPosition(glm::vec3(instability*sin(110*ctime),instability*sin(190*ctime),instability*sin(305*ctime)));
 
     for (int i = 0; i < objects.size(); i++) {
         objects[i]->renderObject(objShader);

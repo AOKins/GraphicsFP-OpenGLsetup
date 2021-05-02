@@ -62,10 +62,21 @@ void application::start() {
     // SkyBox //
     this->mainSkyBox = new skyBox("./shaders/skyCube_vertex.shader", "./shaders/skyCube_fragment.shader", "./resources/Skycube/");
 
-    // Object Stuff //
+    // Object Stuff (including ship) //
     this->myShip = new ship(objectsShader);
-    this->objects.push_back(object("./resources/simpleCube.obj","./resources/front_texture.bmp",objectsShader));
+    this->objects.clear();
+    this->objects.push_back(object("./resources/simpleCube.obj","./resources/front_texture.bmp", objectsShader));
     this->objects[0].setPosition(glm::vec3(10,0,1));
+
+    // Light stuff
+    this->lightPos.clear();
+    this->lightColors.clear();
+    this->lightIntensities.clear();
+    
+    this->lightPos.push_back(glm::vec4(1,10,1,1));
+    this->lightColors.push_back(glm::vec3(1,0,1));
+    this->lightIntensities.push_back(20);
+
     // Call the loop method to 
     loop();
 }
@@ -104,6 +115,13 @@ void application::render(double ctime, double ltime) {
     objectsShader->setMat4("perspective", mainCamera.getPerspective());
     // Setting camera position for lighting
     objectsShader->setVec3("cameraPos", mainCamera.getPosition());
+
+    int numLights = lightPos.size();
+    objectsShader->setInt("lightCount", numLights);
+    objectsShader->setVec4("Lpos", lightPos[0]);
+    objectsShader->setVec3("Lcolor", lightColors[0]);
+    objectsShader->setFloat("Linten", lightIntensities[0]);
+    
     // Render the ship
     this->myShip->renderShip(objectsShader, ctime, ltime);
 
