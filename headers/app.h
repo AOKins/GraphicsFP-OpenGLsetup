@@ -33,6 +33,12 @@ protected:
     std::vector<glm::vec4> lightPos;
     std::vector<glm::vec3> lightColors;
     std::vector<float> lightIntensities;
+    std::vector<float> lightAmbient;
+    std::vector<float> lightDiffuse;
+    std::vector<float> lightSpecular;
+    std::vector<float> lightAlpha;
+
+    bool lightMove = true;
 
     ship * myShip;
 
@@ -76,6 +82,11 @@ public:
     void continuousKeyInput(double deltaTime);
     
     void close();
+
+    // Method for creating torpedo light to emulate "firing"
+    void fireTorpedo();
+    // Method for updating torpedo light positions
+    void updateTorpedoLights(double delta);
 };
 
 #endif

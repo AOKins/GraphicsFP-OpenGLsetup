@@ -42,6 +42,24 @@ void application::onKeyPress(SDL_KeyboardEvent * key_event, double deltaTime) {
         case (SDL_SCANCODE_O):
             myShip->changeStatus();
             break;
+        case (SDL_SCANCODE_P):
+            lightMove = !lightMove;
+            break;
+        case (SDL_SCANCODE_1):
+            myShip->setInstability(0);
+            break;
+        case (SDL_SCANCODE_2):
+            myShip->setInstability(0.5);
+            break;
+        case (SDL_SCANCODE_3):
+            myShip->setInstability(1);
+            break;
+        case (SDL_SCANCODE_4):
+            myShip->setInstability(4);
+            break;
+        case (SDL_SCANCODE_F):
+            fireTorpedo();
+            break;
         default: // If unrecognized, default to doing nothing
             break;
     }

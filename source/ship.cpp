@@ -7,6 +7,7 @@ ship::ship() {
     this->frontNacelleLeft;
     this->frontNacelleRight;
     this->status = OFF;
+    this->instability = 0;
 }
 
 ship::ship(shader * objShader) {
@@ -35,6 +36,7 @@ ship::ship(shader * objShader) {
     this->frontNacelleLeft->setParent(this->mainNacelleLeft, glm::vec3(1.67493,1.80568,0));
 
     this->status = OFF;
+    this->instability = 0;
     if (this->status == ON) {
         this->mainNacelleRight->setBank(1.2);
         this->mainNacelleLeft->setBank(-1.2);
@@ -49,6 +51,10 @@ void ship::setPos(glm::vec3 new_pos) {
     this->mainComponent->setPosition(new_pos);
 }
 
+glm::vec3 ship::getPos() {
+    return this->mainComponent->getPosition();
+}
+
 void ship::setHeading(float new_heading) {
     this->mainComponent->setHeading(new_heading);
 }
@@ -57,13 +63,8 @@ void ship::renderShip(shader * objShader, double ctime, double ltime) {
     this->frontNacelleLeft->setBank(25*ctime);
     this->frontNacelleRight->setBank(-25*ctime);
 
-    float instability = 1.0f/100.0f;
-
-    updateNacelleOri(ctime - ltime);
-
-    this->mainNacelleLeft ->setPosition(glm::vec3(instability*sin(100*ctime),instability*sin(200*ctime),instability*sin(300*ctime)));
-    this->mainNacelleRight->setPosition(glm::vec3(instability*sin(110*ctime),instability*sin(190*ctime),instability*sin(305*ctime)));
-
+    updateNacelleOri(ctime, ltime);
+    
     for (int i = 0; i < objects.size(); i++) {
         objects[i]->renderObject(objShader);
     }
@@ -86,7 +87,8 @@ void ship::changeStatus() {
     }
 }
 
-void ship::updateNacelleOri(double deltaTime) {
+void ship::updateNacelleOri(double cTime, double lTime) {
+    float deltaTime = cTime - lTime;
     float curr_Bank = this->mainNacelleRight->getBank();
     if (this->status == TRANSITION_OFF) {
         curr_Bank += deltaTime;
@@ -104,6 +106,16 @@ void ship::updateNacelleOri(double deltaTime) {
     }
     this->mainNacelleLeft->setBank(-curr_Bank);
     this->mainNacelleRight->setBank(curr_Bank);
+
+    
+    if (this->instability) {
+        this->mainNacelleLeft->setPosition(glm::vec3(sin(cTime*this->instability)/100.0f,sin(2*cTime*this->instability)/100.0f,sin(3*cTime*this->instability)/100.0f));
+        this->mainNacelleRight->setPosition(glm::vec3(sin(2*cTime*this->instability)/100.0f,sin(4*cTime*this->instability)/100.0f,sin(cTime*this->instability)/100.0f));
+    }
+}
+
+void ship::setInstability(float set_inst) {
+    this->instability = set_inst;
 }
 
 ship::~ship() {

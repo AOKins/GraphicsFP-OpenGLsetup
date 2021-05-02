@@ -13,11 +13,13 @@ uniform int LightCount;
 uniform vec4 Lpos[32];
 uniform vec3 Lcolor[32];
 uniform float Linten[32];
-
+uniform float Kambient[32];
+uniform float Kdiffuse[32];
+uniform float Kspecular[32];
+uniform float U_alpha[32];
 
 // Where the camera is (used in light model)
 uniform vec3 cameraPos;
-
 
 // Method for determining the ambient light
 vec3 calcAmbient(vec3 lightColor, float coefficient) {
@@ -26,37 +28,31 @@ vec3 calcAmbient(vec3 lightColor, float coefficient) {
 }
 
 vec3 calcSpecular(vec3 lightColor, float coeff, float alpha, vec3 L, float cosTheta) {
-    vec3 result;
-    
     vec3 v = normalize(cameraPos-vs_vertex.xyz);
     vec3 r = 2 * cosTheta * normalize(vs_normal) - L;
-
     float cosPhi = max(dot(v,r),0.0);
 
-    result = lightColor * coeff * pow(cosPhi, alpha);
-
+    vec3 result = lightColor * coeff * pow(cosPhi, alpha);
     return result;
 }
 
 vec3 calcDiffuse(vec3 lightColor, float coeff, vec3 L, float cosTheta) {
-    vec3 result;
-    result = lightColor * coeff * cosTheta;
+    vec3 result = lightColor * coeff * cosTheta;
     return result;
 }
 
 void main(void) {
     // Final I value from all light sources
     vec3 I_result;
-
     vec3 I; // Resulting illumination value from a light
     // Components of light to be derived then added into resulting value
     vec3 I_ambient, I_diffuse, I_specular;
 
     //Material properties
-    float K_ambient = 0.01; // Ambient reflection coeff.
-    float K_diffuse = 0.55; // Diffuse reflection coeff.
-    float K_specular = 0.95; // Specular reflection coeff.
-    float alpha = 200.0;    // Specular exponent (m_gls)
+    float K_ambient;  // Ambient reflection coeff.
+    float K_diffuse;  // Diffuse reflection coeff.
+    float K_specular; // Specular reflection coeff.
+    float alpha;      // Specular exponent (m_gls)
     //   These could be pulled in via attributes, but for now, we will define them here
     vec3 L_ambient = vec3(1.0, 1.0, 1.0); // around the scene light color
     vec3 L_diffuse = vec3(1.0, 1.0, 1.0);  // Scattered light color
@@ -66,30 +62,37 @@ void main(void) {
     vec3 lightColor;
     float lightIntensity;
 
+    // Get number of lights, capped at 32
     int maxLights = min(LightCount,32);
 
     for(int i=0;i<maxLights;i++) {
-        // Get the values
+        // Get the values for this light
         lightPos = Lpos[i];
         lightColor = Lcolor[i];
         lightIntensity = Linten[i];
+        K_ambient = Kambient[i];
+        K_diffuse = Kdiffuse[i];
+        K_specular = Kspecular[i];
+        alpha = U_alpha[i];
 
         // Deriving a normalized vector from the vertex point to the light source
         vec3 L = normalize(vec3(lightPos.xyz) - vec3(vs_vertex.xyz));
         float cosTheta = max(dot(L, normalize(vs_normal) ),0);
 
-        if (cosTheta > 0) {
+        // Found that currently, not restricting diffuse by cosTheta>0 condition makes multiple lights overlap better
+        I_diffuse = calcDiffuse(L_diffuse, K_diffuse, L, cosTheta);
+
+        if (cosTheta > 0) { 
             I_specular = calcSpecular(L_specular, K_specular, alpha, L, cosTheta);
-            I_diffuse = calcDiffuse(L_diffuse, K_diffuse, L, cosTheta);
         }
 
-        I = (lightIntensity * (I_diffuse + I_specular) / length(lightPos - vs_vertex)) * lightColor;
-        I_result = I_result + I;
+        I_ambient = calcAmbient(L_ambient, K_ambient);
+        I = (lightIntensity * (I_diffuse + I_specular + I_ambient) / length(lightPos - vs_vertex)) * lightColor;
+        I_result = (I_result + I);
     }
     
-    I_ambient = calcAmbient(L_ambient, K_ambient);
 
     // Now apply the resulting texture and light values to the output color    
     vec4 textColor = texture(twoDTex, vs_uv);
-    color = textColor * vec4(I_result+I_ambient, 1.0);
+    color = textColor * vec4(min(I_result+I_ambient,vec3(1,1,1)), 1.0);
 }

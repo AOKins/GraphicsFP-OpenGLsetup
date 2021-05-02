@@ -65,21 +65,42 @@ void application::start() {
     // Object Stuff (including ship) //
     this->myShip = new ship(objectsShader);
     this->objects.clear();
-    this->objects.push_back(object("./resources/simpleCube.obj","./resources/front_texture.bmp", objectsShader));
-    this->objects[0].setPosition(glm::vec3(10,0,1));
+    this->objects.push_back(object("./resources/simpleSphere.obj","./resources/simpleTest.bmp",objectsShader));
+    this->objects[0].setPosition(glm::vec3(3,0,2));
+    this->objects.push_back(object("./resources/simpleSphere.obj","./resources/simpleTest.bmp",objectsShader));
+    this->objects[1].setPosition(glm::vec3(10,1,-1));
+    this->objects.push_back(object("./resources/simpleSphere.obj","./resources/simpleTest.bmp",objectsShader));
+    this->objects[2].setPosition(glm::vec3(-16,-1,-3));
 
     // Light stuff
     this->lightPos.clear();
     this->lightColors.clear();
     this->lightIntensities.clear();
-    
-    this->lightPos.push_back(glm::vec4(1,10,1,1));
-    this->lightColors.push_back(glm::vec3(1,0,1));
-    this->lightIntensities.push_back(10);
+        // Represented light coming from the Earth
+    this->lightPos.push_back(glm::vec4(-200,0,0,1));
+    this->lightColors.push_back(glm::vec3(0.8,0.8,1));
+    this->lightIntensities.push_back(200);
+    this->lightDiffuse.push_back(0.55);
+    this->lightAmbient.push_back(0.01);
+    this->lightSpecular.push_back(0.00);
+    this->lightAlpha.push_back(200);
+        // Represented light coming from the Moon
+    this->lightPos.push_back(glm::vec4(200,100,-100,1));
+    this->lightColors.push_back(glm::vec3(1,1,1));
+    this->lightIntensities.push_back(50);
+    this->lightDiffuse.push_back(0.55);
+    this->lightAmbient.push_back(0.00);
+    this->lightSpecular.push_back(0.0);
+    this->lightAlpha.push_back(200);
+        // A random light to show the dynamic nature of it and illuminate around the ship
+    this->lightPos.push_back(glm::vec4(0,0,0,1));
+    this->lightColors.push_back(glm::vec3(1,1,1));
+    this->lightIntensities.push_back(5);
+    this->lightDiffuse.push_back(0.55);
+    this->lightAmbient.push_back(0.00);
+    this->lightSpecular.push_back(0.01);
+    this->lightAlpha.push_back(200);
 
-    this->lightPos.push_back(glm::vec4(10,10,1,1));
-    this->lightColors.push_back(glm::vec3(0,1,1));
-    this->lightIntensities.push_back(10);
     // Call the loop method to 
     loop();
 }
@@ -119,15 +140,24 @@ void application::render(double ctime, double ltime) {
     // Setting camera position for lighting
     objectsShader->setVec3("cameraPos", mainCamera.getPosition());
 
-    lightPos[0] = glm::vec4(0,10*sin(ctime),10*cos(ctime),1);
+    if (lightMove) {
+        updateTorpedoLights(ctime - ltime);
 
+        lightPos[2] = glm::vec4(0,10*sin(ctime), 10*cos(ctime),1);
+
+    }
 
     int numLights = lightPos.size();
-    objectsShader->setInt("LightCount", numLights);
-    objectsShader->setNvec4("Lpos", numLights, lightPos[0]);
-    objectsShader->setNvec3("Lcolor", numLights, lightColors[0]);
-    objectsShader->setNfloat("Linten",numLights, lightIntensities[0]);
-    
+    if (numLights > 0) {
+        objectsShader->setInt("LightCount", numLights);
+        objectsShader->setNvec4("Lpos", numLights, lightPos[0]);
+        objectsShader->setNvec3("Lcolor", numLights, lightColors[0]);
+        objectsShader->setNfloat("Linten",numLights, lightIntensities[0]);
+        objectsShader->setNfloat("Kambient", numLights, lightAmbient[0]);
+        objectsShader->setNfloat("Kspecular",numLights, lightSpecular[0]);
+        objectsShader->setNfloat("Kdiffuse", numLights, lightDiffuse[0]);;
+        objectsShader->setNfloat("U_alpha", numLights, lightAlpha[0]);
+    }
     // Render the ship
     this->myShip->renderShip(objectsShader, ctime, ltime);
 
@@ -138,7 +168,6 @@ void application::render(double ctime, double ltime) {
 
     // Render the skybox
     this->mainSkyBox->renderSkyBox(mainCamera.getPerspective(), mainCamera.getProjection());
-
     // Swapping buffers to update display
     SDL_GL_SwapWindow(window);
 }
@@ -162,4 +191,43 @@ application::~application() {
     // Clear up everything
     delete this->objectsShader;
     delete this->mainSkyBox;
+}
+
+// Method for creating torpedo light to emulate "firing"
+void application::fireTorpedo() {
+    // Setting the initial position of the torpedo
+    glm::vec4 start = glm::vec4(myShip->getPos(),1);
+    start.x = start.x + 1.6;
+    start.y = start.y + 0.4;
+    // Creating light by pushing onto vectors
+    this->lightPos.push_back(start);
+    this->lightColors.push_back(glm::vec3(1,0,0));
+    this->lightIntensities.push_back(1);
+    this->lightDiffuse.push_back(0.25);
+    this->lightAmbient.push_back(0.00);
+    this->lightSpecular.push_back(0.1);
+    this->lightAlpha.push_back(200);
+}
+
+void application::updateTorpedoLights(double delta) {
+    // Remove lights that exceed a distance (far enough away that they are considered gone)
+    for (int i = lightPos.size()-1; i > 3; i--) {
+        if (this->lightPos[i].x > 100.0f || this->lightPos[i].y > 100.0f || this->lightPos[i].z > 100.0f) {
+            this->lightPos.erase(this->lightPos.begin() + i);
+            this->lightColors.erase(this->lightColors.begin() + i);
+            this->lightIntensities.erase(this->lightIntensities.begin() + i);
+            this->lightDiffuse.erase(this->lightDiffuse.begin() + i);
+            this->lightAmbient.erase(this->lightAmbient.begin() + i);
+            this->lightSpecular.erase(this->lightSpecular.begin() + i);
+            this->lightAlpha.erase(this->lightAlpha.begin() + i);
+        }
+    }
+    // Speed of the torpedos
+    double speed = 2*delta;
+    // Update light positions
+    for (int i = 3; i < lightPos.size(); i++) {
+        // Getting current position, and then moving the light forward along the x axis
+        glm::vec4 curr = this->lightPos[i];
+        this->lightPos[i] = curr + glm::vec4(speed, 0,0,0);
+    }
 }
