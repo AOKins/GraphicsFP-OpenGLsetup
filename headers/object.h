@@ -8,9 +8,6 @@
 #include <glm/glm.hpp>
 #include <GL/gl.h>
 
-#define GLEW_STATIC
-#include <GL/glew.h>
-
 // Structure to hold properties of a rendered object
 // Contents based on Scott's example of object loading
 class object {
@@ -19,12 +16,6 @@ class object {
     float scale; // Scaler for the object
 
     bool textured;
-    // IDs for the vertex arrays
-    GLuint vertexArray_ID, normalArray_ID;
-    // IDs for the buffers themselves
-    GLuint verticiesBuff_ID, normalBuff_ID, uvBuff_ID;
-    GLuint texture_ID;
-    GLuint elementBuff_ID;
 
     glm::mat4 translation;
     glm::mat4 rotation;
@@ -37,7 +28,7 @@ class object {
     glm::vec3 hierTranslate;
 
 public:
-    std::string name;
+    GLuint textureID;
     // Publicly accessible vertices, terxture vertices, and normals
     std::vector<glm::vec4> verticies;
     std::vector<glm::vec2> uvs;
@@ -49,11 +40,9 @@ public:
     object();
     // Constuctor that takes in string to where the .obj file is located and optional texture image file
     // Defaults the orientation to 0,0,0 as well as position
-    object(std::string objPath, std::string textPath, shader * objShader);
-    ~object();
+    object(std::string objPath);
     // Method used in constructor to properly load contents of .obj file
     void load_from_file(std::string filePath);
-    void load_texture(std::string textPath);
     
     // Method used in constructor to derive contents for facePoints and faceNormals
     void deriveFacePoints();
@@ -75,16 +64,11 @@ public:
     glm::mat4 getHierarchyTranslation();
     glm::mat4 getRotation();
     glm::mat4 getToSpace();
-
-    GLuint getVertexArrayID();
-    GLuint getVertexBufferID();
-    GLuint getUvBufferID();
-    GLuint getElementBufferID();
-    GLuint getTextureID();
     
     bool isTextured();
 
     // Setters //
+    void setTextureID(GLuint set_textureID);
     void setBank(float new_bank);
     void setHeading(float new_heading);
     void setPitch(float new_pitch);
@@ -92,9 +76,6 @@ public:
     void setScale(float new_scale);
     // Setter for parent object with option argument for translation
     void setParent(object * new_parent, glm::vec3 setHierTranslate = glm::vec3(0,0,0));
-
-    // Method for handling the rendering of this object with a given shader
-    void renderObject(shader * objShader);
 };
 
 #endif

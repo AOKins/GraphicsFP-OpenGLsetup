@@ -10,6 +10,8 @@
 #include "./functions/transformDerive.cpp"
 #include "skyBox.cpp"
 
+#include "./functions/graphicsMethods.cpp"
+
 #define GL_CHECK_ERR assert(glGetError() == GL_NO_ERROR);
 
 // Default constructor, calls initialize and sets running to false
@@ -63,12 +65,35 @@ void application::start() {
     // Object Stuff //
     // Demo spheres to give more reference points to show light effects
     this->objects.clear();
-    this->objects.push_back(object("./resources/simpleSphere.obj","./resources/simpleTest.bmp",objectsShader));
-    this->objects[0].setPosition(glm::vec3(3,0,2));
-    this->objects.push_back(object("./resources/simpleSphere.obj","./resources/simpleTest.bmp",objectsShader));
-    this->objects[1].setPosition(glm::vec3(10,1,-1));
-    this->objects.push_back(object("./resources/simpleSphere.obj","./resources/simpleTest.bmp",objectsShader));
-    this->objects[2].setPosition(glm::vec3(-16,-1,-3));
+    this->elementBuffers.clear();
+    this->vertexArrays.clear();
+    this->vertexBuffers.clear();
+    this->normalArrays.clear();
+    this->normalBuffers.clear();
+    this->uvBuffers.clear();
+    this->textureIDs.clear();
+
+    this->objects.push_back(object("./resources/simpleSphere.obj"));
+
+    // Reserving space
+    this->elementBuffers.reserve(this->objects.size());
+    this->vertexArrays.reserve(this->objects.size());
+    this->vertexBuffers.reserve(this->objects.size());
+    this->normalArrays.reserve(this->objects.size());
+    this->normalBuffers.reserve(this->objects.size());
+    this->uvBuffers.reserve(this->objects.size());
+    this->textureIDs.reserve(1);
+
+    // Load textures
+    this->textureIDs[0] = GLmethods::load_texture("./resources/test.bmp");
+    this->objects[0].setTextureID(this->textureIDs[0]);
+
+    // Load the objects
+    for (int i = 0; i < this->objects.size(); i++) {
+        GLmethods::load_object(this->objectsShader, &this->objects[i],
+                                &elementBuffers[i], &vertexArrays[i], &vertexBuffers[i],
+                                &normalArrays[i], &normalBuffers[i], &uvBuffers[i]);
+    }
 
     // Light stuff
     this->lightPos.clear();
@@ -81,22 +106,6 @@ void application::start() {
     this->lightDiffuse.push_back(0.55);
     this->lightAmbient.push_back(0.01);
     this->lightSpecular.push_back(0.00);
-    this->lightAlpha.push_back(200);
-        // Represented light coming from the Moon
-    this->lightPos.push_back(glm::vec4(200,100,-100,1));
-    this->lightColors.push_back(glm::vec3(1,1,1));
-    this->lightIntensities.push_back(50);
-    this->lightDiffuse.push_back(0.55);
-    this->lightAmbient.push_back(0.00);
-    this->lightSpecular.push_back(0.0);
-    this->lightAlpha.push_back(200);
-        // A random light to show the dynamic nature of it and illuminate around the ship
-    this->lightPos.push_back(glm::vec4(0,0,0,1));
-    this->lightColors.push_back(glm::vec3(1,1,1));
-    this->lightIntensities.push_back(5);
-    this->lightDiffuse.push_back(0.55);
-    this->lightAmbient.push_back(0.00);
-    this->lightSpecular.push_back(0.01);
     this->lightAlpha.push_back(200);
 
     // Call the loop method to 
@@ -152,7 +161,7 @@ void application::render(double ctime, double ltime) {
 
     // Render other objects
     for (int i = 0; i < objects.size();i++) {
-        objects[i].renderObject(objectsShader);
+        //GLmethods::render_object(objectsShader, &objects[i], this->vertexBuffers[i], this->uvBuffers[i]);
     }
 
     // Render the skybox
@@ -164,6 +173,7 @@ void application::render(double ctime, double ltime) {
 // Handle closing the application
 void application::close() {
     this->running = false;
+    GLmethods::delete_arrays(this->vertexArrays);
     // Closing window and closing library
     SDL_DestroyWindow(window);
     SDL_Quit();

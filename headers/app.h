@@ -29,6 +29,16 @@ protected:
 
     // Vector that holds object data
     std::vector<object> objects;
+
+    // Vectors for ID values
+    std::vector<GLuint> elementBuffers;
+    std::vector<GLuint> vertexArrays;
+    std::vector<GLuint> vertexBuffers;
+    std::vector<GLuint> normalArrays;
+    std::vector<GLuint> normalBuffers;
+    std::vector<GLuint> uvBuffers;
+    std::vector<GLuint> textureIDs;
+    
     std::vector<glm::vec4> lightPos;
     std::vector<glm::vec3> lightColors;
     std::vector<float> lightIntensities;

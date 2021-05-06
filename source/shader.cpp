@@ -1,3 +1,5 @@
+#ifndef _SHADER_CPP_
+#define _SHADER_CPP_
 #include "../headers/shader.h"
 #include <fstream>
 #include <iostream>
@@ -136,3 +138,4 @@ GLuint shader::getLocation(const std::string &name) {
     return glGetAttribLocation(this->shaderID, name.c_str());
 }
 
+#endif

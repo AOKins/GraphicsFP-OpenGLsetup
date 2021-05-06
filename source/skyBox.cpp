@@ -60,7 +60,6 @@ void skyBox::renderSkyBox(glm::mat4 perspective, glm::mat4 projection) {
     glDrawArrays(GL_TRIANGLES, 0, 36);
 
     glDepthFunc(GL_LESS);
-    
 }
 
 
