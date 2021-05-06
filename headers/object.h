@@ -18,7 +18,6 @@ class object {
     glm::vec3 position; // Position in 3D space
     float scale; // Scaler for the object
 
-
     bool textured;
     // IDs for the vertex arrays
     GLuint vertexArray_ID, normalArray_ID;

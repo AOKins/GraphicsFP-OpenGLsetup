@@ -13,7 +13,6 @@
 #include "shader.h"
 #include "camera.h"
 #include "skyBox.h"
-#include "ship.h"
 
 class application {
 protected: 
@@ -39,8 +38,6 @@ protected:
     std::vector<float> lightAlpha;
 
     bool lightMove = true;
-
-    ship * myShip;
 
     // Camera that user controls
     camera mainCamera;
@@ -82,11 +79,6 @@ public:
     void continuousKeyInput(double deltaTime);
     
     void close();
-
-    // Method for creating torpedo light to emulate "firing", would want to later restructure things to enable this to be encapsulated by more abstract representations
-    void fireTorpedo();
-    // Method for updating torpedo light positions, would want to later restructure things to enable this to be encapsulated by more abstract representations
-    void updateTorpedoLights(double delta);
 };
 
 #endif

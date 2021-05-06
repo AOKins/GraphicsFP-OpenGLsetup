@@ -10,8 +10,6 @@
 #include "./functions/transformDerive.cpp"
 #include "skyBox.cpp"
 
-#include "ship.cpp"
-
 #define GL_CHECK_ERR assert(glGetError() == GL_NO_ERROR);
 
 // Default constructor, calls initialize and sets running to false
@@ -62,8 +60,7 @@ void application::start() {
     // SkyBox //
     this->mainSkyBox = new skyBox("./shaders/skyCube_vertex.shader", "./shaders/skyCube_fragment.shader", "./resources/Skycube/");
 
-    // Object Stuff (including ship) //
-    this->myShip = new ship(objectsShader);
+    // Object Stuff //
     // Demo spheres to give more reference points to show light effects
     this->objects.clear();
     this->objects.push_back(object("./resources/simpleSphere.obj","./resources/simpleTest.bmp",objectsShader));
@@ -141,11 +138,6 @@ void application::render(double ctime, double ltime) {
     // Setting camera position for lighting
     objectsShader->setVec3("cameraPos", mainCamera.getPosition());
 
-    if (lightMove) {
-        updateTorpedoLights(ctime - ltime);
-        lightPos[2] = glm::vec4(0,10*sin(ctime), 10*cos(ctime),1);
-    }
-
     int numLights = lightPos.size();
     if (numLights > 0) {
         objectsShader->setInt("LightCount", numLights);
@@ -157,8 +149,6 @@ void application::render(double ctime, double ltime) {
         objectsShader->setNfloat("Kdiffuse", numLights, lightDiffuse[0]);;
         objectsShader->setNfloat("U_alpha", numLights, lightAlpha[0]);
     }
-    // Render the ship
-    this->myShip->renderShip(objectsShader, ctime, ltime);
 
     // Render other objects
     for (int i = 0; i < objects.size();i++) {
@@ -174,7 +164,6 @@ void application::render(double ctime, double ltime) {
 // Handle closing the application
 void application::close() {
     this->running = false;
-    delete this->myShip;
     // Closing window and closing library
     SDL_DestroyWindow(window);
     SDL_Quit();
@@ -190,44 +179,4 @@ application::~application() {
     // Clear up everything
     delete this->objectsShader;
     delete this->mainSkyBox;
-}
-
-// Method for creating torpedo light to emulate "firing"
-void application::fireTorpedo() {
-    // Setting the initial position of the torpedo
-    glm::vec4 start = glm::vec4(myShip->getPos(),1);
-    start.x = start.x + 1.6;
-    start.y = start.y + 0.4;
-    // Creating light by pushing onto vectors
-    this->lightPos.push_back(start);
-    this->lightColors.push_back(glm::vec3(1,0,0));
-    this->lightIntensities.push_back(1);
-    this->lightDiffuse.push_back(0.25);
-    this->lightAmbient.push_back(0.00);
-    this->lightSpecular.push_back(0.1);
-    this->lightAlpha.push_back(200);
-}
-
-// Method for torpedo light movement, would want to later restructure things to enable this to be encapsulated by more abstract representations
-void application::updateTorpedoLights(double delta) {
-    // Remove lights that exceed a distance (far enough away that they are considered gone)
-    for (int i = lightPos.size()-1; i > 3; i--) {
-        if (this->lightPos[i].x > 100.0f || this->lightPos[i].y > 100.0f || this->lightPos[i].z > 100.0f) {
-            this->lightPos.erase(this->lightPos.begin() + i);
-            this->lightColors.erase(this->lightColors.begin() + i);
-            this->lightIntensities.erase(this->lightIntensities.begin() + i);
-            this->lightDiffuse.erase(this->lightDiffuse.begin() + i);
-            this->lightAmbient.erase(this->lightAmbient.begin() + i);
-            this->lightSpecular.erase(this->lightSpecular.begin() + i);
-            this->lightAlpha.erase(this->lightAlpha.begin() + i);
-        }
-    }
-    // Speed of the torpedos
-    double speed = 2*delta;
-    // Update light positions
-    for (int i = 3; i < lightPos.size(); i++) {
-        // Getting current position, and then moving the light forward along the x axis
-        glm::vec4 curr = this->lightPos[i];
-        this->lightPos[i] = curr + glm::vec4(speed, 0,0,0);
-    }
 }
