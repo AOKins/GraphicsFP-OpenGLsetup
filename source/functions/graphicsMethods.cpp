@@ -98,6 +98,8 @@ void load_object(shader * objShader, object * obj,
     // Creating vertex array
     glCreateVertexArrays(1, vertexArray_ID);
     glCreateBuffers(1, verticiesBuff_ID);
+    glBindVertexArray(*vertexArray_ID);
+    glBindBuffer(GL_ARRAY_BUFFER, *verticiesBuff_ID);
     
     // Send triangle data to the buffer, specifing that it is to the array buffer, providing size and address,
     // followed by the usage (which here is as static drawing)
@@ -115,6 +117,7 @@ void load_object(shader * objShader, object * obj,
     // fifth argument gives the distance between each set of data
     // sixth gives offset in the buffer to start off with (which is 0 as there is no need for offsetting) 
     glVertexAttribPointer(vertexID, 4, GL_FLOAT, GL_FALSE, 0, (GLvoid*)0);
+    
     // Enabling the arrays that have been created to be used in the vertex shader
     glEnableVertexAttribArray(*vertexArray_ID);
     

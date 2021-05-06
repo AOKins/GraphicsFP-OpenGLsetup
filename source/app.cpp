@@ -161,7 +161,7 @@ void application::render(double ctime, double ltime) {
 
     // Render other objects
     for (int i = 0; i < objects.size();i++) {
-        //GLmethods::render_object(objectsShader, &objects[i], this->vertexBuffers[i], this->uvBuffers[i]);
+        GLmethods::render_object(objectsShader, &objects[i], this->vertexBuffers[i], this->uvBuffers[i]);
     }
 
     // Render the skybox
