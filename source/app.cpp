@@ -58,7 +58,7 @@ void application::start() {
     mainCamera.setAspect(float(window_width)/float(window_height));
 
     // Creating shaders for objects and skyCube (uses files in /shaders folder)
-    objectsShader = new shader("./shaders/lightVertex.shader","./shaders/lightFragment.shader");
+    objectsShader = new shader("./shaders/vertex.shader","./shaders/fragment.shader");
     // SkyBox //
     this->mainSkyBox = new skyBox("./shaders/skyCube_vertex.shader", "./shaders/skyCube_fragment.shader", "./resources/Skycube/");
 
@@ -74,26 +74,33 @@ void application::start() {
     this->textureIDs.clear();
 
     this->objects.push_back(object("./resources/simpleSphere.obj"));
+    this->objects.push_back(object("./resources/simpleCube.obj"));
     this->objects.push_back(object("./resources/simpleSphere.obj"));
 
     // Reserving space
     this->elementBuffers.reserve(this->objects.size());
-    this->vertexArrays.reserve(this->objects.size());
-    this->vertexBuffers.reserve(this->objects.size());
-    this->normalArrays.reserve(this->objects.size());
-    this->normalBuffers.reserve(this->objects.size());
-    this->uvBuffers.reserve(this->objects.size());
+    this->vertexArrays  .reserve(this->objects.size());
+    this->vertexBuffers .reserve(this->objects.size());
+    this->normalArrays  .reserve(this->objects.size());
+    this->normalBuffers .reserve(this->objects.size());
+    this->uvBuffers     .reserve(this->objects.size());
     this->textureIDs.reserve(1);
 
     // Load textures
-    this->textureIDs[0] = GLmethods::load_texture("./resources/test.bmp");
+    this->textureIDs[0] = GLmethods::load_texture("./resources/test_white.bmp");
 
     // Setting textures for objects
     this->objects[0].setTextureID(this->textureIDs[0]);
     this->objects[1].setTextureID(this->textureIDs[0]);
+    this->objects[2].setTextureID(this->textureIDs[0]);
   
     // Setting other initial stuff for the objects
-    this->objects[1].setPosition(glm::vec3(1,1,1));
+    this->objects[0].setPosition(glm::vec3(10,-3,0));
+    this->objects[1].setPosition(glm::vec3(10,-15,0));
+    this->objects[1].setScale(10);
+
+    this->objects[2].setPosition(glm::vec3(10,0,0));
+    this->objects[2].setScale(0.1);
 
     // Load the objects
     for (int i = 0; i < this->objects.size(); i++) {
@@ -105,14 +112,14 @@ void application::start() {
     this->lightPos.clear();
     this->lightColors.clear();
     this->lightIntensities.clear();
-        // Represented light coming from the Earth
-    this->lightPos.push_back(glm::vec4(-200,0,0,1));
-    this->lightColors.push_back(glm::vec3(0.8,0.8,1));
-    this->lightIntensities.push_back(200);
-    this->lightDiffuse.push_back(0.55);
+
+    this->lightPos.push_back(glm::vec4(10,0,0,1));
+    this->lightColors.push_back(glm::vec3(1.0,1.0,1.0));
+    this->lightIntensities.push_back(100);
+    this->lightDiffuse.push_back(0.45);
     this->lightAmbient.push_back(0.01);
     this->lightSpecular.push_back(0.00);
-    this->lightAlpha.push_back(200);
+    this->lightAlpha.push_back(2);
 
     // Call the loop method to 
     loop();

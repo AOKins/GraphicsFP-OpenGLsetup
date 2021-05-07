@@ -1,3 +1,6 @@
+#ifndef _POPSUBSTR_CPP_
+#define _POPSUBSTR_CPP_
+
 #include <string>
 
 // Method for getting a substring along with removing it from the original string, goes from start of the original string to matching endPattern
@@ -15,3 +18,5 @@ std::string pop_substr(std::string &myString, std::string endPattern) {
     // Return the found substring
     return result;
 }
+
+#endif
