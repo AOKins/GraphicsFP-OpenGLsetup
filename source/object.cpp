@@ -7,17 +7,6 @@
 
 #include <fstream>
 
-object::object() {
-    this->position = glm::vec3();
-    this->bank = 0;
-    this->heading = 0;
-    this->pitch = 0;
-    this->position = glm::vec3(0,0,0);
-    this->scale = 1;
-    this->parentObj = NULL;
-    updateMatrices();
-}
-
 // Constructor
 object::object(std::string objPath) {
     this->position = glm::vec3();

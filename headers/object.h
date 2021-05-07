@@ -37,7 +37,6 @@ public:
     std::vector<glm::vec4> facePoints;
     std::vector<glm::vec4> faceNormals;
 
-    object();
     // Constuctor that takes in string to where the .obj file is located and optional texture image file
     // Defaults the orientation to 0,0,0 as well as position
     object(std::string objPath);
@@ -54,17 +53,14 @@ public:
 
     // Getters //
     glm::vec3 getPosition();
-    
     float getBank();
     float getHeading();
     float getPitch();
     float getScale();
-    
     glm::mat4 getObjectTranslation();
     glm::mat4 getHierarchyTranslation();
     glm::mat4 getRotation();
     glm::mat4 getToSpace();
-    
     bool isTextured();
 
     // Setters //

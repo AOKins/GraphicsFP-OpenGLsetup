@@ -3,12 +3,15 @@
 #include "../shader.cpp"
 #include "../object.cpp"
 
-// Namespace for general common openGL methods needed
+// Namespace for general common openGL methods that I will be needing
 namespace GLmethods {
 
 // Method for rendering a general object with provided shader
 // Input: objShader - pointer to shader for rendering
 //              obj - pointer to object to be rendered
+// verticiesBuff_ID - ID for vertex buffer of the object
+//        uvBuff_ID - ID for UV values for the object
+// Output: The object should be drawn using the provided shader
 void render_object(shader * objShader, object * obj, GLuint verticiesBuff_ID, GLuint uvBuff_ID) {
     GLuint vertexID = objShader->getLocation("position");
     GLuint normalID = objShader->getLocation("normalVertex");
@@ -143,6 +146,7 @@ void load_object(shader * objShader, object * obj,
     }
 }
 
+// Simple method for handling the deletion of the vertex arrays
 void delete_arrays(std::vector<GLuint> &vertexArrays) {
     glDeleteVertexArrays(vertexArrays.size(), vertexArrays.data());
 }

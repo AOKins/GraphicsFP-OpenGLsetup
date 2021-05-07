@@ -74,6 +74,7 @@ void application::start() {
     this->textureIDs.clear();
 
     this->objects.push_back(object("./resources/simpleSphere.obj"));
+    this->objects.push_back(object("./resources/simpleSphere.obj"));
 
     // Reserving space
     this->elementBuffers.reserve(this->objects.size());
@@ -86,13 +87,14 @@ void application::start() {
 
     // Load textures
     this->textureIDs[0] = GLmethods::load_texture("./resources/test.bmp");
+
+    // Setting textures for objects
     this->objects[0].setTextureID(this->textureIDs[0]);
 
     // Load the objects
     for (int i = 0; i < this->objects.size(); i++) {
-        GLmethods::load_object(this->objectsShader, &this->objects[i],
-                                &elementBuffers[i], &vertexArrays[i], &vertexBuffers[i],
-                                &normalArrays[i], &normalBuffers[i], &uvBuffers[i]);
+        GLmethods::load_object(this->objectsShader, &this->objects[i], &elementBuffers[i], &vertexArrays[i], 
+                                 &vertexBuffers[i],  &normalArrays[i],  &normalBuffers[i],    &uvBuffers[i]);
     }
 
     // Light stuff

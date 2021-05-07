@@ -39,6 +39,7 @@ protected:
     std::vector<GLuint> uvBuffers;
     std::vector<GLuint> textureIDs;
     
+    // Vectors for light info
     std::vector<glm::vec4> lightPos;
     std::vector<glm::vec3> lightColors;
     std::vector<float> lightIntensities;
@@ -47,6 +48,7 @@ protected:
     std::vector<float> lightSpecular;
     std::vector<float> lightAlpha;
 
+    // Simple boolean, if false then set the light to not move
     bool lightMove = true;
 
     // Camera that user controls
