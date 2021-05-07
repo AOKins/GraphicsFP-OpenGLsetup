@@ -90,6 +90,10 @@ void application::start() {
 
     // Setting textures for objects
     this->objects[0].setTextureID(this->textureIDs[0]);
+    this->objects[1].setTextureID(this->textureIDs[0]);
+  
+    // Setting other initial stuff for the objects
+    this->objects[1].setPosition(glm::vec3(1,1,1));
 
     // Load the objects
     for (int i = 0; i < this->objects.size(); i++) {
