@@ -1,6 +1,6 @@
 #version 450 core  
 
-layout (location = 0) in vec4 position;
+in vec4 position;
 
 uniform mat4 perspective;
 uniform mat4 projection;

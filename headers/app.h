@@ -20,7 +20,7 @@ protected:
 
     SDL_Window * window;
     SDL_GLContext context;
-    shader * objectsShader; 
+    shader * objectsShader, *shadowMapShader;
 
     // Dimensions of the window
     int window_width, window_height;
@@ -38,6 +38,9 @@ protected:
     std::vector<GLuint> normalBuffers;
     std::vector<GLuint> uvBuffers;
     std::vector<GLuint> textureIDs;
+
+    // Shadow mapping values
+    GLuint depthMapTexture, shadowRes, depthMapBuffer;
     
     // Vectors for light info
     std::vector<glm::vec4> lightPos;

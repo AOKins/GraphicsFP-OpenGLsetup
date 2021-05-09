@@ -12,7 +12,7 @@ namespace GLmethods {
 // verticiesBuff_ID - ID for vertex buffer of the object
 //        uvBuff_ID - ID for UV values for the object
 // Output: The object should be drawn using the provided shader
-void render_object(shader * objShader, object * obj, GLuint verticiesBuff_ID, GLuint uvBuff_ID) {
+void render_object(shader * objShader, object * obj, GLuint verticiesBuff_ID, GLuint uvBuff_ID, GLuint shadowMapBuffer, GLuint shadowMapTexture) {
     GLuint vertexID = objShader->getLocation("position");
     GLuint normalID = objShader->getLocation("normalVertex");
     GLuint uvID = objShader->getLocation("obj_uv");
@@ -42,7 +42,11 @@ void render_object(shader * objShader, object * obj, GLuint verticiesBuff_ID, GL
             0);        // initial offset
 
     // Binding and enabling the texture
+    glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, obj->textureID);
+    // Binding and enabling the shadow depth map texture
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, shadowMapTexture);
 
     glEnableVertexAttribArray(uvID); //Recall the vertex ID
     glBindBuffer(GL_ARRAY_BUFFER, uvBuff_ID);//Link object buffer to vertex_ID
@@ -90,6 +94,7 @@ GLuint load_texture(std::string textPath) {
 void load_object(shader * objShader, object * obj,
                  GLuint  * elementBuff_ID, GLuint * vertexArray_ID, GLuint * verticiesBuff_ID,
                  GLuint * normalArray_ID, GLuint * normalBuff_ID, GLuint * uvBuff_ID) {
+    glUseProgram(objShader->shaderID);
     // Creating element buffer
     glCreateBuffers(1, elementBuff_ID);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, *elementBuff_ID);
@@ -149,6 +154,43 @@ void load_object(shader * objShader, object * obj,
 // Simple method for handling the deletion of the vertex arrays
 void delete_arrays(std::vector<GLuint> &vertexArrays) {
     glDeleteVertexArrays(vertexArrays.size(), vertexArrays.data());
+}
+
+void setupDepthMap(GLuint &depthMapBuffer, GLuint &depthMapTexture, GLuint resolution) {
+    glGenFramebuffers(1, &depthMapBuffer);
+    glGenTextures(1, &depthMapTexture);
+    glBindTexture(GL_TEXTURE_2D, depthMapTexture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, resolution, resolution, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, depthMapBuffer);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMapTexture, 0);
+    glDrawBuffer(GL_NONE);
+    glReadBuffer(GL_NONE);
+    glBindFramebuffer(GL_FRAMEBUFFER,0);
+}
+
+void render_shadow(shader * shadowShader, object * obj, GLuint verticiesBuff_ID, 
+                    GLuint depthMapBuffer, GLuint depthMapTexture, GLuint resolution) {
+    shadowShader->setMat4("toSpace", obj->getToSpace());
+    GLuint vertexID = shadowShader->getLocation("position");
+
+    // Linking vertex buffer
+    glEnableVertexAttribArray(vertexID); //Recall the vertex ID
+    glBindBuffer(GL_ARRAY_BUFFER, verticiesBuff_ID);//Link object buffer to vertex_ID
+    glVertexAttribPointer( // Index into the buffer
+            vertexID,  // Attribute in question
+            4,         // Number of elements per vertex call (vec4)
+            GL_FLOAT,  // Type of element
+            GL_FALSE,  // Normalize? Nope
+            0,         // No stride (steps between indexes)
+            0);        // initial offset
+
+    glDrawArrays(GL_TRIANGLES, 0, obj->verticies.size());
 }
 
 };

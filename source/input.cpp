@@ -54,34 +54,34 @@ void application::continuousKeyInput(double deltaTime) {
     const Uint8 * keyboardState = SDL_GetKeyboardState(NULL);
     // Movement inputs
     if (keyboardState[SDL_SCANCODE_W] == SDL_PRESSED) {
-        mainCamera.moveFoward(deltaTime*2.0f);
+        mainCamera.moveFoward(deltaTime*4.0f);
     }
     if (keyboardState[SDL_SCANCODE_S] == SDL_PRESSED) {
-        mainCamera.moveFoward(-deltaTime*2.0f);
+        mainCamera.moveFoward(-deltaTime*4.0f);
     }
     if (keyboardState[SDL_SCANCODE_A] == SDL_PRESSED) {
-        mainCamera.moveLeft(deltaTime*2.0f);
+        mainCamera.moveLeft(deltaTime*4.0f);
     }
     if (keyboardState[SDL_SCANCODE_D] == SDL_PRESSED) {
-        mainCamera.moveLeft(-deltaTime*2.0f);
+        mainCamera.moveLeft(-deltaTime*4.0f);
     }
     if (keyboardState[SDL_SCANCODE_SPACE] == SDL_PRESSED) {
-        mainCamera.moveUp(deltaTime*2.0f);
+        mainCamera.moveUp(deltaTime*4.0f);
     }
     if (keyboardState[SDL_SCANCODE_LCTRL] == SDL_PRESSED) {
-        mainCamera.moveUp(-deltaTime*2.0f);
+        mainCamera.moveUp(-deltaTime*4.0f);
     }
     // Camera look-around keyboard controls
     if (keyboardState[SDL_SCANCODE_RIGHT] == SDL_PRESSED) {
-        mainCamera.turnRight(deltaTime*2.0f);
+        mainCamera.turnRight(deltaTime*4.0f);
     }
     if (keyboardState[SDL_SCANCODE_LEFT] == SDL_PRESSED) {
-        mainCamera.turnRight(-deltaTime*2.0f);
+        mainCamera.turnRight(-deltaTime*4.0f);
     }
     if (keyboardState[SDL_SCANCODE_UP] == SDL_PRESSED) {
-        mainCamera.turnUp(deltaTime*2.0f);
+        mainCamera.turnUp(deltaTime*4.0f);
     }
     if (keyboardState[SDL_SCANCODE_DOWN] == SDL_PRESSED) {
-        mainCamera.turnUp(-deltaTime*2.0f);
+        mainCamera.turnUp(-deltaTime*4.0f);
     }
 }
