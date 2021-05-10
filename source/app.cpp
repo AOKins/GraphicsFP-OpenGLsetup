@@ -21,7 +21,7 @@ application::application() {
     this->window_width = 1352;
     this->window_height = 760;
     // Set dimension for shadow map
-    this->shadowRes = 1024;
+    this->shadowRes = 760;
 
     // Call initialize
     initialize();
@@ -58,7 +58,7 @@ void application::start() {
     this->running = true;
     // Correcting main camera to the aspect ratio of the window
     mainCamera.setAspect(float(window_width)/float(window_height));
-
+    mainCamera.setPitch(1.0f);
     // Creating shaders (uses files in ./shaders folder)
     // Objects //
     this->objectsShader = new shader("./shaders/vertex.shader","./shaders/fragment.shader");
@@ -85,8 +85,9 @@ void application::start() {
     this->uvBuffers.clear();
     this->textureIDs.clear();
 
+    this->objects.push_back(object("./resources/simpleSphere.obj"));
     this->objects.push_back(object("./resources/simpleCube.obj"));
-    this->objects.push_back(object("./resources/simpleCube.obj"));
+    this->objects.push_back(object("./resources/simpleSphere.obj"));
 
     // Reserving space
     this->elementBuffers.reserve(this->objects.size());
@@ -103,11 +104,13 @@ void application::start() {
     // Setting textures for objects
     this->objects[0].setTextureID(this->textureIDs[0]);
     this->objects[1].setTextureID(this->textureIDs[0]);
+    this->objects[2].setTextureID(this->textureIDs[0]);
   
     // Setting other initial stuff for the objects
-    this->objects[0].setPosition(glm::vec3(0,-1,0));
+    this->objects[0].setPosition(glm::vec3(-3,-1,0));
     this->objects[1].setPosition(glm::vec3(0,-13,0));
     this->objects[1].setScale(10);
+    this->objects[2].setPosition(glm::vec3(0,-1,0));
 
     // Load the objects
     for (int i = 0; i < this->objects.size(); i++) {
@@ -120,9 +123,9 @@ void application::start() {
     this->lightColors.clear();
     this->lightIntensities.clear();
 
-    this->lightPos.push_back(glm::vec4(0,2,0,1));
+    this->lightPos.push_back(glm::vec4(1.0,5,0,1));
     this->lightColors.push_back(glm::vec3(1.0,1.0,1.0));
-    this->lightIntensities.push_back(100);
+    this->lightIntensities.push_back(15);
     this->lightDiffuse.push_back(0.45);
     this->lightAmbient.push_back(0.01);
     this->lightSpecular.push_back(0.00);
@@ -155,65 +158,67 @@ void application::loop() {
 
 // Handles the actual rendering behavior (including manage of triangle data)
 void application::render(double ctime, double ltime) {
-    this->lightPos[0] = glm::vec4(sin(ctime/2.0f),3,cos(ctime/2.0f),1);
+    glm::mat4 lightProj = glm::ortho(-100.0f,100.0f,-100.0f,100.0f,1.0f,20.5f);
+    glm::mat4 lightView,lightSpaceMatrix;
+
+    this->objects[0].setPosition(glm::vec3(cos(ctime),-1,sin(ctime)));
+
+    lightView = glm::lookAt(glm::vec3(lightPos[0].x,lightPos[0].y,lightPos[0].z),
+                            glm::vec3(0),glm::vec3(0,1,0));
+    lightSpaceMatrix = lightProj * lightView;
+
     // Render the shadow mappings for all the objects //
-    glUseProgram(this->shadowMapShader->shaderID);
-
-    glm::mat4 lightProj = glm::ortho(-10.0f,10.0f,-10.0f,10.0f,1.0f,7.5f);
-    glm::mat4 lightView;
-    glm::mat4 lightSpaceMatrix;
-
     glViewport(0,0, this->shadowRes, this->shadowRes);
-    glBindFramebuffer(GL_FRAMEBUFFER, this->depthMapBuffer);
-    glClear(GL_DEPTH_BUFFER_BIT);    // Clearing the frame buffer
-    glActiveTexture(GL_TEXTURE0);
-    for (int i = 0; i < objects.size(); i++) {
-        lightView = glm::lookAt(glm::vec3(lightPos[0].x,lightPos[0].y,lightPos[0].z),
-                                            this->objects[i].getPosition(),glm::vec3(0,0,1));
-        lightSpaceMatrix = lightProj * lightView;
-        shadowMapShader->setMat4("lightSpace", lightSpaceMatrix);
-        GLmethods::render_shadow(this->shadowMapShader, &this->objects[i], this->vertexBuffers[i],
-                                this->depthMapBuffer, this->depthMapTexture, this->shadowRes);
-    }
-    glBindFramebuffer(GL_FRAMEBUFFER,0);
-
-    // Render the scene normally //
-    glViewport(0,0, this->window_width, this->window_height);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
-        // Using the one object shader program created in setup, identifying with the id value in the app's struct
-    glUseProgram(objectsShader->shaderID);
-
-
-    int numLights = lightPos.size();
-    if (numLights > 0) {
-        objectsShader->setInt("LightCount", numLights);
-        objectsShader->setNvec4("Lpos", numLights, lightPos[0]);
-        objectsShader->setNvec3("Lcolor", numLights, lightColors[0]);
-        objectsShader->setNfloat("Linten",numLights, lightIntensities[0]);
-        objectsShader->setNfloat("Kambient", numLights, lightAmbient[0]);
-        objectsShader->setNfloat("Kspecular",numLights, lightSpecular[0]);
-        objectsShader->setNfloat("Kdiffuse", numLights, lightDiffuse[0]);;
-        objectsShader->setNfloat("U_alpha", numLights, lightAlpha[0]);
+    if (renderMap == false) {
+        glBindFramebuffer(GL_FRAMEBUFFER, this->depthMapBuffer);
     }
 
-    // Setting camera transform
-    objectsShader->setMat4("camera", mainCamera.getView());
-    // Setting perspective transform
-    objectsShader->setMat4("perspective", mainCamera.getPerspective());
-    // Setting camera position for lighting
-    objectsShader->setVec3("cameraPos", mainCamera.getPosition());
-
-    objectsShader->setMat4("lightSpace", lightSpaceMatrix);
-    
-    for (int i = 0; i < objects.size();i++) {
-
-        GLmethods::render_object(this->objectsShader, &this->objects[i], this->vertexBuffers[i], this->uvBuffers[i],
-                                 this->depthMapBuffer, this->depthMapTexture);
+    glUseProgram(this->shadowMapShader->shaderID);
+    this->shadowMapShader->setMat4("lightSpace",lightSpaceMatrix);
+    for (int i = 0; i < objects.size(); i++) {
+        GLmethods::render_shadow(this->shadowMapShader, &this->objects[i], this->vertexBuffers[i],
+                                    this->depthMapBuffer, this->depthMapTexture, this->shadowRes);
     }
 
-    // Render the skybox
-    this->mainSkyBox->renderSkyBox(mainCamera.getPerspective(), mainCamera.getProjection());
+    if (renderMap == false) {
+        // Render the scene normally //
+        glViewport(0,0, this->window_width, this->window_height);
+        glEnable(GL_DEPTH_TEST);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            // Using the one object shader program created in setup, identifying with the id value in the app's struct
+        glUseProgram(objectsShader->shaderID);
+        int numLights = lightPos.size();
+        if (numLights > 0) {
+            objectsShader->setInt("LightCount", numLights);
+            objectsShader->setNvec4("Lpos", numLights, lightPos[0]);
+            objectsShader->setNvec3("Lcolor", numLights, lightColors[0]);
+            objectsShader->setNfloat("Linten",numLights, lightIntensities[0]);
+            objectsShader->setNfloat("Kambient", numLights, lightAmbient[0]);
+            objectsShader->setNfloat("Kspecular",numLights, lightSpecular[0]);
+            objectsShader->setNfloat("Kdiffuse", numLights, lightDiffuse[0]);;
+            objectsShader->setNfloat("U_alpha", numLights, lightAlpha[0]);
+        }
+
+        // Setting camera transform
+        objectsShader->setMat4("camera", mainCamera.getView());
+        // Setting perspective transform
+        objectsShader->setMat4("perspective", mainCamera.getPerspective());
+        // Setting camera position for lighting
+        objectsShader->setVec3("cameraPos", mainCamera.getPosition());
+
+        objectsShader->setMat4("lightSpace", lightSpaceMatrix);
+
+        for (int i = 0; i < objects.size();i++) {
+            GLmethods::render_object(this->objectsShader, &this->objects[i], this->vertexBuffers[i], this->uvBuffers[i],
+                                     this->depthMapBuffer, this->depthMapTexture);
+        }
+
+        // Render the skybox
+        this->mainSkyBox->renderSkyBox(mainCamera.getPerspective(), mainCamera.getProjection());
+    }
     // Swapping buffers to update display
     SDL_GL_SwapWindow(window);
 }

@@ -7,5 +7,6 @@ uniform mat4 lightSpace;
 uniform mat4 toSpace;
 
 void main() {
-    gl_Position = lightSpace * toSpace * position;
+    gl_Position = lightSpace * (toSpace * position) / position.w;
+    gl_Position = gl_Position / gl_Position.w;
 }

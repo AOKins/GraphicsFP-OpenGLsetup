@@ -33,7 +33,7 @@ void main() {
 
     vs_vertex = (toSpace * position) / position.w;
 
-    L_vertex = lightSpace * (toSpace * position) / position.w;
+    L_vertex = lightSpace * vs_vertex;
 
     gl_Position = perspective * camera * vs_vertex; 
 }

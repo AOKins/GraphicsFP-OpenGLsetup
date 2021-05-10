@@ -47,7 +47,8 @@ vec3 calcDiffuse(vec3 lightColor, float coeff, vec3 L, float cosTheta) {
 float shadowValue(vec4 position) {
     vec3 projPos = (position.xyz/position.w)*0.5 + 0.5;
     float closestDepth = texture(shadowMap, projPos.xy).r;
-    float thisDepth = position.z;
+    float thisDepth = projPos.z;
+//    return thisDepth;
     if (thisDepth <= closestDepth) {
         return 1.0f;
     }
@@ -101,7 +102,7 @@ void main(void) {
             I_specular = calcSpecular(L_specular, K_specular, alpha, L, cosTheta);
         }
 
-        I_ambient = calcAmbient(L_ambient, K_ambient);
+        I_ambient = I_ambient + calcAmbient(L_ambient, K_ambient);
         I = (lightIntensity * (I_diffuse + I_specular + I_ambient) / length(lightPos - vs_vertex));
         I = I * lightColor * shadowValue(L_vertex);
         I_result = (I_result + I);
@@ -110,4 +111,5 @@ void main(void) {
     // Now apply the resulting texture and light values to the output color    
     vec4 textColor = texture(twoDTex, vs_uv);
     color = textColor * vec4(min(I_result+I_ambient,vec3(1,1,1)), 1.0);
+    //color = vec4(vec3(shadowValue(L_vertex)),1.0);
 }

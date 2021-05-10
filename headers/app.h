@@ -52,7 +52,7 @@ protected:
     std::vector<float> lightAlpha;
 
     // Simple boolean, if false then set the light to not move
-    bool lightMove = true;
+    bool renderMap = false;
 
     // Camera that user controls
     camera mainCamera;

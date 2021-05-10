@@ -17,6 +17,14 @@ void render_object(shader * objShader, object * obj, GLuint verticiesBuff_ID, GL
     GLuint normalID = objShader->getLocation("normalVertex");
     GLuint uvID = objShader->getLocation("obj_uv");
 
+    // Binding and enabling the texture
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, obj->textureID);
+    // Binding and enabling the shadow depth map texture
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, shadowMapTexture);
+
+
     objShader->setMat4("toSpace", obj->getToSpace());
     
     // Linking vertex buffer
@@ -41,12 +49,6 @@ void render_object(shader * objShader, object * obj, GLuint verticiesBuff_ID, GL
             0,         // No stride (steps between indexes)
             0);        // initial offset
 
-    // Binding and enabling the texture
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, obj->textureID);
-    // Binding and enabling the shadow depth map texture
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, shadowMapTexture);
 
     glEnableVertexAttribArray(uvID); //Recall the vertex ID
     glBindBuffer(GL_ARRAY_BUFFER, uvBuff_ID);//Link object buffer to vertex_ID
@@ -158,20 +160,18 @@ void delete_arrays(std::vector<GLuint> &vertexArrays) {
 
 void setupDepthMap(GLuint &depthMapBuffer, GLuint &depthMapTexture, GLuint resolution) {
     glGenFramebuffers(1, &depthMapBuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, depthMapBuffer);
+
     glGenTextures(1, &depthMapTexture);
     glBindTexture(GL_TEXTURE_2D, depthMapTexture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, resolution, resolution, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, resolution, resolution, 0, GL_DEPTH_COMPONENT16, GL_FLOAT, NULL);
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-    glBindFramebuffer(GL_FRAMEBUFFER, depthMapBuffer);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMapTexture, 0);
+
     glDrawBuffer(GL_NONE);
     glReadBuffer(GL_NONE);
-    glBindFramebuffer(GL_FRAMEBUFFER,0);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void render_shadow(shader * shadowShader, object * obj, GLuint verticiesBuff_ID, 
@@ -189,6 +189,10 @@ void render_shadow(shader * shadowShader, object * obj, GLuint verticiesBuff_ID,
             GL_FALSE,  // Normalize? Nope
             0,         // No stride (steps between indexes)
             0);        // initial offset
+
+    // Binding and enabling the shadow depth map texture
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, depthMapTexture);
 
     glDrawArrays(GL_TRIANGLES, 0, obj->verticies.size());
 }
