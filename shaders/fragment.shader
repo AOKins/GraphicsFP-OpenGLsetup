@@ -4,8 +4,8 @@
 
 out vec4 color;
 
-uniform sampler2D twoDTex; 
-uniform sampler2D shadowMap;
+layout (binding = 0) uniform sampler2D twoDTex; 
+layout (binding = 1) uniform sampler2D shadowMap;
 
 in vec2 vs_uv;     // UV coordinate
 in vec4 vs_vertex; // Where the vertex is in world space
@@ -46,9 +46,8 @@ vec3 calcDiffuse(vec3 lightColor, float coeff, vec3 L, float cosTheta) {
 
 float shadowValue(vec4 position) {
     vec3 projPos = (position.xyz/position.w)*0.5 + 0.5;
-    float closestDepth = texture(shadowMap, projPos.xy).r;
-    float thisDepth = projPos.z;
-//    return thisDepth;
+    float closestDepth = texture(shadowMap, projPos.xy).x;
+    float thisDepth = projPos.z - 0.005; // 0.005 bias to help remove "shadow acne"
     if (thisDepth <= closestDepth) {
         return 1.0f;
     }
@@ -63,6 +62,7 @@ void main(void) {
     vec3 I; // Resulting illumination value from a light
     // Components of light to be derived then added into resulting value
     vec3 I_ambient, I_diffuse, I_specular;
+    I_ambient = vec3(0);
 
     //Material properties
     float K_ambient;  // Ambient reflection coeff.
@@ -103,7 +103,7 @@ void main(void) {
         }
 
         I_ambient = I_ambient + calcAmbient(L_ambient, K_ambient);
-        I = (lightIntensity * (I_diffuse + I_specular + I_ambient) / length(lightPos - vs_vertex));
+        I = (lightIntensity * (I_diffuse + I_specular) / length(lightPos - vs_vertex));
         I = I * lightColor * shadowValue(L_vertex);
         I_result = (I_result + I);
     }
@@ -111,5 +111,4 @@ void main(void) {
     // Now apply the resulting texture and light values to the output color    
     vec4 textColor = texture(twoDTex, vs_uv);
     color = textColor * vec4(min(I_result+I_ambient,vec3(1,1,1)), 1.0);
-    //color = vec4(vec3(shadowValue(L_vertex)),1.0);
 }

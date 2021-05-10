@@ -2,6 +2,7 @@
 #define _GRAPHICS_METHODS_CPP_
 #include "../shader.cpp"
 #include "../object.cpp"
+#define GL_CHECK_ERR assert(glGetError() == GL_NO_ERROR);
 
 // Namespace for general common openGL methods that I will be needing
 namespace GLmethods {
@@ -160,39 +161,30 @@ void delete_arrays(std::vector<GLuint> &vertexArrays) {
 
 void setupDepthMap(GLuint &depthMapBuffer, GLuint &depthMapTexture, GLuint resolution) {
     glGenFramebuffers(1, &depthMapBuffer);
-    glBindFramebuffer(GL_FRAMEBUFFER, depthMapBuffer);
-
     glGenTextures(1, &depthMapTexture);
     glBindTexture(GL_TEXTURE_2D, depthMapTexture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, resolution, resolution, 0, GL_DEPTH_COMPONENT16, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, resolution, resolution, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
 
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, depthMapBuffer);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMapTexture, 0);
-
     glDrawBuffer(GL_NONE);
     glReadBuffer(GL_NONE);
-
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glBindFramebuffer(GL_FRAMEBUFFER,0);
 }
 
 void render_shadow(shader * shadowShader, object * obj, GLuint verticiesBuff_ID, 
                     GLuint depthMapBuffer, GLuint depthMapTexture, GLuint resolution) {
     shadowShader->setMat4("toSpace", obj->getToSpace());
     GLuint vertexID = shadowShader->getLocation("position");
-
     // Linking vertex buffer
     glEnableVertexAttribArray(vertexID); //Recall the vertex ID
     glBindBuffer(GL_ARRAY_BUFFER, verticiesBuff_ID);//Link object buffer to vertex_ID
-    glVertexAttribPointer( // Index into the buffer
-            vertexID,  // Attribute in question
-            4,         // Number of elements per vertex call (vec4)
-            GL_FLOAT,  // Type of element
-            GL_FALSE,  // Normalize? Nope
-            0,         // No stride (steps between indexes)
-            0);        // initial offset
-
-    // Binding and enabling the shadow depth map texture
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, depthMapTexture);
+    glVertexAttribPointer(vertexID, 4, GL_FLOAT, GL_FALSE, 0, 0);        
 
     glDrawArrays(GL_TRIANGLES, 0, obj->verticies.size());
 }
