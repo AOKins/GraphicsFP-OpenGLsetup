@@ -38,8 +38,7 @@ protected:
     std::vector<GLuint> normalBuffers;
     std::vector<GLuint> uvBuffers;
     std::vector<GLuint> textureIDs;
-
-    // Shadow mapping values
+        // Shadow mapping values
     GLuint depthMapTexture, shadowRes, depthMapBuffer;
     
     // Vectors for light info

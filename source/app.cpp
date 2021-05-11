@@ -67,12 +67,6 @@ void application::start() {
     // Shadow Mapping //
     this->shadowMapShader = new shader("./shaders/shadow_vertex.shader","./shaders/shadow_fragment.shader");
 
-    // Setting up Depth Map for Shadow mapping //
-    GLmethods::setupDepthMap(this->depthMapBuffer, this->depthMapTexture, this->shadowRes);
-
-    glUseProgram(this->objectsShader->shaderID);
-    this->objectsShader->setInt("twoDTex", 0);
-    this->objectsShader->setInt("shadowMap", 1);
 
     // Object Stuff //
     // Demo spheres to give more reference points to show light effects
@@ -85,9 +79,11 @@ void application::start() {
     this->uvBuffers.clear();
     this->textureIDs.clear();
 
-    this->objects.push_back(object("./resources/simpleCube.obj"));
-    this->objects.push_back(object("./resources/simpleCube.obj"));
-    this->objects.push_back(object("./resources/simpleSphere.obj"));
+    // Load objects
+    this->objects.push_back(object("./resources/test.obj"));
+
+    // Load textures
+    this->textureIDs.push_back(GLmethods::load_texture("./resources/test_white.bmp"));
 
     // Reserving space
     this->elementBuffers.reserve(this->objects.size());
@@ -96,39 +92,35 @@ void application::start() {
     this->normalArrays  .reserve(this->objects.size());
     this->normalBuffers .reserve(this->objects.size());
     this->uvBuffers     .reserve(this->objects.size());
-    this->textureIDs    .reserve(1);
-
-    // Load textures
-    this->textureIDs[0] = GLmethods::load_texture("./resources/test_white.bmp");
 
     // Setting textures for objects
     this->objects[0].setTextureID(this->textureIDs[0]);
-    this->objects[1].setTextureID(this->textureIDs[0]);
-    this->objects[2].setTextureID(this->textureIDs[0]);
 
-    // Setting other initial stuff for the objects
-    this->objects[0].setPosition(glm::vec3(0,-1,0));
-    this->objects[1].setPosition(glm::vec3(0,-13,0));
-    this->objects[1].setScale(10);
-    this->objects[2].setPosition(glm::vec3(2,-1,0));
 
-    // Load the objects
+    // Load the objects into OpenGL
     for (int i = 0; i < this->objects.size(); i++) {
         GLmethods::load_object(this->objectsShader, &this->objects[i], &elementBuffers[i], &vertexArrays[i], 
                                  &vertexBuffers[i],  &normalArrays[i],  &normalBuffers[i],    &uvBuffers[i]);
     }
 
-    // Light stuff
+    // Light Setup
     this->lightPos.clear();
     this->lightColors.clear();
     this->lightIntensities.clear();
+    this->lightDiffuse.clear();
+    this->lightAmbient.clear();
+    this->lightSpecular.clear();
+    this->lightAlpha.clear();
 
-    this->lightPos.push_back(glm::vec4(1,12,0,1));
+    // Setting up Depth Map for Shadow mapping //
+    GLmethods::setupDepthMap(this->depthMapBuffer, this->depthMapTexture, this->shadowRes);
+
+    this->lightPos.push_back(glm::vec4(1,40,0,1));
     this->lightColors.push_back(glm::vec3(1.0,1.0,1.0));
-    this->lightIntensities.push_back(100);
-    this->lightDiffuse.push_back(0.45);
-    this->lightAmbient.push_back(0.05);
-    this->lightSpecular.push_back(0.00);
+    this->lightIntensities.push_back(800);
+    this->lightDiffuse.push_back(0.95);
+    this->lightAmbient.push_back(0.15);
+    this->lightSpecular.push_back(0.05);
     this->lightAlpha.push_back(2);
 
     // Call the loop method to 
@@ -138,8 +130,7 @@ void application::start() {
 // Core event/render loop
 void application::loop() {
     SDL_Event event;
-    double currTime;
-    double lastTime;
+    double currTime,lastTime;
     // Last time is currently now
     lastTime = double(SDL_GetTicks()) / 1000.0f;
     while (this->running) {
@@ -158,34 +149,32 @@ void application::loop() {
 
 // Handles the actual rendering behavior (including manage of triangle data)
 void application::render(double ctime, double ltime) {
-    this->lightPos[0] = (glm::vec4(sin(ctime/2.0f),3,cos(ctime/2.0f),1));
-    // Render the shadow mappings for all the objects //
-    glUseProgram(this->shadowMapShader->shaderID);
-
+    // Having only light at index 0 have the shadow
+    glm::mat4 lightView,lightSpaceMatrix;
     glm::mat4 lightProj = glm::ortho(-10.0f,10.0f,-10.0f,10.0f,1.0f,107.5f);
-    glm::mat4 lightView;
-    glm::mat4 lightSpaceMatrix;
     lightView = glm::lookAt(glm::vec3(lightPos[0].x,lightPos[0].y,lightPos[0].z),
                                         glm::vec3(0),glm::vec3(0,0,1));
     lightSpaceMatrix = lightProj * lightView;
 
+    // Render the shadow mappings for all the objects //
+    glUseProgram(this->shadowMapShader->shaderID);
+    shadowMapShader->setMat4("lightSpace", lightSpaceMatrix);
+    
     glViewport(0,0, this->shadowRes, this->shadowRes);
     glBindFramebuffer(GL_FRAMEBUFFER, this->depthMapBuffer);
     glClear(GL_DEPTH_BUFFER_BIT);    // Clearing the frame buffer
     for (int i = 0; i < objects.size(); i++) {
-        shadowMapShader->setMat4("lightSpace", lightSpaceMatrix);
         GLmethods::render_shadow(this->shadowMapShader, &this->objects[i], this->vertexBuffers[i],
                                 this->depthMapBuffer, this->depthMapTexture, this->shadowRes);
     }
-    glBindFramebuffer(GL_FRAMEBUFFER,0);
 
     // Render the scene normally //
+    glBindFramebuffer(GL_FRAMEBUFFER,0);
     glViewport(0,0, this->window_width, this->window_height);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
         // Using the one object shader program created in setup, identifying with the id value in the app's struct
     glUseProgram(objectsShader->shaderID);
-
 
     int numLights = lightPos.size();
     if (numLights > 0) {
@@ -205,9 +194,10 @@ void application::render(double ctime, double ltime) {
     objectsShader->setMat4("perspective", mainCamera.getPerspective());
     // Setting camera position for lighting
     objectsShader->setVec3("cameraPos", mainCamera.getPosition());
-
+    // Setting the light matrix
     objectsShader->setMat4("lightSpace", lightSpaceMatrix);
     
+    // Render the objects
     for (int i = 0; i < objects.size();i++) {
         GLmethods::render_object(this->objectsShader, &this->objects[i], this->vertexBuffers[i], this->uvBuffers[i],
                                  this->depthMapBuffer, this->depthMapTexture);
@@ -222,6 +212,7 @@ void application::render(double ctime, double ltime) {
 // Handle closing the application
 void application::close() {
     this->running = false;
+    glDeleteFramebuffers(1, &this->depthMapBuffer);
     GLmethods::delete_arrays(this->vertexArrays);
     // Closing window and closing library
     SDL_DestroyWindow(window);
