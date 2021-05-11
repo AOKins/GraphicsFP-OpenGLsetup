@@ -12,8 +12,6 @@
 
 #include "./functions/graphicsMethods.cpp"
 
-#define GL_CHECK_ERR assert(glGetError() == GL_NO_ERROR);
-
 // Default constructor, calls initialize and sets running to false
 application::application() {
     this->running = false;
@@ -21,7 +19,7 @@ application::application() {
     this->window_width = 1352;
     this->window_height = 760;
     // Set dimension for shadow map
-    this->shadowRes = 2000;
+    this->shadowRes = 3000;
 
     // Call initialize
     initialize();
@@ -67,7 +65,6 @@ void application::start() {
     // Shadow Mapping //
     this->shadowMapShader = new shader("./shaders/shadow_vertex.shader","./shaders/shadow_fragment.shader");
 
-
     // Object Stuff //
     // Demo spheres to give more reference points to show light effects
     this->objects.clear();
@@ -80,9 +77,11 @@ void application::start() {
     this->textureIDs.clear();
 
     // Load objects
-    this->objects.push_back(object("./resources/test.obj"));
+    this->objects.push_back(object("./resources/plane.obj"));
+    this->objects.push_back(object("./resources/simple_car.obj"));
 
     // Load textures
+    this->textureIDs.push_back(GLmethods::load_texture("./resources/grass.bmp"));
     this->textureIDs.push_back(GLmethods::load_texture("./resources/test_white.bmp"));
 
     // Reserving space
@@ -95,7 +94,11 @@ void application::start() {
 
     // Setting textures for objects
     this->objects[0].setTextureID(this->textureIDs[0]);
+    this->objects[1].setTextureID(this->textureIDs[1]);
 
+    this->objects[0].setScale(0.5f);
+    this->objects[0].setPosition(glm::vec3(0,-2.5,0));
+    this->objects[1].setPosition(glm::vec3(0,0.5,0));
 
     // Load the objects into OpenGL
     for (int i = 0; i < this->objects.size(); i++) {
@@ -115,9 +118,9 @@ void application::start() {
     // Setting up Depth Map for Shadow mapping //
     GLmethods::setupDepthMap(this->depthMapBuffer, this->depthMapTexture, this->shadowRes);
 
-    this->lightPos.push_back(glm::vec4(1,40,0,1));
+    this->lightPos.push_back(glm::vec3(2,4,1));
     this->lightColors.push_back(glm::vec3(1.0,1.0,1.0));
-    this->lightIntensities.push_back(800);
+    this->lightIntensities.push_back(8000);
     this->lightDiffuse.push_back(0.95);
     this->lightAmbient.push_back(0.15);
     this->lightSpecular.push_back(0.05);
@@ -151,9 +154,8 @@ void application::loop() {
 void application::render(double ctime, double ltime) {
     // Having only light at index 0 have the shadow
     glm::mat4 lightView,lightSpaceMatrix;
-    glm::mat4 lightProj = glm::ortho(-10.0f,10.0f,-10.0f,10.0f,1.0f,107.5f);
-    lightView = glm::lookAt(glm::vec3(lightPos[0].x,lightPos[0].y,lightPos[0].z),
-                                        glm::vec3(0),glm::vec3(0,0,1));
+    glm::mat4 lightProj = glm::ortho(-100.0f,100.0f,-100.0f,100.0f,0.1f,157.5f);
+    lightView = glm::lookAt(lightPos[0] + mainCamera.getPosition(), glm::vec3(0)+ mainCamera.getPosition(),glm::vec3(0,0,1));
     lightSpaceMatrix = lightProj * lightView;
 
     // Render the shadow mappings for all the objects //
@@ -179,12 +181,12 @@ void application::render(double ctime, double ltime) {
     int numLights = lightPos.size();
     if (numLights > 0) {
         objectsShader->setInt("LightCount", numLights);
-        objectsShader->setNvec4("Lpos", numLights, lightPos[0]);
+        objectsShader->setNvec3("Lpos", numLights, lightPos[0]);
         objectsShader->setNvec3("Lcolor", numLights, lightColors[0]);
         objectsShader->setNfloat("Linten",numLights, lightIntensities[0]);
         objectsShader->setNfloat("Kambient", numLights, lightAmbient[0]);
         objectsShader->setNfloat("Kspecular",numLights, lightSpecular[0]);
-        objectsShader->setNfloat("Kdiffuse", numLights, lightDiffuse[0]);;
+        objectsShader->setNfloat("Kdiffuse", numLights, lightDiffuse[0]);
         objectsShader->setNfloat("U_alpha", numLights, lightAlpha[0]);
     }
 

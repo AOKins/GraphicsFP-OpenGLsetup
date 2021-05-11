@@ -13,7 +13,7 @@ in vec3 vs_normal; // The normal for the vertex (in world orientation)
 in vec4 L_vertex;
 
 uniform int LightCount;
-uniform vec4 Lpos[32];
+uniform vec3 Lpos[32];
 uniform vec3 Lcolor[32];
 uniform float Linten[32];
 uniform float Kambient[32];
@@ -83,7 +83,7 @@ void main(void) {
 
     for(int i = 0; i < maxLights; i++) {
         // Get the values for this light
-        lightPos = Lpos[i];
+        lightPos = vec4(Lpos[i],1.0);
         lightColor = Lcolor[i];
         lightIntensity = Linten[i];
         K_ambient = Kambient[i];
@@ -98,13 +98,17 @@ void main(void) {
         // Found that currently, not restricting diffuse by cosTheta>0 condition makes multiple lights overlap better
         I_diffuse = calcDiffuse(L_diffuse, K_diffuse, L, cosTheta);
 
-        if (cosTheta > 0) { 
-            I_specular = calcSpecular(L_specular, K_specular, alpha, L, cosTheta);
+        if (i == 0) {
+            I = lightIntensity * lightColor * shadowValue(L_vertex);
         }
-
-        I_ambient = I_ambient + calcAmbient(L_ambient, K_ambient);
-        I = (lightIntensity * (I_diffuse + I_specular) / length(lightPos - vs_vertex));
-        I = I * lightColor * shadowValue(L_vertex);
+        else {
+            if (cosTheta > 0) { 
+                I_specular = calcSpecular(L_specular, K_specular, alpha, L, cosTheta);
+            }
+            I_ambient = I_ambient + calcAmbient(L_ambient, K_ambient);
+            I = (lightIntensity * (I_diffuse + I_specular) / length(lightPos - vs_vertex));
+            I = I * lightColor;
+        }
         I_result = (I_result + I);
     }
     

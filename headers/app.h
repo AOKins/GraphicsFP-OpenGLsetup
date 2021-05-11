@@ -42,7 +42,7 @@ protected:
     GLuint depthMapTexture, shadowRes, depthMapBuffer;
     
     // Vectors for light info
-    std::vector<glm::vec4> lightPos;
+    std::vector<glm::vec3> lightPos;
     std::vector<glm::vec3> lightColors;
     std::vector<float> lightIntensities;
     std::vector<float> lightAmbient;
