@@ -42,6 +42,17 @@ void application::onKeyPress(SDL_KeyboardEvent * key_event, double deltaTime) {
         case (SDL_SCANCODE_P):
             renderMap = !renderMap;
             break;
+        case (SDL_SCANCODE_O):
+            this->fill_factor = this->fill_factor + 0.1f;
+            glPolygonOffset(this->fill_factor,0.1f);
+            std::cout << this->fill_factor << std::endl;
+
+            break;
+        case (SDL_SCANCODE_I):
+            this->fill_factor = this->fill_factor - 0.1f;
+            glPolygonOffset(this->fill_factor,0.1f);
+            std::cout << this->fill_factor << std::endl;
+            break;
         default: // If unrecognized, default to doing nothing
             break;
     }

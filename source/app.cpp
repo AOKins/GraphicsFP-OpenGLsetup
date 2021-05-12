@@ -19,7 +19,8 @@ application::application() {
     this->window_width = 1352;
     this->window_height = 760;
     // Set dimension for shadow map
-    this->shadowRes = 3000;
+    this->shadowRes = 7000;
+    this->fill_factor = 0.9;
 
     // Call initialize
     initialize();
@@ -56,6 +57,7 @@ void application::start() {
     this->running = true;
     // Correcting main camera to the aspect ratio of the window
     mainCamera.setAspect(float(window_width)/float(window_height));
+    mainCamera.setClipFar(300.0f);
 
     // Creating shaders (uses files in ./shaders folder)
     // Objects //
@@ -77,12 +79,29 @@ void application::start() {
     this->textureIDs.clear();
 
     // Load objects
-    this->objects.push_back(object("./resources/plane.obj"));
-    this->objects.push_back(object("./resources/simple_car.obj"));
+    this->objects.push_back(object("./resources/other/plane.obj"));
+    this->objects.push_back(object("./resources/plane/plane_body.obj"));
+    this->objects.push_back(object("./resources/plane/propellor_cap.obj"));
+    this->objects.push_back(object("./resources/plane/propellor.obj"));
+    this->objects.push_back(object("./resources/plane/wing.obj"));
+    this->objects.push_back(object("./resources/plane/wing.obj"));
+    this->objects.push_back(object("./resources/plane/landing_leg_main.obj"));
+    this->objects.push_back(object("./resources/plane/wheel_main.obj"));
+
+    this->objects.push_back(object("./resources/plane/landing_leg_main.obj"));
+    this->objects.push_back(object("./resources/plane/wheel_main.obj"));
+    this->objects.push_back(object("./resources/plane/landing_leg_back.obj"));
+    this->objects.push_back(object("./resources/plane/wheel_back.obj"));
+
 
     // Load textures
-    this->textureIDs.push_back(GLmethods::load_texture("./resources/grass.bmp"));
-    this->textureIDs.push_back(GLmethods::load_texture("./resources/test_white.bmp"));
+    this->textureIDs.push_back(GLmethods::load_texture("./resources/other/grass.bmp"));
+    this->textureIDs.push_back(GLmethods::load_texture("./resources/plane/plane_body.bmp"));
+    this->textureIDs.push_back(GLmethods::load_texture("./resources/plane/propellor_cap.bmp"));
+    this->textureIDs.push_back(GLmethods::load_texture("./resources/plane/propellor.bmp"));
+    this->textureIDs.push_back(GLmethods::load_texture("./resources/plane/wing.bmp"));
+    this->textureIDs.push_back(GLmethods::load_texture("./resources/other/test_white.bmp")); // Temporary leg texture
+    this->textureIDs.push_back(GLmethods::load_texture("./resources/plane/wheel.bmp"));
 
     // Reserving space
     this->elementBuffers.reserve(this->objects.size());
@@ -95,10 +114,37 @@ void application::start() {
     // Setting textures for objects
     this->objects[0].setTextureID(this->textureIDs[0]);
     this->objects[1].setTextureID(this->textureIDs[1]);
+    this->objects[2].setTextureID(this->textureIDs[2]);
+    this->objects[3].setTextureID(this->textureIDs[3]);
+    this->objects[4].setTextureID(this->textureIDs[4]);
+    this->objects[5].setTextureID(this->textureIDs[4]);
+    this->objects[6].setTextureID(this->textureIDs[5]);
+    this->objects[7].setTextureID(this->textureIDs[6]);
+    this->objects[8].setTextureID(this->textureIDs[5]);
+    this->objects[9].setTextureID(this->textureIDs[6]);
+    this->objects[10].setTextureID(this->textureIDs[5]);
+    this->objects[11].setTextureID(this->textureIDs[6]);
 
-    this->objects[0].setScale(0.5f);
-    this->objects[0].setPosition(glm::vec3(0,-2.5,0));
-    this->objects[1].setPosition(glm::vec3(0,0.5,0));
+
+
+    this->objects[0].setPosition(glm::vec3(0,-3.5,0));
+
+
+    // Setting up connections for plane
+    this->objects[1].setScale(0.50f);
+    this->objects[2].setParent(&this->objects[1],glm::vec3(6.1,-0.49767,0));
+    this->objects[3].setParent(&this->objects[2],glm::vec3(0,0,0));
+    this->objects[4].setParent(&this->objects[1],glm::vec3(2.26556,1,-1));
+    this->objects[5].setParent(&this->objects[1],glm::vec3(2.26556,1,1));
+    this->objects[5].setBank(M_PI);
+    this->objects[6].setParent(&this->objects[1],glm::vec3(3.4147,-1,-1.6));
+    this->objects[7].setParent(&this->objects[6],glm::vec3(0,-1.8,-1.7));
+    this->objects[8].setParent(&this->objects[1],glm::vec3(3.4147,-1,1.6));
+    this->objects[9].setParent(&this->objects[8],glm::vec3(0,-1.8,-1.7));
+    this->objects[10].setParent(&this->objects[1],glm::vec3(-5.85983,-0.8 ,0));
+    this->objects[11].setParent(&this->objects[10],glm::vec3(-0.8,-0.5 ,0));
+
+    this->objects[8].setHeading(M_PI);
 
     // Load the objects into OpenGL
     for (int i = 0; i < this->objects.size(); i++) {
@@ -118,13 +164,24 @@ void application::start() {
     // Setting up Depth Map for Shadow mapping //
     GLmethods::setupDepthMap(this->depthMapBuffer, this->depthMapTexture, this->shadowRes);
 
-    this->lightPos.push_back(glm::vec3(2,4,1));
+    this->lightPos.push_back(glm::vec3(10,10,10));
     this->lightColors.push_back(glm::vec3(1.0,1.0,1.0));
-    this->lightIntensities.push_back(8000);
+    this->lightIntensities.push_back(1);
     this->lightDiffuse.push_back(0.95);
     this->lightAmbient.push_back(0.15);
     this->lightSpecular.push_back(0.05);
     this->lightAlpha.push_back(2);
+
+    this->lightPos.push_back(glm::vec3(0));
+    this->lightColors.push_back(glm::vec3(1.0,1.0,1.0));
+    this->lightIntensities.push_back(1);
+    this->lightDiffuse.push_back(0.0);
+    this->lightAmbient.push_back(0.25);
+    this->lightSpecular.push_back(0.00);
+    this->lightAlpha.push_back(2);
+
+
+    glPolygonOffset(this->fill_factor,0.1f);
 
     // Call the loop method to 
     loop();
@@ -152,10 +209,17 @@ void application::loop() {
 
 // Handles the actual rendering behavior (including manage of triangle data)
 void application::render(double ctime, double ltime) {
+    this->objects[1].setHeading(ctime*1.0f);
+    this->objects[3].setBank(ctime*12.0f);
+    this->objects[7].setPitch(ctime*2.0f);
+    this->objects[9].setPitch(ctime*2.0f);
+    this->objects[11].setPitch(ctime*2.0f);
+    
     // Having only light at index 0 have the shadow
     glm::mat4 lightView,lightSpaceMatrix;
-    glm::mat4 lightProj = glm::ortho(-100.0f,100.0f,-100.0f,100.0f,0.1f,157.5f);
-    lightView = glm::lookAt(lightPos[0] + mainCamera.getPosition(), glm::vec3(0)+ mainCamera.getPosition(),glm::vec3(0,0,1));
+    float size = mainCamera.getClipFar() * 0.2f;
+    glm::mat4 lightProj = glm::ortho(-size,size,-size,size,0.1f,size*3);
+    lightView = glm::lookAt(lightPos[0] + mainCamera.getPosition(), glm::vec3(0) + mainCamera.getPosition(),glm::vec3(0,0,1));
     lightSpaceMatrix = lightProj * lightView;
 
     // Render the shadow mappings for all the objects //

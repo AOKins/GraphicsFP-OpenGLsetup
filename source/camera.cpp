@@ -45,6 +45,13 @@ void camera::setClipNear(float new_clipNear) {
     }
 }
 
+float camera::getClipFar() {
+    return this->clip_far;
+}
+float camera::getClipNear() {
+    return this->clip_near;
+}
+
 // Setter for position
 void camera::setPos(glm::vec4 new_pos) {
     this->position = new_pos;

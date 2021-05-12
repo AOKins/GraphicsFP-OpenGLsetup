@@ -44,11 +44,12 @@ vec3 calcDiffuse(vec3 lightColor, float coeff, vec3 L, float cosTheta) {
     return result;
 }
 
-float shadowValue(vec4 position) {
+float shadowValue(vec4 position, vec3 L) {
     vec3 projPos = (position.xyz/position.w)*0.5 + 0.5;
     float closestDepth = texture(shadowMap, projPos.xy).x;
-    float thisDepth = projPos.z - 0.005; // 0.005 bias to help remove "shadow acne"
-    if (thisDepth <= closestDepth) {
+    float bias = max(0.00002*(1.0-dot(L,vs_normal)),0.00002);
+    float thisDepth = projPos.z - bias; // bias to help remove "shadow acne"
+    if (thisDepth <= closestDepth || thisDepth > 1.0) {
         return 1.0f;
     }
     else {
@@ -99,7 +100,7 @@ void main(void) {
         I_diffuse = calcDiffuse(L_diffuse, K_diffuse, L, cosTheta);
 
         if (i == 0) {
-            I = lightIntensity * lightColor * shadowValue(L_vertex);
+            I = lightIntensity * lightColor * shadowValue(L_vertex, L);
         }
         else {
             if (cosTheta > 0) { 

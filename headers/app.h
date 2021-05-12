@@ -27,6 +27,8 @@ protected:
     // Tracker for number of mouse clicks made (left increases, right decreases)
     int mouseClick = 0;
 
+    float fill_factor;
+
     // Vector that holds object data
     std::vector<object> objects;
 
