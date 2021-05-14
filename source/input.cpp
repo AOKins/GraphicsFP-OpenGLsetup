@@ -46,12 +46,29 @@ void application::onKeyPress(SDL_KeyboardEvent * key_event, double deltaTime) {
             this->fill_factor = this->fill_factor + 0.1f;
             glPolygonOffset(this->fill_factor,0.1f);
             std::cout << this->fill_factor << std::endl;
-
             break;
         case (SDL_SCANCODE_I):
             this->fill_factor = this->fill_factor - 0.1f;
             glPolygonOffset(this->fill_factor,0.1f);
             std::cout << this->fill_factor << std::endl;
+            break;
+        case(SDL_SCANCODE_R):
+            this->lightColors[0].r += 0.1;
+            break;
+        case(SDL_SCANCODE_F):
+            this->lightColors[0].r -= 0.1;
+            break;
+        case(SDL_SCANCODE_T):
+            this->lightColors[0].g += 0.1;
+            break;
+        case(SDL_SCANCODE_G):
+            this->lightColors[0].g -= 0.1;
+            break;
+        case(SDL_SCANCODE_Y):
+            this->lightColors[0].b += 0.1;
+            break;
+        case(SDL_SCANCODE_H):
+            this->lightColors[0].b -= 0.1;
             break;
         default: // If unrecognized, default to doing nothing
             break;

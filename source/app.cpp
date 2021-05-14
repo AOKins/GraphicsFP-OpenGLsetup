@@ -271,6 +271,7 @@ void application::render(double ctime, double ltime) {
     }
 
     // Render the skybox
+    glUseProgram(this->mainSkyBox->skyBoxShader->shaderID);
     this->mainSkyBox->skyBoxShader->setFloat("sky_light_intensity",lightIntensities[0]);
     this->mainSkyBox->skyBoxShader->setVec3("sky_light_color",lightColors[0]);
     this->mainSkyBox->renderSkyBox(mainCamera.getPerspective(), mainCamera.getProjection());
