@@ -8,9 +8,6 @@
 // Shall attempt to make as compact as possible
 class skyBox {
 private:
-    // Shader for the SkyBox object only
-    shader * skyBoxShader;
-
     GLuint vertexArray_id, vertexBuffer_id, elementBuffer_id, texture_ID;
 
     bool textured;
@@ -79,6 +76,8 @@ private:
     };
 
 public:
+    // Shader for the SkyBox object only
+    shader * skyBoxShader;
     // Cosntructor that takes in file paths for vertex and fragment shaders, along with optional directory to textures
     // For textureDir, put in file path to appriopriate directory, assumes the explicit file names as sc_[side].bmp
     skyBox(const char* vertexPath, const char* fragmentPath, const char* textureDir = "");

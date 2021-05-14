@@ -20,7 +20,7 @@ application::application() {
     this->window_height = 760;
     // Set dimension for shadow map
     this->shadowRes = 7000;
-    this->fill_factor = 0.9;
+    this->fill_factor = 1.0;
 
     // Call initialize
     initialize();
@@ -125,8 +125,6 @@ void application::start() {
     this->objects[10].setTextureID(this->textureIDs[5]);
     this->objects[11].setTextureID(this->textureIDs[6]);
 
-
-
     this->objects[0].setPosition(glm::vec3(0,-3.5,0));
 
 
@@ -164,8 +162,9 @@ void application::start() {
     // Setting up Depth Map for Shadow mapping //
     GLmethods::setupDepthMap(this->depthMapBuffer, this->depthMapTexture, this->shadowRes);
 
-    this->lightPos.push_back(glm::vec3(10,10,10));
-    this->lightColors.push_back(glm::vec3(1.0,1.0,1.0));
+    this->sky_light_pos = glm::vec3(10,12.5,5);
+    this->lightPos.push_back(sky_light_pos);
+    this->lightColors.push_back(glm::vec3(1.0,1.0,0.984)); // Setting color to be like sunlight
     this->lightIntensities.push_back(1);
     this->lightDiffuse.push_back(0.95);
     this->lightAmbient.push_back(0.15);
@@ -179,7 +178,6 @@ void application::start() {
     this->lightAmbient.push_back(0.25);
     this->lightSpecular.push_back(0.00);
     this->lightAlpha.push_back(2);
-
 
     glPolygonOffset(this->fill_factor,0.1f);
 
@@ -209,17 +207,20 @@ void application::loop() {
 
 // Handles the actual rendering behavior (including manage of triangle data)
 void application::render(double ctime, double ltime) {
-    this->objects[1].setHeading(ctime*1.0f);
+
+    this->objects[1].setHeading(ctime*0.5f);
+    this->objects[1].setPitch(sin(ctime*0.75f));
     this->objects[3].setBank(ctime*12.0f);
     this->objects[7].setPitch(ctime*2.0f);
     this->objects[9].setPitch(ctime*2.0f);
     this->objects[11].setPitch(ctime*2.0f);
     
     // Having only light at index 0 have the shadow
+    lightPos[0] = sky_light_pos + mainCamera.getPosition();
     glm::mat4 lightView,lightSpaceMatrix;
     float size = mainCamera.getClipFar() * 0.2f;
     glm::mat4 lightProj = glm::ortho(-size,size,-size,size,0.1f,size*3);
-    lightView = glm::lookAt(lightPos[0] + mainCamera.getPosition(), glm::vec3(0) + mainCamera.getPosition(),glm::vec3(0,0,1));
+    lightView = glm::lookAt(lightPos[0], mainCamera.getPosition(),glm::vec3(0,0,1));
     lightSpaceMatrix = lightProj * lightView;
 
     // Render the shadow mappings for all the objects //
@@ -270,6 +271,8 @@ void application::render(double ctime, double ltime) {
     }
 
     // Render the skybox
+    this->mainSkyBox->skyBoxShader->setFloat("sky_light_intensity",lightIntensities[0]);
+    this->mainSkyBox->skyBoxShader->setVec3("sky_light_color",lightColors[0]);
     this->mainSkyBox->renderSkyBox(mainCamera.getPerspective(), mainCamera.getProjection());
     // Swapping buffers to update display
     SDL_GL_SwapWindow(window);

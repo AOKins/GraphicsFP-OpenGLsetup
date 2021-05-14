@@ -45,6 +45,7 @@ protected:
     
     // Vectors for light info
     std::vector<glm::vec3> lightPos;
+    glm::vec3 sky_light_pos; // Position of the skylight relative to the camera
     std::vector<glm::vec3> lightColors;
     std::vector<float> lightIntensities;
     std::vector<float> lightAmbient;
