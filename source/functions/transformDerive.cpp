@@ -2,7 +2,7 @@
 #define _TRANSFORMS_CPP_
 // Methods for generating rotation matrices
 #include <GLM/glm.hpp>
-
+namespace myRotationMethods {
 // Generate rotation matrix using euler angles, relies on getRotationY, getRotationX, and getRotationZ methods
 // Input: bank, heading, pitch - euler angles for rotation
 // Output: A 4x4 matrix of rotation is returned
@@ -70,4 +70,5 @@ glm::mat3 getRotataionN(float angle, glm::vec3 axis) {
     );
 }
 
+}
 #endif

@@ -79,14 +79,14 @@ void camera::setPitch(float angle) {
 
 // Method for moving the camera forward (positive heading orientation direction)
 void camera::moveFoward(float offset) {
-    glm::vec3 forward_dir = glm::vec4(1.0f,0.0f,0.0f,1.0f) * getRotationY(this->heading);
+    glm::vec3 forward_dir = glm::vec4(1.0f,0.0f,0.0f,1.0f) * myRotationMethods::getRotationY(this->heading);
     this->position = this->position + offset * forward_dir;
     updateView();
 }
 
 // Method for moving the camera left (positive heading orientation direction)
 void camera::moveLeft(float offset) {
-    glm::vec3 right_dir = glm::vec4(0.0f,0.0f,1.0f,1.0f) * getRotationY(this->heading);
+    glm::vec3 right_dir = glm::vec4(0.0f,0.0f,1.0f,1.0f) * myRotationMethods::getRotationY(this->heading);
     this->position = this->position - offset * right_dir;
     updateView();
 }
@@ -127,7 +127,7 @@ void camera::turnUp(float degrees) {
 void camera::updateView() {
     this->up = this->abs_up;// * getRotationX(this->pitch);
     // Rotation is a bit different because the main axis is along Z as opposed to X
-    glm::vec3 direction = this->abs_foward * getRotationZ(this->pitch) * getRotationY(this->heading);
+    glm::vec3 direction = this->abs_foward * myRotationMethods::getRotationZ(this->pitch) * myRotationMethods::getRotationY(this->heading);
     // Update view matrix (projection + translation)
     this->view = glm::lookAt(this->position, direction + this->position, this->up);
     // Setting projection to have projection contents of view matrix, but ommitting translation elements

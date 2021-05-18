@@ -237,7 +237,7 @@ void object::updateMatrices() {
     scaleMatrix[3].w = 1.0f; // Correcting the w componenet
 
     // Derive orientation
-    this->rotation = getRotationMatrix(this->bank, this->heading, this->pitch); //
+    this->rotation = myRotationMethods::getRotationMatrix(this->bank, this->heading, this->pitch); //
     this->translation = glm::mat4(
         glm::vec4(1.0, 0.0, 0.0, 0.0),
         glm::vec4(0.0, 1.0, 0.0, 0.0),

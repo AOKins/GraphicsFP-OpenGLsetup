@@ -14,6 +14,7 @@
 #include "./functions/physicsMethods.cpp"
 
 #include "helicopter.cpp"
+#include "aabb3.cpp"
 
 // Default constructor, calls initialize and sets running to false
 application::application() {
@@ -89,7 +90,7 @@ void application::start() {
 
 
     // Load textures
-    this->textureIDs.push_back(GLmethods::load_texture("./resources/other/grass.bmp"));
+    this->textureIDs.push_back(GLmethods::load_texture("./resources/other/grass_landing.bmp"));
     this->textureIDs.push_back(GLmethods::load_texture("./resources/helicopter/helicopter_body.bmp"));
     this->textureIDs.push_back(GLmethods::load_texture("./resources/helicopter/helicopter_blades.bmp"));
 
@@ -153,9 +154,9 @@ void application::start() {
 
     glPolygonOffset(this->fill_factor,0.1f);
 
+    this->myHelicopter = new helicopter(&this->objects[1],&this->objects[2],&this->objects[3], 4000.0f);
 
-    this->myHelicopter = new helicopter(&this->objects[1],&this->objects[2],&this->objects[3], 5000.0f);
-    this->myHelicopter->increaseThrottle(49.05f);
+    this->myHelicopter->setupHelicopter(1);
     // Call the loop method to 
     loop();
 }
@@ -185,10 +186,36 @@ void application::render(double ctime, double ltime) {
     this->myHelicopter->updateAnimation();
     PSmethods::updateHelicopter(this->myHelicopter, ctime - ltime);
 
+    this->mainCamera.setPos(glm::vec4(this->myHelicopter->getPos()+glm::vec3(0,2,8),1));
+
+    int partCollided = this->myHelicopter->collidedGround();
+    if (partCollided) {
+        switch(partCollided) {
+            case(1):
+                if (this->myHelicopter->getSpeed() < 100.0f) {
+                    glm::vec3 pos = this->myHelicopter->getPos();
+                    if (pos.x > 1 && pos.x < -1 && pos.z > 1 && pos.z < -1) {
+                        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Success!", "You landed on the pad successfully!", this->window);
+                    }
+                    else {
+                        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Success!", "You landed well, but missed the pad!", this->window);
+                    }
+                }
+                else {
+                    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "So close!", "It appears you landed to hard!", this->window);
+                }
+                break;
+            default:
+                SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Total failure!", "You crashed the helicopter completely!", this->window);
+                break;
+        }
+        this->myHelicopter->setupHelicopter(ctime);
+    }
+
     // Having only light at index 0 have the shadow
     lightPos[0] = sky_light_pos + mainCamera.getPosition();
     glm::mat4 lightView,lightSpaceMatrix;
-    float size = mainCamera.getClipFar() * 0.2f;
+    float size = mainCamera.getClipFar() * 0.2f; // Space dimensions for the light to render around the camera in a square shape
     glm::mat4 lightProj = glm::ortho(-size,size,-size,size,0.1f,size*3);
     lightView = glm::lookAt(lightPos[0], mainCamera.getPosition(),glm::vec3(0,0,1));
     lightSpaceMatrix = lightProj * lightView;
