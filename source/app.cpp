@@ -11,6 +11,9 @@
 #include "skyBox.cpp"
 
 #include "./functions/graphicsMethods.cpp"
+#include "./functions/physicsMethods.cpp"
+
+#include "helicopter.cpp"
 
 // Default constructor, calls initialize and sets running to false
 application::application() {
@@ -20,7 +23,7 @@ application::application() {
     this->window_height = 760;
     // Set dimension for shadow map
     this->shadowRes = 7000;
-    this->fill_factor = 1.0;
+    this->fill_factor = 3.0;
 
     // Call initialize
     initialize();
@@ -80,28 +83,15 @@ void application::start() {
 
     // Load objects
     this->objects.push_back(object("./resources/other/plane.obj"));
-    this->objects.push_back(object("./resources/plane/plane_body.obj"));
-    this->objects.push_back(object("./resources/plane/propellor_cap.obj"));
-    this->objects.push_back(object("./resources/plane/propellor.obj"));
-    this->objects.push_back(object("./resources/plane/wing.obj"));
-    this->objects.push_back(object("./resources/plane/wing.obj"));
-    this->objects.push_back(object("./resources/plane/landing_leg_main.obj"));
-    this->objects.push_back(object("./resources/plane/wheel_main.obj"));
-
-    this->objects.push_back(object("./resources/plane/landing_leg_main.obj"));
-    this->objects.push_back(object("./resources/plane/wheel_main.obj"));
-    this->objects.push_back(object("./resources/plane/landing_leg_back.obj"));
-    this->objects.push_back(object("./resources/plane/wheel_back.obj"));
+    this->objects.push_back(object("./resources/helicopter/helicopter_body.obj"));
+    this->objects.push_back(object("./resources/helicopter/propellor.obj"));
+    this->objects.push_back(object("./resources/helicopter/tail_propellor.obj"));
 
 
     // Load textures
     this->textureIDs.push_back(GLmethods::load_texture("./resources/other/grass.bmp"));
-    this->textureIDs.push_back(GLmethods::load_texture("./resources/plane/plane_body.bmp"));
-    this->textureIDs.push_back(GLmethods::load_texture("./resources/plane/propellor_cap.bmp"));
-    this->textureIDs.push_back(GLmethods::load_texture("./resources/plane/propellor.bmp"));
-    this->textureIDs.push_back(GLmethods::load_texture("./resources/plane/wing.bmp"));
-    this->textureIDs.push_back(GLmethods::load_texture("./resources/other/test_white.bmp")); // Temporary leg texture
-    this->textureIDs.push_back(GLmethods::load_texture("./resources/plane/wheel.bmp"));
+    this->textureIDs.push_back(GLmethods::load_texture("./resources/helicopter/helicopter_body.bmp"));
+    this->textureIDs.push_back(GLmethods::load_texture("./resources/helicopter/helicopter_blades.bmp"));
 
     // Reserving space
     this->elementBuffers.reserve(this->objects.size());
@@ -113,36 +103,18 @@ void application::start() {
 
     // Setting textures for objects
     this->objects[0].setTextureID(this->textureIDs[0]);
+
     this->objects[1].setTextureID(this->textureIDs[1]);
     this->objects[2].setTextureID(this->textureIDs[2]);
-    this->objects[3].setTextureID(this->textureIDs[3]);
-    this->objects[4].setTextureID(this->textureIDs[4]);
-    this->objects[5].setTextureID(this->textureIDs[4]);
-    this->objects[6].setTextureID(this->textureIDs[5]);
-    this->objects[7].setTextureID(this->textureIDs[6]);
-    this->objects[8].setTextureID(this->textureIDs[5]);
-    this->objects[9].setTextureID(this->textureIDs[6]);
-    this->objects[10].setTextureID(this->textureIDs[5]);
-    this->objects[11].setTextureID(this->textureIDs[6]);
-
-    this->objects[0].setPosition(glm::vec3(0,-3.5,0));
+    this->objects[3].setTextureID(this->textureIDs[2]);
 
 
-    // Setting up connections for plane
-    this->objects[1].setScale(0.50f);
-    this->objects[2].setParent(&this->objects[1],glm::vec3(6.1,-0.49767,0));
-    this->objects[3].setParent(&this->objects[2],glm::vec3(0,0,0));
-    this->objects[4].setParent(&this->objects[1],glm::vec3(2.26556,1,-1));
-    this->objects[5].setParent(&this->objects[1],glm::vec3(2.26556,1,1));
-    this->objects[5].setBank(M_PI);
-    this->objects[6].setParent(&this->objects[1],glm::vec3(3.4147,-1,-1.6));
-    this->objects[7].setParent(&this->objects[6],glm::vec3(0,-1.8,-1.7));
-    this->objects[8].setParent(&this->objects[1],glm::vec3(3.4147,-1,1.6));
-    this->objects[9].setParent(&this->objects[8],glm::vec3(0,-1.8,-1.7));
-    this->objects[10].setParent(&this->objects[1],glm::vec3(-5.85983,-0.8 ,0));
-    this->objects[11].setParent(&this->objects[10],glm::vec3(-0.8,-0.5 ,0));
+    // Setting up connections for helicopter
+    this->objects[2].setParent(&this->objects[1],glm::vec3(0,1.19338,0));
+    this->objects[3].setParent(&this->objects[1],glm::vec3(-4.77431,0.767765,0));
 
-    this->objects[8].setHeading(M_PI);
+    // Setting initial position
+    this->objects[1].setPosition(glm::vec3(0,2.0,0));
 
     // Load the objects into OpenGL
     for (int i = 0; i < this->objects.size(); i++) {
@@ -181,6 +153,9 @@ void application::start() {
 
     glPolygonOffset(this->fill_factor,0.1f);
 
+
+    this->myHelicopter = new helicopter(&this->objects[1],&this->objects[2],&this->objects[3], 5000.0f);
+    this->myHelicopter->increaseThrottle(49.05f);
     // Call the loop method to 
     loop();
 }
@@ -207,14 +182,9 @@ void application::loop() {
 
 // Handles the actual rendering behavior (including manage of triangle data)
 void application::render(double ctime, double ltime) {
+    this->myHelicopter->updateAnimation();
+    PSmethods::updateHelicopter(this->myHelicopter, ctime - ltime);
 
-    this->objects[1].setHeading(ctime*0.5f);
-    this->objects[1].setPitch(sin(ctime*0.75f));
-    this->objects[3].setBank(ctime*12.0f);
-    this->objects[7].setPitch(ctime*2.0f);
-    this->objects[9].setPitch(ctime*2.0f);
-    this->objects[11].setPitch(ctime*2.0f);
-    
     // Having only light at index 0 have the shadow
     lightPos[0] = sky_light_pos + mainCamera.getPosition();
     glm::mat4 lightView,lightSpaceMatrix;
@@ -299,4 +269,5 @@ application::~application() {
     // Clear up everything
     delete this->objectsShader;
     delete this->mainSkyBox;
+    delete this->myHelicopter;
 }

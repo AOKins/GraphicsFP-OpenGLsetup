@@ -70,6 +70,9 @@ void application::onKeyPress(SDL_KeyboardEvent * key_event, double deltaTime) {
         case(SDL_SCANCODE_H):
             this->lightColors[0].b -= 0.1;
             break;
+        case(SDL_SCANCODE_KP_PERIOD):
+            std::cout << myHelicopter->getLift().y/1000;
+            break;
         default: // If unrecognized, default to doing nothing
             break;
     }
@@ -112,4 +115,23 @@ void application::continuousKeyInput(double deltaTime) {
     if (keyboardState[SDL_SCANCODE_DOWN] == SDL_PRESSED) {
         mainCamera.turnUp(-deltaTime*4.0f);
     }
+    if (keyboardState[SDL_SCANCODE_KP_DIVIDE] == SDL_PRESSED) {
+        this->myHelicopter->increaseThrottle(-deltaTime);
+    }
+    if (keyboardState[SDL_SCANCODE_KP_MULTIPLY] == SDL_PRESSED) {
+        this->myHelicopter->increaseThrottle(deltaTime);
+    }
+    if (keyboardState[SDL_SCANCODE_KP_8] == SDL_PRESSED) {
+        this->myHelicopter->pitchForward(deltaTime);
+    }
+    if (keyboardState[SDL_SCANCODE_KP_2] == SDL_PRESSED) {
+        this->myHelicopter->pitchForward(-deltaTime);
+    }
+   if (keyboardState[SDL_SCANCODE_KP_4] == SDL_PRESSED) {
+        this->myHelicopter->turnLeft(deltaTime);
+    }
+    if (keyboardState[SDL_SCANCODE_KP_6] == SDL_PRESSED) {
+        this->myHelicopter->turnLeft(-deltaTime);
+    }
+
 }

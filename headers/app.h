@@ -14,6 +14,8 @@
 #include "camera.h"
 #include "skyBox.h"
 
+#include "helicopter.h"
+
 class application {
 protected: 
     bool running;
@@ -31,6 +33,9 @@ protected:
 
     // Vector that holds object data
     std::vector<object> objects;
+
+    // Helicopter object
+    helicopter * myHelicopter;
 
     // Vectors for ID values
     std::vector<GLuint> elementBuffers;
